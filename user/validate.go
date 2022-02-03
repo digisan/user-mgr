@@ -28,6 +28,10 @@ func VerifyActive(s string) bool {
 	return s == "T" || s == "F"
 }
 
+func VerifyRegtime(s string) bool {
+	return s != ""
+}
+
 func VerifyTel(s string) bool {
 	return len(s) > 3
 }

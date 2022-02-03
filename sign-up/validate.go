@@ -38,6 +38,10 @@ func validateInput(user usr.User) error {
 		lenOK, number, upper, special := usr.VerifyPwd(fl.Field().String(), MinLenLetter)
 		return lenOK && number && upper && special
 	})
+	_ = v.RegisterValidation("regtime", func(fl validator.FieldLevel) bool {
+		regtime := fl.Field().String()
+		return usr.VerifyRegtime(regtime)
+	})
 	_ = v.RegisterValidation("tel", func(fl validator.FieldLevel) bool {
 		tel := fl.Field().String()
 		return usr.VerifyTel(tel)
@@ -74,6 +78,8 @@ func validateInput(user usr.User) error {
 				return fmt.Errorf("invalid password, at least %d letters, consist of UPPER-CASE, number and symbol", MinLenLetter)
 			case strings.Contains(es, "UName"):
 				return fmt.Errorf("invalid user name, [%s] is already existing", user.UName)
+			case strings.Contains(es, "Regtime"):
+				return fmt.Errorf("must add register time when signing up")
 			case strings.Contains(es, "Tel"):
 				return fmt.Errorf("invalid telephone number")
 			}

@@ -61,6 +61,9 @@ func TestListUsers(t *testing.T) {
 
 	for _, u := range users {
 		fmt.Println(u)
+		t := &time.Time{}
+		t.UnmarshalText([]byte(u.Regtime))
+		fmt.Println("Been regstered for", time.Since(*t))
 	}
 }
 

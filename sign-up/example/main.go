@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	su "github.com/digisan/user-mgr/sign-up"
 	"github.com/digisan/user-mgr/udb"
@@ -23,6 +24,7 @@ func main() {
 		Name:     "A girl has no name",
 		Password: "pa55a@aD20TTTTT",
 		Tel:      "123456789",
+		Regtime:  time.Now().UTC().Format(time.RFC3339),
 	}
 
 	if err := su.Validate(user, true, true); err != nil {
