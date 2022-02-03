@@ -1,0 +1,75 @@
+package main
+
+import (
+	"fmt"
+
+	lk "github.com/digisan/logkit"
+	rp "github.com/digisan/user-mgr/reset-pwd"
+	su "github.com/digisan/user-mgr/sign-up"
+	"github.com/digisan/user-mgr/udb"
+	usr "github.com/digisan/user-mgr/user"
+)
+
+func main() {
+
+	udb.OpenSession("../../data/user")
+	defer udb.CloseSession()
+
+	// get [user] from GET
+
+	// Will be GET header
+	user := usr.User{
+		UName: "QMiao",
+		Email: "cdutwhu@outlook.com",
+		// Password: "pa55a@aD20TTTTT",
+	}
+
+	if err := rp.UserExists(user); err != nil {
+		lk.Log("%v", err)
+		return
+	}
+	if !rp.EmailOK(user) {
+		lk.Log("%s's email [%s] is different from your sign-up one", user.UName, user.Email)
+		return
+	}
+	if err := su.Validate(user, false, true); err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println("Input verification code in you email:", user.Email)
+	incode := ""
+	fmt.Scanf("%s", &incode)
+	// get [incode] from POST
+
+	if err := su.VerifyCode(user, incode); err != nil {
+		fmt.Println("Email verification failed:", err)
+		return
+	}
+
+	user, _, err := udb.UserDB.LoadActiveUser(user.UName)
+	lk.FailOnErr("%v", err)
+
+	/////
+
+AGAIN:
+	fmt.Println("Input new password")
+	pwdUpdated := ""
+	fmt.Scanf("%s", &pwdUpdated)
+	// get [pwdUpdated] from POST
+
+	lenOK, number, upper, special := usr.VerifyPwd(pwdUpdated, su.MinLenLetter)
+	if lenOK && number && upper && special {
+		user.Password = pwdUpdated
+	} else {
+		fmt.Println("invalid new password")
+		goto AGAIN
+	}
+
+	// store into db
+	if err := su.Store(user); err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println("OK")
+}
