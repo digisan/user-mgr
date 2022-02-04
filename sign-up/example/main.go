@@ -32,13 +32,13 @@ func main() {
 		return
 	}
 
-	fmt.Println("Input verification code in you email:", user.Email)
+	fmt.Println("Input verification code in your email:", user.Email)
 	incode := ""
 	fmt.Scanf("%s", &incode)
 
 	// get [incode] from POST
 	if err := su.VerifyCode(user, incode); err != nil {
-		fmt.Println("Sign-up failed:", err)
+		fmt.Println("Sign-Up failed:", err)
 		return
 	}
 
