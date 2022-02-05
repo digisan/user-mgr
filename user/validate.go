@@ -1,57 +1,54 @@
 package user
 
 import (
-	"unicode"
+	"fmt"
+	"regexp"
+	"strings"
+	"sync"
+
+	lk "github.com/digisan/logkit"
+	"gopkg.in/go-playground/validator.v9"
 )
 
-func VerifyPwd(s string, minLenLetter int) (lenOK, number, upper, special bool) {
-	letters := 0
-	for _, c := range s {
-		switch {
-		case unicode.IsNumber(c):
-			number = true
-		case unicode.IsUpper(c):
-			upper = true
-			letters++
-		case unicode.IsPunct(c) || unicode.IsSymbol(c):
-			special = true
-		case unicode.IsLetter(c) || c == ' ':
-			letters++
-		default:
-			//return false, false, false, false
+var (
+	vTags           = ListUserValidator()
+	mFieldValidator = &sync.Map{}
+)
+
+func RegisterValidator(tag string, f func(fv string) bool) {
+	mFieldValidator.Store(tag, f)
+}
+
+func fnValidator(tag string) func(fv string) bool {
+	f, ok := mFieldValidator.Load(tag)
+	lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("missing [%s] validator", tag))
+	return f.(func(fv string) bool)
+}
+
+func (user User) Validate() error {
+	v := validator.New()
+	for _, vTag := range vTags {
+		fn := fnValidator(vTag)
+		_ = v.RegisterValidation(vTag, func(fl validator.FieldLevel) bool {
+			return fn(fl.Field().String())
+		})
+	}
+	if err := v.Struct(user); err != nil {
+		for _, e := range err.(validator.ValidationErrors) {
+			return fmt.Errorf("%v", e)
 		}
 	}
-	return letters >= minLenLetter, number, upper, special
+	return nil
 }
 
-func VerifyActive(s string) bool {
-	return s == "T" || s == "F"
-}
-
-func VerifyRegtime(s string) bool {
-	return s != ""
-}
-
-func VerifyTel(s string) bool {
-	return len(s) > 3
-}
-
-func VerifyAddr(s string) bool {
-	return true
-}
-
-func VerifyRole(s string) bool {
-	return true
-}
-
-func VerifyLevel(s string) bool {
-	return true
-}
-
-func VerifyExpire(s string) bool {
-	return true
-}
-
-func VerifyAvatar(s string) bool {
-	return true
+// return field string is one of user/valfield/ const
+// from "Key: 'User.Addr' Error:Field validation for 'Addr' failed on the 'addr' tag"
+func ErrField(err error) (string, string) {
+	r := regexp.MustCompile(`'[^\.\s]+'`)
+	es := fmt.Sprint(err)
+	fieldtag := r.FindAllString(es, -1)
+	field, tag := fieldtag[0], fieldtag[1]
+	field = strings.Trim(field, "'")
+	tag = strings.Trim(tag, "'")
+	return field, tag
 }

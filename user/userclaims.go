@@ -5,6 +5,7 @@ import (
 	"time"
 
 	lk "github.com/digisan/logkit"
+	"github.com/digisan/user-mgr/tool"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -14,7 +15,7 @@ type UserClaims struct {
 }
 
 var (
-	key        = SelfMD5()
+	key        = tool.SelfMD5()
 	mUserToken = &sync.Map{}
 )
 

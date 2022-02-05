@@ -32,7 +32,8 @@ func main() {
 		lk.Log("%s's email [%s] is different from your sign-up one", user.UName, user.Email)
 		return
 	}
-	if err := su.Validate(user, false, true); err != nil {
+
+	if err := su.ChkEmail(user); err != nil {
 		fmt.Println(err)
 		return
 	}
@@ -58,7 +59,7 @@ AGAIN:
 	fmt.Scanf("%s", &pwdUpdated)
 	// get [pwdUpdated] from POST
 
-	lenOK, number, upper, special := usr.VerifyPwd(pwdUpdated, su.MinLenLetter)
+	lenOK, number, upper, special := su.ChkPwd(pwdUpdated, su.MinLenLetter)
 	if lenOK && number && upper && special {
 		user.Password = pwdUpdated
 	} else {

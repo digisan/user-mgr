@@ -21,7 +21,7 @@ func TestOpen(t *testing.T) {
 		Email:    "hello@abc.net",
 		Name:     "test-name",
 		Password: "this is my password",
-		Tel:      "123",
+		Phone:    "123",
 	}
 	lk.FailOnErr("%v", udb.UpdateUser(u))
 
