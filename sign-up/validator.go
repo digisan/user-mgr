@@ -45,6 +45,24 @@ func SetValidator() {
 	usr.RegisterValidator(vf.Expire, func(fv string) bool {
 		return true
 	})
+	usr.RegisterValidator(vf.NationalID, func(fv string) bool {
+		return true
+	})
+	usr.RegisterValidator(vf.Gender, func(fv string) bool {
+		if fv != "" {
+			return fv == "M" || fv == "F"
+		}
+		return true
+	})
+	usr.RegisterValidator(vf.Position, func(fv string) bool {
+		return true
+	})
+	usr.RegisterValidator(vf.Title, func(fv string) bool {
+		return true
+	})
+	usr.RegisterValidator(vf.Employer, func(fv string) bool {
+		return true
+	})
 }
 
 func TransInvalidErr(err error) error {
@@ -72,6 +90,16 @@ func TransInvalidErr(err error) error {
 		return fmt.Errorf("invalid system subscribe level")
 	case vf.Expire:
 		return fmt.Errorf("invalid expiry date")
+	case vf.NationalID:
+		return fmt.Errorf("invalid national ID")
+	case vf.Gender:
+		return fmt.Errorf("invalid gender")
+	case vf.Position:
+		return fmt.Errorf("invalid position")
+	case vf.Title:
+		return fmt.Errorf("invalid title")
+	case vf.Employer:
+		return fmt.Errorf("invalid employer")
 	case vf.Avatar:
 		return fmt.Errorf("invalid avatar")
 	case "required":
