@@ -4,9 +4,10 @@ var (
 	UserDB *UDB // global, for using
 )
 
+// init udb.UserDB
 func OpenSession(udbPath string) {
 	if UserDB == nil {
-		UserDB = GetDB(udbPath)
+		UserDB = getDB(udbPath)
 	}
 }
 

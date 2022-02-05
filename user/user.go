@@ -55,18 +55,19 @@ func ListUserValidator() (tags []string) {
 
 func (u User) String() string {
 	if u.UName != "" {
-		return fmt.Sprintf("Active: %s\n"+
-			"UName: %s\n"+
-			"Email: %s\n"+
-			"Name: %s\n"+
-			"Password: %s\n"+
-			"Register Time: %s\n"+
-			"Telephone: %s\n"+
-			"Address: %s\n"+
-			"Role: %s\n"+
-			"Level: %s\n"+
-			"Expire: %s\n"+
-			"Avatar: %s", // add more
+		return fmt.Sprintf(
+			"Active: %s\n"+
+				"UName: %s\n"+
+				"Email: %s\n"+
+				"Name: %s\n"+
+				"Password: %s\n"+
+				"Register Time: %s\n"+
+				"Phone: %s\n"+
+				"Address: %s\n"+
+				"Role: %s\n"+
+				"Level: %s\n"+
+				"Expire: %s\n"+
+				"Avatar: %s", // add more
 			u.Active, u.UName, u.Email,
 			u.Name, u.Password, u.Regtime,
 			u.Phone, u.Addr, u.SysRole,
@@ -136,10 +137,6 @@ func (u *User) Unmarshal(info []byte, key []byte) {
 			panic("sep || error")
 		}
 	}
-}
-
-func (u *User) Activate(val bool) {
-	u.Active = strings.ToUpper(fmt.Sprint(val))[:1]
 }
 
 func (u *User) IsActive() bool {

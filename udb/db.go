@@ -1,6 +1,8 @@
 package udb
 
 import (
+	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -13,7 +15,7 @@ var once sync.Once
 
 type UDB struct {
 	sync.Mutex
-	db       *badger.DB
+	dbReg    *badger.DB
 	dbOnline *badger.DB
 }
 
@@ -29,11 +31,11 @@ func open(dir string) *badger.DB {
 	return db
 }
 
-func GetDB(dir string) *UDB {
+func getDB(dir string) *UDB {
 	if uDB == nil {
 		once.Do(func() {
 			uDB = &UDB{
-				db:       open(dir),
+				dbReg:    open(dir),
 				dbOnline: open(""),
 			}
 		})
@@ -41,22 +43,22 @@ func GetDB(dir string) *UDB {
 	return uDB
 }
 
-func (udb *UDB) Close() {
-	udb.Lock()
-	defer udb.Unlock()
+func (db *UDB) Close() {
+	db.Lock()
+	defer db.Unlock()
 
-	lk.FailOnErr("%v", udb.dbOnline.Close())
-	lk.FailOnErr("%v", udb.db.Close())
+	lk.FailOnErr("%v", db.dbOnline.Close())
+	lk.FailOnErr("%v", db.dbReg.Close())
 }
 
 ///////////////////////////////////////////////////////////////
 
-func (udb *UDB) LoadOnlineUser(uname string) (time.Time, error) {
-	udb.Lock()
-	defer udb.Unlock()
+func (db *UDB) LoadOnlineUser(uname string) (time.Time, error) {
+	db.Lock()
+	defer db.Unlock()
 
 	tm := &time.Time{}
-	err := udb.dbOnline.View(func(txn *badger.Txn) error {
+	err := db.dbOnline.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(uname))
 		if err != nil {
 			return err
@@ -68,11 +70,11 @@ func (udb *UDB) LoadOnlineUser(uname string) (time.Time, error) {
 	return *tm, err
 }
 
-func (udb *UDB) UpdateOnlineUser(uname string) error {
-	udb.Lock()
-	defer udb.Unlock()
+func (db *UDB) UpdateOnlineUser(uname string) error {
+	db.Lock()
+	defer db.Unlock()
 
-	return udb.dbOnline.Update(func(txn *badger.Txn) error {
+	return db.dbOnline.Update(func(txn *badger.Txn) error {
 		tmBytes, err := time.Now().UTC().MarshalBinary()
 		if err != nil {
 			return err
@@ -81,20 +83,20 @@ func (udb *UDB) UpdateOnlineUser(uname string) error {
 	})
 }
 
-func (udb *UDB) RemoveOnlineUser(uname string) error {
-	udb.Lock()
-	defer udb.Unlock()
+func (db *UDB) RemoveOnlineUser(uname string) error {
+	db.Lock()
+	defer db.Unlock()
 
-	return udb.dbOnline.Update(func(txn *badger.Txn) (err error) {
+	return db.dbOnline.Update(func(txn *badger.Txn) (err error) {
 		return txn.Delete([]byte(uname))
 	})
 }
 
-func (udb *UDB) ListOnlineUsers() (unames []string, err error) {
-	udb.Lock()
-	defer udb.Unlock()
+func (db *UDB) ListOnlineUsers() (unames []string, err error) {
+	db.Lock()
+	defer db.Unlock()
 
-	err = udb.dbOnline.View(func(txn *badger.Txn) error {
+	err = db.dbOnline.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchValues = false
 		it := txn.NewIterator(opts)
@@ -109,23 +111,23 @@ func (udb *UDB) ListOnlineUsers() (unames []string, err error) {
 
 ///////////////////////////////////////////////////////////////
 
-func (udb *UDB) UpdateUser(user usr.User) error {
+func (db *UDB) UpdateUser(user usr.User) error {
 	// remove all existing items
-	udb.RemoveUser(user.UName)
+	db.RemoveUser(user.UName)
 
-	udb.Lock()
-	defer udb.Unlock()
-	return udb.db.Update(func(txn *badger.Txn) error {
+	db.Lock()
+	defer db.Unlock()
+	return db.dbReg.Update(func(txn *badger.Txn) error {
 		return txn.Set(user.Marshal())
 	})
 }
 
-func (udb *UDB) LoadUser(uname string, active bool) (usr.User, bool, error) {
-	udb.Lock()
-	defer udb.Unlock()
+func (db *UDB) LoadUser(uname string, active bool) (usr.User, bool, error) {
+	db.Lock()
+	defer db.Unlock()
 
 	u := &usr.User{}
-	err := udb.db.View(func(txn *badger.Txn) error {
+	err := db.dbReg.View(func(txn *badger.Txn) error {
 		it := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer it.Close()
 		prefix := []byte("T||" + uname + "||")
@@ -146,15 +148,15 @@ func (udb *UDB) LoadUser(uname string, active bool) (usr.User, bool, error) {
 	return *u, u.Email != "", err
 }
 
-func (udb *UDB) LoadActiveUser(uname string) (usr.User, bool, error) {
-	return udb.LoadUser(uname, true)
+func (db *UDB) LoadActiveUser(uname string) (usr.User, bool, error) {
+	return db.LoadUser(uname, true)
 }
 
-func (udb *UDB) LoadUserByEmail(email string, active bool) (usr.User, bool, error) {
-	udb.Lock()
-	defer udb.Unlock()
+func (db *UDB) LoadUserByEmail(email string, active bool) (usr.User, bool, error) {
+	db.Lock()
+	defer db.Unlock()
 
-	users, err := udb.ListUsers(func(u *usr.User) bool {
+	users, err := db.ListUsers(func(u *usr.User) bool {
 		if active {
 			return u.IsActive() && u.Email == email
 		}
@@ -166,15 +168,15 @@ func (udb *UDB) LoadUserByEmail(email string, active bool) (usr.User, bool, erro
 	return usr.User{}, false, err
 }
 
-func (udb *UDB) LoadActiveUserByEmail(email string) (usr.User, bool, error) {
-	return udb.LoadUserByEmail(email, true)
+func (db *UDB) LoadActiveUserByEmail(email string) (usr.User, bool, error) {
+	return db.LoadUserByEmail(email, true)
 }
 
-func (udb *UDB) RemoveUser(uname string) error {
-	udb.Lock()
-	defer udb.Unlock()
+func (db *UDB) RemoveUser(uname string) error {
+	db.Lock()
+	defer db.Unlock()
 
-	return udb.db.Update(func(txn *badger.Txn) (err error) {
+	return db.dbReg.Update(func(txn *badger.Txn) (err error) {
 		it := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer it.Close()
 
@@ -193,11 +195,11 @@ func (udb *UDB) RemoveUser(uname string) error {
 	})
 }
 
-func (udb *UDB) ListUsers(filter func(*usr.User) bool) (users []usr.User, err error) {
-	udb.Lock()
-	defer udb.Unlock()
+func (db *UDB) ListUsers(filter func(*usr.User) bool) (users []usr.User, err error) {
+	db.Lock()
+	defer db.Unlock()
 
-	err = udb.db.View(func(txn *badger.Txn) error {
+	err = db.dbReg.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchValues = false
 		it := txn.NewIterator(opts)
@@ -214,15 +216,24 @@ func (udb *UDB) ListUsers(filter func(*usr.User) bool) (users []usr.User, err er
 	return
 }
 
-func (udb *UDB) IsExisting(uname string, onlyActive bool) bool {
+func (db *UDB) IsExisting(uname string, onlyActive bool) bool {
 	if onlyActive {
-		_, okActive, err := udb.LoadUser(uname, true)
+		_, okActive, err := db.LoadUser(uname, true)
 		lk.WarnOnErr("%v", err)
 		return okActive
 	}
-	_, okActive, err := udb.LoadUser(uname, true)
+	_, okActive, err := db.LoadUser(uname, true)
 	lk.WarnOnErr("%v", err)
-	_, okDorm, err := udb.LoadUser(uname, false)
+	_, okDorm, err := db.LoadUser(uname, false)
 	lk.WarnOnErr("%v", err)
 	return okActive || okDorm
+}
+
+func (db *UDB) ActivateUser(uname string, flag bool) error {
+	u, ok, err := db.LoadUser(uname, !flag)
+	if err == nil && ok {
+		u.Active = strings.ToUpper(fmt.Sprint(flag))[:1]
+		return db.UpdateUser(u)
+	}
+	return err
 }

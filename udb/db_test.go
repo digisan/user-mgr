@@ -12,8 +12,8 @@ import (
 const dbPath = "../data/user"
 
 func TestOpen(t *testing.T) {
-	udb := GetDB(dbPath)
-	defer udb.Close()
+	OpenSession(dbPath)
+	defer CloseSession()
 
 	u := usr.User{
 		Active:   "T",
@@ -23,24 +23,23 @@ func TestOpen(t *testing.T) {
 		Password: "this is my password",
 		Phone:    "123",
 	}
-	lk.FailOnErr("%v", udb.UpdateUser(u))
+	lk.FailOnErr("%v", UserDB.UpdateUser(u))
 
-	u.Activate(false)
-	lk.FailOnErr("%v", udb.UpdateUser(u))
+	lk.FailOnErr("%v", UserDB.ActivateUser("unique-name", false))
 }
 
 func TestRemove(t *testing.T) {
-	udb := GetDB(dbPath)
-	defer udb.Close()
+	OpenSession(dbPath)
+	defer CloseSession()
 
-	lk.FailOnErr("%v", udb.RemoveUser("unique-name"))
+	lk.FailOnErr("%v", UserDB.RemoveUser("unique-name"))
 }
 
 func TestLoad(t *testing.T) {
-	udb := GetDB(dbPath)
-	defer udb.Close()
+	OpenSession(dbPath)
+	defer CloseSession()
 
-	user, ok, err := udb.LoadUser("unique-name", false)
+	user, ok, err := UserDB.LoadUser("unique-name", false)
 	lk.FailOnErr("%v", err)
 
 	fmt.Println(ok)
@@ -51,10 +50,10 @@ func TestLoad(t *testing.T) {
 }
 
 func TestListUsers(t *testing.T) {
-	udb := GetDB(dbPath)
-	defer udb.Close()
+	OpenSession(dbPath)
+	defer CloseSession()
 
-	users, err := udb.ListUsers(func(u *usr.User) bool {
+	users, err := UserDB.ListUsers(func(u *usr.User) bool {
 		return u.IsActive() || !u.IsActive()
 	})
 	lk.FailOnErr("%v", err)
@@ -68,29 +67,29 @@ func TestListUsers(t *testing.T) {
 }
 
 func TestExisting(t *testing.T) {
-	udb := GetDB(dbPath)
-	defer udb.Close()
+	OpenSession(dbPath)
+	defer CloseSession()
 
-	fmt.Println(udb.IsExisting("unique-name", false))
+	fmt.Println(UserDB.IsExisting("unique-name", false))
 }
 
 ///////////////////////////////////////////////////////////////
 
 func TestUpdateOnlineUser(t *testing.T) {
-	udb := GetDB(dbPath)
-	defer udb.Close()
+	OpenSession(dbPath)
+	defer CloseSession()
 
-	udb.UpdateOnlineUser("a")
-	udb.UpdateOnlineUser("b")
-	udb.UpdateOnlineUser("c")
+	UserDB.UpdateOnlineUser("a")
+	UserDB.UpdateOnlineUser("b")
+	UserDB.UpdateOnlineUser("c")
 
-	users, err := udb.ListOnlineUsers()
+	users, err := UserDB.ListOnlineUsers()
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(users)
 
-	tm, _ := udb.LoadOnlineUser("a")
+	tm, _ := UserDB.LoadOnlineUser("a")
 	fmt.Println(tm)
 
 	time.Sleep(3 * time.Second)
