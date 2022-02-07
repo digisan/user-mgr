@@ -12,8 +12,8 @@ import (
 const dbPath = "../data/user"
 
 func TestOpen(t *testing.T) {
-	OpenSession(dbPath)
-	defer CloseSession()
+	OpenUserStorage(dbPath)
+	defer CloseUserStorage()
 
 	u := usr.User{
 		Active:   "T",
@@ -29,15 +29,15 @@ func TestOpen(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
-	OpenSession(dbPath)
-	defer CloseSession()
+	OpenUserStorage(dbPath)
+	defer CloseUserStorage()
 
 	lk.FailOnErr("%v", UserDB.RemoveUser("unique-name"))
 }
 
 func TestLoad(t *testing.T) {
-	OpenSession(dbPath)
-	defer CloseSession()
+	OpenUserStorage(dbPath)
+	defer CloseUserStorage()
 
 	user, ok, err := UserDB.LoadUser("unique-name", false)
 	lk.FailOnErr("%v", err)
@@ -50,8 +50,8 @@ func TestLoad(t *testing.T) {
 }
 
 func TestListUsers(t *testing.T) {
-	OpenSession(dbPath)
-	defer CloseSession()
+	OpenUserStorage(dbPath)
+	defer CloseUserStorage()
 
 	users, err := UserDB.ListUsers(func(u *usr.User) bool {
 		return u.IsActive() || !u.IsActive()
@@ -67,8 +67,8 @@ func TestListUsers(t *testing.T) {
 }
 
 func TestExisting(t *testing.T) {
-	OpenSession(dbPath)
-	defer CloseSession()
+	OpenUserStorage(dbPath)
+	defer CloseUserStorage()
 
 	fmt.Println(UserDB.IsExisting("unique-name", false))
 }
@@ -76,8 +76,8 @@ func TestExisting(t *testing.T) {
 ///////////////////////////////////////////////////////////////
 
 func TestUpdateOnlineUser(t *testing.T) {
-	OpenSession(dbPath)
-	defer CloseSession()
+	OpenUserStorage(dbPath)
+	defer CloseUserStorage()
 
 	UserDB.UpdateOnlineUser("a")
 	UserDB.UpdateOnlineUser("b")

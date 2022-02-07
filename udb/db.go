@@ -43,7 +43,7 @@ func getDB(dir string) *UDB {
 	return uDB
 }
 
-func (db *UDB) Close() {
+func (db *UDB) close() {
 	db.Lock()
 	defer db.Unlock()
 

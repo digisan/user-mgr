@@ -4,16 +4,16 @@ var (
 	UserDB *UDB // global, for using
 )
 
-// init udb.UserDB
-func OpenSession(udbPath string) {
+// initiate [udb.UserDB] for using
+func OpenUserStorage(udbPath string) {
 	if UserDB == nil {
 		UserDB = getDB(udbPath)
 	}
 }
 
-func CloseSession() {
+func CloseUserStorage() {
 	if UserDB != nil {
-		UserDB.Close()
+		UserDB.close()
 		UserDB = nil
 	}
 }

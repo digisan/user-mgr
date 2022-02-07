@@ -12,8 +12,8 @@ import (
 
 func main() {
 
-	udb.OpenSession("../../data/user")
-	defer udb.CloseSession()
+	udb.OpenUserStorage("../../data/user")
+	defer udb.CloseUserStorage()
 
 	// get [user] from GET
 

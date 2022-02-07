@@ -14,8 +14,8 @@ func main() {
 
 	lk.WarnDetail(false)
 
-	udb.OpenSession("../../data/user")
-	defer udb.CloseSession()
+	udb.OpenUserStorage("../../data/user")
+	defer udb.CloseUserStorage()
 
 	// get [user] from POST
 

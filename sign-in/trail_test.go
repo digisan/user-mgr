@@ -12,8 +12,8 @@ import (
 
 func TestInactiveMonitor(t *testing.T) {
 
-	udb.OpenSession("../data/user")
-	defer udb.CloseSession()
+	udb.OpenUserStorage("../data/user")
+	defer udb.CloseUserStorage()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
