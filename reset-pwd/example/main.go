@@ -59,8 +59,7 @@ AGAIN:
 	fmt.Scanf("%s", &pwdUpdated)
 	// get [pwdUpdated] from POST
 
-	lenOK, number, upper, special := su.ChkPwd(pwdUpdated, su.MinLenLetter)
-	if lenOK && number && upper && special {
+	if su.ChkPwd(pwdUpdated, su.LetterLen) {
 		user.Password = pwdUpdated
 	} else {
 		fmt.Println("invalid new password")

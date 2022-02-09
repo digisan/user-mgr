@@ -6,5 +6,6 @@ import (
 )
 
 func Store(user usr.User) error {
+	user.StampRegTime()
 	return udb.UserDB.UpdateUser(user)
 }

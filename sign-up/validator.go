@@ -4,117 +4,88 @@ import (
 	"fmt"
 	"unicode"
 
+	"github.com/digisan/go-generics/str"
 	lk "github.com/digisan/logkit"
+	"github.com/digisan/user-mgr/tool"
 	"github.com/digisan/user-mgr/udb"
 	usr "github.com/digisan/user-mgr/user"
 	vf "github.com/digisan/user-mgr/user/valfield"
 )
 
-func SetValidator() {
-	usr.RegisterValidator(vf.Active, func(fv string) bool {
-		return fv == "T" || fv == "F"
-	})
-	usr.RegisterValidator(vf.UName, func(fv string) bool {
-		return !udb.UserDB.IsExisting(fv, false)
-	})
-	usr.RegisterValidator(vf.Name, func(fv string) bool {
-		return len(fv) > 0
-	})
-	usr.RegisterValidator(vf.Password, func(fv string) bool {
-		lenOK, number, upper, special := ChkPwd(fv, MinLenLetter)
-		return lenOK && number && upper && special
-	})
-	usr.RegisterValidator(vf.Avatar, func(fv string) bool {
-		return len(fv) > 0
-	})
-	usr.RegisterValidator(vf.Regtime, func(fv string) bool {
-		return len(fv) > 0
-	})
-	usr.RegisterValidator(vf.Phone, func(fv string) bool {
-		return len(fv) > 0
-	})
-	usr.RegisterValidator(vf.Addr, func(fv string) bool {
-		return true
-	})
-	usr.RegisterValidator(vf.SysRole, func(fv string) bool {
-		return true
-	})
-	usr.RegisterValidator(vf.SysLevel, func(fv string) bool {
-		return true
-	})
-	usr.RegisterValidator(vf.Expire, func(fv string) bool {
-		return true
-	})
-	usr.RegisterValidator(vf.NationalID, func(fv string) bool {
-		return true
-	})
-	usr.RegisterValidator(vf.Gender, func(fv string) bool {
-		if fv != "" {
-			return fv == "M" || fv == "F"
-		}
-		return true
-	})
-	usr.RegisterValidator(vf.Position, func(fv string) bool {
-		return true
-	})
-	usr.RegisterValidator(vf.Title, func(fv string) bool {
-		return true
-	})
-	usr.RegisterValidator(vf.Employer, func(fv string) bool {
-		return true
-	})
+var (
+	condOper        = tool.CondOper
+	mFieldValidator = map[string]func(string) bool{
+		vf.Active:     func(v string) bool { return v == "T" || v == "F" },
+		vf.UName:      func(v string) bool { return !udb.UserDB.IsExisting(v, false) },
+		vf.Email:      func(v string) bool { return true },
+		vf.Name:       func(v string) bool { return len(v) > 0 },
+		vf.Password:   func(v string) bool { return ChkPwd(v, LetterLen) },
+		vf.Avatar:     func(v string) bool { return condOper(v != "", len(v) > 10, true).(bool) },
+		vf.Regtime:    func(v string) bool { return true },
+		vf.Phone:      func(v string) bool { return condOper(v != "", len(v) > 6, true).(bool) },
+		vf.Addr:       func(v string) bool { return condOper(v != "", len(v) > 6, true).(bool) },
+		vf.SysRole:    func(v string) bool { return condOper(v != "", len(v) > 2, true).(bool) },
+		vf.SysLevel:   func(v string) bool { return condOper(v != "", str.In(v, "1", "2", "3"), true).(bool) },
+		vf.Expire:     func(v string) bool { return condOper(v != "", len(v) > 6, true).(bool) },
+		vf.NationalID: func(v string) bool { return condOper(v != "", len(v) > 6, true).(bool) },
+		vf.Gender:     func(v string) bool { return condOper(v != "", v == "M" || v == "F", true).(bool) },
+		vf.Position:   func(v string) bool { return condOper(v != "", len(v) > 3, true).(bool) },
+		vf.Title:      func(v string) bool { return condOper(v != "", len(v) > 3, true).(bool) },
+		vf.Employer:   func(v string) bool { return condOper(v != "", len(v) > 3, true).(bool) },
+	}
+
+	fEf          = fmt.Errorf
+	mFieldValErr = map[string]func(string) error{
+		vf.Active:     func(v string) error { return fEf("active status need 'T'/'F' for true/false") },
+		vf.UName:      func(v string) error { return fEf("[%s] is already existing", v) },
+		vf.Email:      func(v string) error { return fEf("invalid email format") },
+		vf.Name:       func(v string) error { return fEf("invalid user real name") },
+		vf.Password:   func(v string) error { return fEf("password needs minimal %d letters with UPPER,0-9,symbol", LetterLen) },
+		vf.Regtime:    func(v string) error { return fEf("register time is mandatory when signing up successfully") },
+		vf.Phone:      func(v string) error { return fEf("invalid telephone number") },
+		vf.Addr:       func(v string) error { return fEf("invalid address") },
+		vf.SysRole:    func(v string) error { return fEf("invalid system role") },
+		vf.SysLevel:   func(v string) error { return fEf("invalid system subscribe level") },
+		vf.Expire:     func(v string) error { return fEf("invalid expiry date") },
+		vf.NationalID: func(v string) error { return fEf("invalid national ID") },
+		vf.Gender:     func(v string) error { return fEf("gender needs 'M'/'F' for male/female") },
+		vf.Position:   func(v string) error { return fEf("invalid position") },
+		vf.Title:      func(v string) error { return fEf("invalid title") },
+		vf.Employer:   func(v string) error { return fEf("invalid employer") },
+		vf.Avatar:     func(v string) error { return fEf("invalid avatar") },
+		"required":    func(v string) error { return fEf("[%s] must be provided", v) },
+	}
+)
+
+func SetValidator(mExtraValidator map[string]func(string) bool) {
+	// create temp mFieldValidator
+	mFV := make(map[string]func(string) bool)
+	for f, v := range mFieldValidator {
+		mFV[f] = v
+	}
+	for f, v := range mExtraValidator {
+		mFV[f] = v
+	}
+	// register
+	for field, validator := range mFV {
+		usr.RegisterValidator(field, validator)
+	}
 }
 
 func TransInvalidErr(err error) error {
 	field, tag := usr.ErrField(err)
-	switch tag {
-	case vf.Active:
-		return fmt.Errorf("invalid active status, set 'T' for true, or 'F' for false")
-	case vf.UName:
-		return fmt.Errorf("invalid user name, [%s] is already existing", field)
-	case vf.Email:
-		return fmt.Errorf("invalid email format")
-	case vf.Name:
-		return fmt.Errorf("invalid user real name")
-	case vf.Password:
-		return fmt.Errorf("invalid password, at least %d letters, consists of UPPER-CASE, number and symbol", MinLenLetter)
-	case vf.Regtime:
-		return fmt.Errorf("must add register time when signing up")
-	case vf.Phone:
-		return fmt.Errorf("invalid telephone number")
-	case vf.Addr:
-		return fmt.Errorf("invalid address")
-	case vf.SysRole:
-		return fmt.Errorf("invalid system role")
-	case vf.SysLevel:
-		return fmt.Errorf("invalid system subscribe level")
-	case vf.Expire:
-		return fmt.Errorf("invalid expiry date")
-	case vf.NationalID:
-		return fmt.Errorf("invalid national ID")
-	case vf.Gender:
-		return fmt.Errorf("invalid gender")
-	case vf.Position:
-		return fmt.Errorf("invalid position")
-	case vf.Title:
-		return fmt.Errorf("invalid title")
-	case vf.Employer:
-		return fmt.Errorf("invalid employer")
-	case vf.Avatar:
-		return fmt.Errorf("invalid avatar")
-	case "required":
-		return fmt.Errorf("[%s] must be provided", field)
-	default:
-		fmt.Println(err)
-		lk.FailOnErr("%v", fmt.Errorf("unknown Field Invalid Error @ [%s]", field))
+	fn, ok := mFieldValErr[tag]
+	if ok {
+		return fn(tag)
 	}
+	lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("unknown field invalid error @ [%s]", field))
 	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-func ChkPwd(s string, minLenLetter int) (lenOK, number, upper, special bool) {
-	letters := 0
+func ChkPwd(s string, minLenLetter int) bool {
+	letters, number, upper, special := 0, false, false, false
 	for _, c := range s {
 		switch {
 		case unicode.IsNumber(c):
@@ -130,5 +101,5 @@ func ChkPwd(s string, minLenLetter int) (lenOK, number, upper, special bool) {
 			//return false, false, false, false
 		}
 	}
-	return letters >= minLenLetter, number, upper, special
+	return letters >= minLenLetter && number && upper && special
 }

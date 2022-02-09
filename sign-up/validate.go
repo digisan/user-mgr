@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	MinLenLetter = 6
-	timeout      = 30 * time.Second
+	LetterLen = 6
+	timeout   = 30 * time.Second
 )
 
 var (

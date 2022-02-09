@@ -22,6 +22,13 @@ var (
 	mu       sync.Mutex
 )
 
+func CondOper(condition bool, ifTrue, ifFalse interface{}) interface{} {
+	if condition {
+		return ifTrue
+	}
+	return ifFalse
+}
+
 func Maxlen(s string, length int) string {
 	if len(s) < length {
 		return s

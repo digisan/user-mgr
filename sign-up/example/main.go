@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	lk "github.com/digisan/logkit"
 	su "github.com/digisan/user-mgr/sign-up"
@@ -22,18 +21,18 @@ func main() {
 	// Will be POST header
 	user := usr.User{
 		Active:   "T",
-		UName:    "QMiao",
-		Email:    "cdutwhu@outlook.com",
-		Name:     "A girl has no name",
+		UName:    "Qing Miao",
+		Email:    "4987346@qq.com",
+		Name:     "A boy has no name",
 		Password: "pa55a@aD20TTTTT",
 		Phone:    "123456789",
-		Regtime:  time.Now().UTC().Format(time.RFC3339),
+		Regtime:  "", // stamp it before storing
 		SysRole:  "admin",
 		SysLevel: "1",
-		Avatar:   "abcdefg",
+		Avatar:   "abcdefg****************************",
 	}
 
-	su.SetValidator()
+	su.SetValidator(nil)
 
 	if err := su.ChkInput(user); err != nil {
 		lk.WarnOnErr("%v", err)
@@ -60,5 +59,5 @@ func main() {
 		fmt.Println(err)
 	}
 
-	fmt.Println("OK")
+	fmt.Println("Sign-up OK")
 }
