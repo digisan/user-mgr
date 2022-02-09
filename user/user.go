@@ -20,9 +20,9 @@ type User struct {
 	Regtime    string `json:"regtime" validate:"regtime"`       // register time
 	Phone      string `json:"phone" validate:"phone"`           // optional
 	Addr       string `json:"addr" validate:"addr"`             // optional
-	SysRole    string `json:"role" validate:"sysrole"`          // optional
-	SysLevel   string `json:"level" validate:"syslevel"`        // optional
-	Expire     string `json:"expire" validate:"expire"`         // optional
+	SysRole    string `json:"role" validate:"sysRole"`          // optional
+	MemLevel   string `json:"level" validate:"memLevel"`        // optional
+	MemExpire  string `json:"expire" validate:"memExpire"`      // optional
 	NationalID string `json:"nationalid" validate:"nationalid"` // optional
 	Gender     string `json:"gender" validate:"gender"`         // optional
 	Position   string `json:"position" validate:"position"`     // optional
@@ -60,24 +60,15 @@ func ListUserValidator() (tags []string) {
 
 func (u User) String() string {
 	if u.UName != "" {
-		return fmt.Sprintf(
-			"Active: %s\n"+
-				"UName: %s\n"+
-				"Email: %s\n"+
-				"Name: %s\n"+
-				"Password: %s\n"+
-				"Register Time: %s\n"+
-				"Phone: %s\n"+
-				"Address: %s\n"+
-				"Role: %s\n"+
-				"Level: %s\n"+
-				"Expire: %s\n"+
-				"Avatar: %s", // add more
-			u.Active, u.UName, u.Email,
-			u.Name, u.Password, u.Regtime,
-			u.Phone, u.Addr, u.SysRole,
-			u.SysLevel, u.Expire, u.Avatar,
-		)
+		sb := strings.Builder{}
+		typ := reflect.TypeOf(u)
+		val := reflect.ValueOf(u)
+		for i := 0; i < typ.NumField(); i++ {
+			fld := typ.Field(i)
+			val := val.Field(i)
+			sb.WriteString(fmt.Sprintf("%-10s %v\n", fld.Name+":", val.String()))
+		}
+		return sb.String()
 	}
 	return "[Empty User]\n"
 }
@@ -89,16 +80,18 @@ func (u *User) GenKey() []byte {
 	return u.key
 }
 
-// Active||UName||Email||Name||Regtime||Phone||...||pwdBuf <==> key
+// Active||UName||Email||Name||...||pwdBuf <==> key
 func (u *User) Marshal() (info []byte, key []byte) {
 	// key : db value
 	key = u.GenKey() // db value
 	// info : db key
-	info = []byte(fmt.Sprintf("%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||",
+	info = []byte(fmt.Sprintf("%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||",
 		u.Active, u.UName, u.Email,
 		u.Name, u.Regtime, u.Phone,
-		u.Addr, u.SysRole, u.SysLevel,
-		u.Expire, u.Avatar)) // add more
+		u.Addr, u.SysRole, u.MemLevel,
+		u.MemExpire, u.NationalID, u.Gender,
+		u.Position, u.Title, u.Employer,
+		u.Avatar)) // add more
 	pwdBuf := tool.Encrypt(u.Password, key)
 	info = append(info, pwdBuf...) // from u.Password
 	return
@@ -128,13 +121,23 @@ func (u *User) Unmarshal(info []byte, key []byte) {
 		case 7: // Role
 			u.SysRole = value
 		case 8: // Level
-			u.SysLevel = value
+			u.MemLevel = value
 		case 9: // Expire
-			u.Expire = value
-		case 10: // Avatar
+			u.MemExpire = value
+		case 10: // National ID
+			u.NationalID = value
+		case 11: // Gender
+			u.Gender = value
+		case 12: // Position
+			u.Position = value
+		case 13: // Title
+			u.Title = value
+		case 14: // Employer
+			u.Employer = value
+		case 15: // Avatar
 			u.Avatar = value
 		// add more
-		case 11: // pwdBuf (11 must change as last if added more)
+		case 16: // pwdBuf (16 must change to be the last one if added more)
 			if key != nil {
 				u.Password = tool.Decrypt(seg, key)
 			}

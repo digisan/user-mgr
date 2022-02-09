@@ -11,14 +11,15 @@ import (
 	usr "github.com/digisan/user-mgr/user"
 )
 
-const (
-	LetterLen = 6
-	timeout   = 30 * time.Second
+var (
+	timeoutSend   = 45 * time.Second
+	timeoutVerify = 30 * time.Minute
+	mUserCodeTm   = &sync.Map{}
 )
 
-var (
-	mUserCodeTm = &sync.Map{}
-)
+func SetVerifyEmailTimeout(t time.Duration) {
+	timeoutVerify = t
+}
 
 // only support gmail now
 func SetCodeEmail(email, password string) {
@@ -36,7 +37,7 @@ func ChkInput(user usr.User) error {
 func verifyEmail(user usr.User) (string, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	code, err := tool.SendCode(ctx, user.Email, timeout)
+	code, err := tool.SendCode(ctx, user.Email, timeoutSend)
 	if err != nil {
 		return "", fmt.Errorf("verification code sending error: %v", err)
 	}
@@ -73,7 +74,7 @@ func VerifyCode(user usr.User, incode string) error {
 		Tm   time.Time
 	})
 
-	if time.Since(ct.Tm) > 30*time.Minute {
+	if time.Since(ct.Tm) > timeoutVerify {
 		return fmt.Errorf("email verification code is expired")
 	}
 

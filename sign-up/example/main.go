@@ -28,7 +28,7 @@ func main() {
 		Phone:    "123456789",
 		Regtime:  "", // stamp it before storing
 		SysRole:  "admin",
-		SysLevel: "1",
+		MemLevel: "1",
 		Avatar:   "abcdefg****************************",
 	}
 

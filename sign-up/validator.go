@@ -12,6 +12,10 @@ import (
 	vf "github.com/digisan/user-mgr/user/valfield"
 )
 
+const (
+	LetterLen = 6
+)
+
 var (
 	condOper        = tool.CondOper
 	mFieldValidator = map[string]func(string) bool{
@@ -25,8 +29,8 @@ var (
 		vf.Phone:      func(v string) bool { return condOper(v != "", len(v) > 6, true).(bool) },
 		vf.Addr:       func(v string) bool { return condOper(v != "", len(v) > 6, true).(bool) },
 		vf.SysRole:    func(v string) bool { return condOper(v != "", len(v) > 2, true).(bool) },
-		vf.SysLevel:   func(v string) bool { return condOper(v != "", str.In(v, "1", "2", "3"), true).(bool) },
-		vf.Expire:     func(v string) bool { return condOper(v != "", len(v) > 6, true).(bool) },
+		vf.MemLevel:   func(v string) bool { return condOper(v != "", str.In(v, "1", "2", "3"), true).(bool) },
+		vf.MemExpire:  func(v string) bool { return condOper(v != "", len(v) > 6, true).(bool) },
 		vf.NationalID: func(v string) bool { return condOper(v != "", len(v) > 6, true).(bool) },
 		vf.Gender:     func(v string) bool { return condOper(v != "", v == "M" || v == "F", true).(bool) },
 		vf.Position:   func(v string) bool { return condOper(v != "", len(v) > 3, true).(bool) },
@@ -45,8 +49,8 @@ var (
 		vf.Phone:      func(v string) error { return fEf("invalid telephone number") },
 		vf.Addr:       func(v string) error { return fEf("invalid address") },
 		vf.SysRole:    func(v string) error { return fEf("invalid system role") },
-		vf.SysLevel:   func(v string) error { return fEf("invalid system subscribe level") },
-		vf.Expire:     func(v string) error { return fEf("invalid expiry date") },
+		vf.MemLevel:   func(v string) error { return fEf("invalid membership level") },
+		vf.MemExpire:  func(v string) error { return fEf("invalid expiry date") },
 		vf.NationalID: func(v string) error { return fEf("invalid national ID") },
 		vf.Gender:     func(v string) error { return fEf("gender needs 'M'/'F' for male/female") },
 		vf.Position:   func(v string) error { return fEf("invalid position") },
