@@ -29,7 +29,7 @@ var (
 		vf.Phone:      func(v string) bool { return condOper(v != "", len(v) > 6, true).(bool) },
 		vf.Addr:       func(v string) bool { return condOper(v != "", len(v) > 6, true).(bool) },
 		vf.SysRole:    func(v string) bool { return condOper(v != "", len(v) > 2, true).(bool) },
-		vf.MemLevel:   func(v string) bool { return condOper(v != "", str.In(v, "1", "2", "3"), true).(bool) },
+		vf.MemLevel:   func(v string) bool { return ChkMemLvl(v) },
 		vf.MemExpire:  func(v string) bool { return condOper(v != "", len(v) > 6, true).(bool) },
 		vf.NationalID: func(v string) bool { return condOper(v != "", len(v) > 6, true).(bool) },
 		vf.Gender:     func(v string) bool { return condOper(v != "", v == "M" || v == "F", true).(bool) },
@@ -49,7 +49,7 @@ var (
 		vf.Phone:      func(v string) error { return fEf("invalid telephone number") },
 		vf.Addr:       func(v string) error { return fEf("invalid address") },
 		vf.SysRole:    func(v string) error { return fEf("invalid system role") },
-		vf.MemLevel:   func(v string) error { return fEf("invalid membership level") },
+		vf.MemLevel:   func(v string) error { return fEf("invalid membership level, must between 0-9") },
 		vf.MemExpire:  func(v string) error { return fEf("invalid expiry date") },
 		vf.NationalID: func(v string) error { return fEf("invalid national ID") },
 		vf.Gender:     func(v string) error { return fEf("gender needs 'M'/'F' for male/female") },
@@ -106,4 +106,8 @@ func ChkPwd(s string, minLenLetter int) bool {
 		}
 	}
 	return letters >= minLenLetter && number && upper && special
+}
+
+func ChkMemLvl(s string) bool {
+	return str.In(s, "0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
 }
