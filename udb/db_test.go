@@ -25,7 +25,8 @@ func TestOpen(t *testing.T) {
 	}
 	lk.FailOnErr("%v", UserDB.UpdateUser(u))
 
-	lk.FailOnErr("%v", UserDB.ActivateUser("unique-name", false))
+	done, err := UserDB.ActivateUser("unique-name", false)
+	lk.FailOnErr("%v - %v", done, err)
 }
 
 func TestRemove(t *testing.T) {

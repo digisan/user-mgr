@@ -229,11 +229,16 @@ func (db *UDB) IsExisting(uname string, onlyActive bool) bool {
 	return okActive || okDorm
 }
 
-func (db *UDB) ActivateUser(uname string, flag bool) error {
+func (db *UDB) ActivateUser(uname string, flag bool) (bool, error) {
 	u, ok, err := db.LoadUser(uname, !flag)
-	if err == nil && ok {
-		u.Active = strings.ToUpper(fmt.Sprint(flag))[:1]
-		return db.UpdateUser(u)
+	if err == nil {
+		if ok {
+			u.Active = strings.ToUpper(fmt.Sprint(flag))[:1]
+			return true, db.UpdateUser(u)
+		}
+		if !ok {
+			return false, fmt.Errorf("no action applied for [%s]", uname)
+		}
 	}
-	return err
+	return false, err
 }
