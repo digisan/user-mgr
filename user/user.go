@@ -29,7 +29,7 @@ type User struct {
 	Title      string `json:"title" validate:"title"`           // optional
 	Employer   string `json:"employer" validate:"employer"`     // optional
 	Avatar     string `json:"avatar" validate:"avatar"`         // optional
-	key        []byte // at last, from 'Password'
+	key        string
 }
 
 func ListUserField() (fields []string) {
@@ -66,86 +66,144 @@ func (u User) String() string {
 		for i := 0; i < typ.NumField(); i++ {
 			fld := typ.Field(i)
 			val := val.Field(i)
-			sb.WriteString(fmt.Sprintf("%-10s %v\n", fld.Name+":", val.String()))
+			sb.WriteString(fmt.Sprintf("%-12s %v\n", fld.Name+":", val.String()))
 		}
 		return sb.String()
 	}
 	return "[Empty User]\n"
 }
 
-func (u *User) GenKey() []byte {
-	if u.key == nil {
-		u.key = []byte(fmt.Sprintf("%d", time.Now().UnixNano())[3:19])
+func (u *User) GenKey() string {
+	if u.key == "" {
+		u.key = fmt.Sprintf("%d", time.Now().UnixNano())[3:19]
 	}
 	return u.key
 }
 
-// Active||UName||Email||Name||...||pwdBuf <==> key
-func (u *User) Marshal() (info []byte, key []byte) {
-	// key : db value
-	key = u.GenKey() // db value
-	// info : db key
-	info = []byte(fmt.Sprintf("%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||",
-		u.Active, u.UName, u.Email,
-		u.Name, u.Regtime, u.Phone,
-		u.Addr, u.SysRole, u.MemLevel,
-		u.MemExpire, u.NationalID, u.Gender,
-		u.Position, u.Title, u.Employer,
-		u.Avatar)) // add more
-	pwdBuf := tool.Encrypt(u.Password, key)
-	info = append(info, pwdBuf...) // from u.Password
+const SEP = "||"
+
+// db key order
+const (
+	MOK_Active int = iota
+	MOK_UName
+	MOK_Email
+	MOK_Name
+	MOK_Regtime
+	MOK_Phone
+	MOK_Addr
+	MOK_SysRole
+	MOK_MemLevel
+	MOK_MemExpire
+	MOK_NationalID
+	MOK_Gender
+	MOK_Position
+	MOK_Title
+	MOK_Employer
+	MOK_Avatar
+	MOK_PwdBuf
+	MOK_END
+)
+
+func (u *User) KeyFieldAddr(mok int) *string {
+	mFldAddr := map[int]*string{
+		MOK_Active:     &u.Active,
+		MOK_UName:      &u.UName,
+		MOK_Email:      &u.Email,
+		MOK_Name:       &u.Name,
+		MOK_Regtime:    &u.Regtime,
+		MOK_Phone:      &u.Phone,
+		MOK_Addr:       &u.Addr,
+		MOK_SysRole:    &u.SysRole,
+		MOK_MemLevel:   &u.MemLevel,
+		MOK_MemExpire:  &u.MemExpire,
+		MOK_NationalID: &u.NationalID,
+		MOK_Gender:     &u.Gender,
+		MOK_Position:   &u.Position,
+		MOK_Title:      &u.Title,
+		MOK_Employer:   &u.Employer,
+		MOK_Avatar:     &u.Avatar,
+		MOK_PwdBuf:     &u.Password,
+	}
+	return mFldAddr[mok]
+}
+
+// db value order
+const (
+	MOV_Key int = iota
+	MOV_END
+)
+
+func (u *User) ValFieldAddr(mov int) *string {
+	mFldAddr := map[int]*string{
+		MOV_Key: &u.key,
+	}
+	return mFldAddr[mov]
+}
+
+////////////////////////////////////////////////////
+
+func (u *User) Marshal() (forKey, forValue []byte) {
+
+	key := u.GenKey()
+	forValue = []byte(fmt.Sprint(len(u.UName)) + key) // *** fake key forValue in db ***
+
+	params := []struct {
+		end       int
+		fnFldAddr func(int) *string
+		out       *[]byte
+	}{
+		{
+			end:       MOK_END,
+			fnFldAddr: u.KeyFieldAddr,
+			out:       &forKey,
+		},
+	}
+	for _, param := range params {
+		sb := &strings.Builder{}
+		for i := 0; i < param.end; i++ {
+			if i > 0 {
+				sb.WriteString(SEP)
+			}
+			if i == MOK_PwdBuf {
+				sb.Write(tool.Encrypt(u.Password, []byte(key))) // from u.Password
+				continue
+			}
+			sb.WriteString(*param.fnFldAddr(i))
+		}
+		*param.out = []byte(sb.String())
+	}
 	return
 }
 
-func (u *User) Unmarshal(info []byte, key []byte) {
-	if key != nil {
-		u.key = key
+func (u *User) Unmarshal(dbKey, dbVal []byte) {
+	if dbVal != nil {
+		u.key = string(dbVal) // *** fake key ***
 	}
-	for i, seg := range bytes.Split(info, []byte("||")) {
-		value := string(seg)
-		switch i {
-		case 0: // Active
-			u.Active = value
-		case 1: // UName
-			u.UName = value
-		case 2: // Email
-			u.Email = value
-		case 3: // Name
-			u.Name = value
-		case 4: // Register Time
-			u.Regtime = value
-		case 5: // Phone
-			u.Phone = value
-		case 6: // Address
-			u.Addr = value
-		case 7: // Role
-			u.SysRole = value
-		case 8: // Level
-			u.MemLevel = value
-		case 9: // Expire
-			u.MemExpire = value
-		case 10: // National ID
-			u.NationalID = value
-		case 11: // Gender
-			u.Gender = value
-		case 12: // Position
-			u.Position = value
-		case 13: // Title
-			u.Title = value
-		case 14: // Employer
-			u.Employer = value
-		case 15: // Avatar
-			u.Avatar = value
-		// add more
-		case 16: // pwdBuf (16 must change to be the last one if added more)
-			if key != nil {
-				u.Password = tool.Decrypt(seg, key)
+	params := []struct {
+		in        []byte
+		fnFldAddr func(int) *string
+	}{
+		{
+			in:        dbKey,
+			fnFldAddr: u.KeyFieldAddr,
+		},
+	}
+	for _, param := range params {
+		for i, seg := range bytes.Split(param.in, []byte(SEP)) {
+			if i == MOK_PwdBuf {
+				if u.key != "" {
+					offset := len(fmt.Sprint(len(u.UName)))
+					u.key = u.key[offset:]
+					u.Password = tool.Decrypt(seg, []byte(u.key))
+					continue
+				}
 			}
-		default:
-			panic("sep || error")
+			*param.fnFldAddr(i) = string(seg)
 		}
 	}
 }
+
+///////////////////////////////////////////////////
 
 func (u *User) IsActive() bool {
 	return u.Active == "T"
