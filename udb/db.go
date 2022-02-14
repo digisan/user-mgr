@@ -70,7 +70,7 @@ func (db *UDB) LoadOnlineUser(uname string) (time.Time, error) {
 	return *tm, err
 }
 
-func (db *UDB) UpdateOnlineUser(uname string) error {
+func (db *UDB) RefreshOnlineUser(uname string) error {
 	db.Lock()
 	defer db.Unlock()
 
@@ -111,29 +111,32 @@ func (db *UDB) ListOnlineUsers() (unames []string, err error) {
 
 ///////////////////////////////////////////////////////////////
 
-func (db *UDB) UpdateUser(user usr.User) error {
-	// remove all existing items
-	db.RemoveUser(user.UName)
-
+func (db *UDB) UpdateUser(user *usr.User) error {
 	db.Lock()
 	defer db.Unlock()
+
+	// remove all existing items
+	if err := db.RemoveUser(user.UName, false); err != nil {
+		return err
+	}
 	return db.dbReg.Update(func(txn *badger.Txn) error {
 		return txn.Set(user.Marshal())
 	})
 }
 
-func (db *UDB) LoadUser(uname string, active bool) (usr.User, bool, error) {
+func (db *UDB) LoadUser(uname string, active bool) (*usr.User, bool, error) {
 	db.Lock()
 	defer db.Unlock()
+
+	prefix := []byte("T" + usr.SEP + uname + usr.SEP)
+	if !active {
+		prefix = []byte("F" + usr.SEP + uname + usr.SEP)
+	}
 
 	u := &usr.User{}
 	err := db.dbReg.View(func(txn *badger.Txn) error {
 		it := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer it.Close()
-		prefix := []byte("T||" + uname + "||")
-		if !active {
-			prefix = []byte("F||" + uname + "||")
-		}
 		if it.Seek(prefix); it.ValidForPrefix(prefix) {
 			item := it.Item()
 			k := item.Key()
@@ -145,14 +148,14 @@ func (db *UDB) LoadUser(uname string, active bool) (usr.User, bool, error) {
 		}
 		return nil
 	})
-	return *u, u.Email != "", err
+	return u, u.Email != "", err
 }
 
-func (db *UDB) LoadActiveUser(uname string) (usr.User, bool, error) {
+func (db *UDB) LoadActiveUser(uname string) (*usr.User, bool, error) {
 	return db.LoadUser(uname, true)
 }
 
-func (db *UDB) LoadUserByEmail(email string, active bool) (usr.User, bool, error) {
+func (db *UDB) LoadUserByEmail(email string, active bool) (*usr.User, bool, error) {
 	db.Lock()
 	defer db.Unlock()
 
@@ -165,25 +168,26 @@ func (db *UDB) LoadUserByEmail(email string, active bool) (usr.User, bool, error
 	if len(users) > 0 {
 		return users[0], true, err
 	}
-	return usr.User{}, false, err
+	return &usr.User{}, false, err
 }
 
-func (db *UDB) LoadActiveUserByEmail(email string) (usr.User, bool, error) {
+func (db *UDB) LoadActiveUserByEmail(email string) (*usr.User, bool, error) {
 	return db.LoadUserByEmail(email, true)
 }
 
-func (db *UDB) RemoveUser(uname string) error {
-	db.Lock()
-	defer db.Unlock()
+func (db *UDB) RemoveUser(uname string, lock bool) error {
+	if lock {
+		db.Lock()
+		defer db.Unlock()
+	}
 
+	prefixList := [][]byte{
+		[]byte("T" + usr.SEP + uname + usr.SEP),
+		[]byte("F" + usr.SEP + uname + usr.SEP),
+	}
 	return db.dbReg.Update(func(txn *badger.Txn) (err error) {
 		it := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer it.Close()
-
-		prefixList := [][]byte{
-			[]byte("T||" + uname + "||"),
-			[]byte("F||" + uname + "||"),
-		}
 		for _, prefix := range prefixList {
 			for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 				if err = txn.Delete(it.Item().KeyCopy(nil)); err != nil {
@@ -195,7 +199,7 @@ func (db *UDB) RemoveUser(uname string) error {
 	})
 }
 
-func (db *UDB) ListUsers(filter func(*usr.User) bool) (users []usr.User, err error) {
+func (db *UDB) ListUsers(filter func(*usr.User) bool) (users []*usr.User, err error) {
 	db.Lock()
 	defer db.Unlock()
 
@@ -208,7 +212,7 @@ func (db *UDB) ListUsers(filter func(*usr.User) bool) (users []usr.User, err err
 			u := &usr.User{}
 			u.Unmarshal(it.Item().KeyCopy(nil), nil)
 			if filter(u) {
-				users = append(users, *u)
+				users = append(users, u)
 			}
 		}
 		return nil

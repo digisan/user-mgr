@@ -17,9 +17,24 @@ func main() {
 	// get [user] from GET
 
 	// Will be GET header
-	user := usr.User{
-		UName:    "QMiao",
-		Password: "pa55a@aD20TTTTT",
+	user := &usr.User{
+		Active:     "",
+		UName:      "QMiao",
+		Email:      "",
+		Name:       "",
+		Password:   "pa55a@aD20TTTTT",
+		Regtime:    "",
+		Phone:      "",
+		Addr:       "",
+		SysRole:    "",
+		MemLevel:   "",
+		MemExpire:  "",
+		NationalID: "",
+		Gender:     "",
+		Position:   "",
+		Title:      "",
+		Employer:   "",
+		Avatar:     "",
 	}
 
 	lk.FailOnErr("%v", si.UserExists(user))

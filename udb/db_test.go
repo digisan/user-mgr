@@ -15,13 +15,24 @@ func TestOpen(t *testing.T) {
 	OpenUserStorage(dbPath)
 	defer CloseUserStorage()
 
-	u := usr.User{
-		Active:   "T",
-		UName:    "unique-name",
-		Email:    "hello@abc.net",
-		Name:     "test-name",
-		Password: "this is my password",
-		Phone:    "123",
+	u := &usr.User{
+		Active:     "T",
+		UName:      "unique-name",
+		Email:      "hello@abc.net",
+		Name:       "test-name",
+		Password:   "this is my password",
+		Regtime:    "",
+		Phone:      "123",
+		Addr:       "",
+		SysRole:    "",
+		MemLevel:   "",
+		MemExpire:  "",
+		NationalID: "",
+		Gender:     "",
+		Position:   "",
+		Title:      "",
+		Employer:   "",
+		Avatar:     "",
 	}
 	lk.FailOnErr("%v", UserDB.UpdateUser(u))
 
@@ -33,7 +44,7 @@ func TestRemove(t *testing.T) {
 	OpenUserStorage(dbPath)
 	defer CloseUserStorage()
 
-	lk.FailOnErr("%v", UserDB.RemoveUser("unique-name"))
+	lk.FailOnErr("%v", UserDB.RemoveUser("unique-name", true))
 }
 
 func TestLoad(t *testing.T) {
@@ -63,7 +74,7 @@ func TestListUsers(t *testing.T) {
 		fmt.Println(u)
 		t := &time.Time{}
 		t.UnmarshalText([]byte(u.Regtime))
-		fmt.Println("Been regstered for", time.Since(*t))
+		fmt.Println("been regstered for", time.Since(*t))
 	}
 }
 
@@ -80,9 +91,9 @@ func TestUpdateOnlineUser(t *testing.T) {
 	OpenUserStorage(dbPath)
 	defer CloseUserStorage()
 
-	UserDB.UpdateOnlineUser("a")
-	UserDB.UpdateOnlineUser("b")
-	UserDB.UpdateOnlineUser("c")
+	UserDB.RefreshOnlineUser("a")
+	UserDB.RefreshOnlineUser("b")
+	UserDB.RefreshOnlineUser("c")
 
 	users, err := UserDB.ListOnlineUsers()
 	if err != nil {

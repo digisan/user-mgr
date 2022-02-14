@@ -19,17 +19,24 @@ func main() {
 	// get [user] from POST
 
 	// Will be POST header
-	user := usr.User{
-		Active:   "T",
-		UName:    "Qing Miao",
-		Email:    "4987346@qq.com",
-		Name:     "A boy has no name",
-		Password: "pa55a@aD20TTTTT",
-		Phone:    "123456789",
-		Regtime:  "", // stamp it before storing
-		SysRole:  "admin",
-		MemLevel: "1",
-		Avatar:   "abcdefg****************************",
+	user := &usr.User{
+		Active:     "T",
+		UName:      "Qing Miao",
+		Email:      "4987346@qq.com",
+		Name:       "A boy has no name",
+		Password:   "pa55a@aD20TTTTT",
+		Regtime:    "",
+		Phone:      "123456789",
+		Addr:       "",
+		SysRole:    "admin",
+		MemLevel:   "1",
+		MemExpire:  "",
+		NationalID: "",
+		Gender:     "",
+		Position:   "",
+		Title:      "",
+		Employer:   "",
+		Avatar:     "abcdefg****************************",
 	}
 
 	su.SetValidator(nil)

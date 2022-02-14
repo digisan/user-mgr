@@ -24,9 +24,9 @@ func TokenKey() string {
 }
 
 // invoke in 'login'
-func MakeUserClaims(user User) *UserClaims {
+func MakeUserClaims(user *User) *UserClaims {
 	return &UserClaims{
-		user,
+		*user,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
 		},

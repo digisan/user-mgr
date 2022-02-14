@@ -25,7 +25,7 @@ func fnValidator(tag string) func(fv string) bool {
 	return f.(func(fv string) bool)
 }
 
-func (user User) Validate() error {
+func (user *User) Validate() error {
 	v := validator.New()
 	for _, vTag := range vTags {
 		fn := fnValidator(vTag)

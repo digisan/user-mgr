@@ -13,7 +13,7 @@ const (
 )
 
 func Trail(uname string) error {
-	return udb.UserDB.UpdateOnlineUser(uname)
+	return udb.UserDB.RefreshOnlineUser(uname)
 }
 
 func MonitorInactive(ctx context.Context, inactive chan<- string, offlineTimeout time.Duration) {

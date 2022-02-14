@@ -27,14 +27,14 @@ func SetCodeEmail(email, password string) {
 }
 
 // POST 1
-func ChkInput(user usr.User) error {
+func ChkInput(user *usr.User) error {
 	if err := user.Validate(); err != nil {
 		return TransInvalidErr(err)
 	}
 	return nil
 }
 
-func verifyEmail(user usr.User) (string, error) {
+func verifyEmail(user *usr.User) (string, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	code, err := tool.SendCode(ctx, user.Email, timeoutSend)
@@ -45,7 +45,7 @@ func verifyEmail(user usr.User) (string, error) {
 }
 
 // POST 1
-func ChkEmail(user usr.User) error {
+func ChkEmail(user *usr.User) error {
 	code, err := verifyEmail(user)
 	if err != nil {
 		return err
@@ -58,7 +58,7 @@ func ChkEmail(user usr.User) error {
 }
 
 // POST 2
-func VerifyCode(user usr.User, incode string) error {
+func VerifyCode(user *usr.User, incode string) error {
 
 	// fmt.Println("Input your code sent to you email")
 	// incode := ""

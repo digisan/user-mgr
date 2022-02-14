@@ -17,9 +17,19 @@ func TestUser(t *testing.T) {
 		Email:      "hello@abc.com",
 		Name:       "test-name",
 		Password:   "123456789a",
-		Avatar:     "******",
+		Regtime:    "",
+		Phone:      "",
+		Addr:       "",
+		SysRole:    "",
+		MemLevel:   "",
+		MemExpire:  "",
 		NationalID: "9876543210",
+		Gender:     "",
 		Position:   "professor",
+		Title:      "",
+		Employer:   "",
+		Avatar:     "******",
+		key:        "",
 	}
 	fmt.Println(user)
 

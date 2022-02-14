@@ -17,12 +17,24 @@ import (
 
 func login(c echo.Context) error {
 	// [POST] Form to fill user info
-	user := usr.User{
-		Active:   "T",
-		UName:    c.FormValue("name"),
-		Email:    "hello@abc.com",
-		Name:     c.FormValue("name"),
-		Password: "123456789a",
+	user := &usr.User{
+		Active:     "T",
+		UName:      c.FormValue("name"),
+		Email:      "hello@abc.com",
+		Name:       c.FormValue("name"),
+		Password:   "123456789a",
+		Regtime:    "",
+		Phone:      "",
+		Addr:       "",
+		SysRole:    "",
+		MemLevel:   "",
+		MemExpire:  "",
+		NationalID: "",
+		Gender:     "",
+		Position:   "",
+		Title:      "",
+		Employer:   "",
+		Avatar:     "",
 	}
 
 	fmt.Println(user)

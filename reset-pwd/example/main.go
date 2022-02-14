@@ -18,10 +18,24 @@ func main() {
 	// get [user] from GET
 
 	// Will be GET header
-	user := usr.User{
-		UName: "QMiao",
-		Email: "cdutwhu@outlook.com",
-		// Password: "pa55a@aD20TTTTT",
+	user := &usr.User{
+		Active:     "",
+		UName:      "QMiao",
+		Email:      "cdutwhu@outlook.com",
+		Name:       "",
+		Password:   "",
+		Regtime:    "",
+		Phone:      "",
+		Addr:       "",
+		SysRole:    "",
+		MemLevel:   "",
+		MemExpire:  "",
+		NationalID: "",
+		Gender:     "",
+		Position:   "",
+		Title:      "",
+		Employer:   "",
+		Avatar:     "",
 	}
 
 	if err := rp.UserExists(user); err != nil {

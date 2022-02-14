@@ -7,7 +7,7 @@ import (
 	usr "github.com/digisan/user-mgr/user"
 )
 
-func UserExists(login usr.User) error {
+func UserExists(login *usr.User) error {
 	if udb.UserDB.IsExisting(login.UName, true) {
 		return nil
 	}
@@ -17,7 +17,7 @@ func UserExists(login usr.User) error {
 	return fmt.Errorf("[%v] is not existing", login.UName)
 }
 
-func PwdOK(login usr.User) bool {
+func PwdOK(login *usr.User) bool {
 	user, ok, err := udb.UserDB.LoadUser(login.UName, true)
 	return err == nil && ok && user.Password == login.Password
 }
