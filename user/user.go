@@ -2,7 +2,9 @@ package user
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
+	"io"
 	"reflect"
 	"strings"
 	"time"
@@ -30,7 +32,7 @@ type User struct {
 	Title      string `json:"title" validate:"title"`           // optional
 	Employer   string `json:"employer" validate:"employer"`     // optional
 	Tags       string `json:"tags" validate:"tags"`             // optional // linked by '^'
-	Avatar     string `json:"avatar" validate:"avatar"`         // optional
+	Avatar     []byte `json:"avatar" validate:"avatar"`         // optional
 	key        string
 }
 
@@ -108,8 +110,8 @@ const (
 	MOK_END
 )
 
-func (u *User) KeyFieldAddr(mok int) *string {
-	mFldAddr := map[int]*string{
+func (u *User) KeyFieldAddr(mok int) interface{} {
+	mFldAddr := map[int]interface{}{
 		MOK_Active:     &u.Active,
 		MOK_UName:      &u.UName,
 		MOK_Email:      &u.Email,
@@ -138,8 +140,8 @@ const (
 	MOV_END
 )
 
-func (u *User) ValFieldAddr(mov int) *string {
-	mFldAddr := map[int]*string{
+func (u *User) ValFieldAddr(mov int) interface{} {
+	mFldAddr := map[int]interface{}{
 		MOV_Key: &u.key,
 	}
 	return mFldAddr[mov]
@@ -154,7 +156,7 @@ func (u *User) Marshal() (forKey, forValue []byte) {
 
 	params := []struct {
 		end       int
-		fnFldAddr func(int) *string
+		fnFldAddr func(int) interface{}
 		out       *[]byte
 	}{
 		{
@@ -173,7 +175,14 @@ func (u *User) Marshal() (forKey, forValue []byte) {
 				sb.Write(tool.Encrypt(u.Password, []byte(key))) // from u.Password
 				continue
 			}
-			sb.WriteString(*param.fnFldAddr(i))
+			switch v := param.fnFldAddr(i).(type) {
+			case *string:
+				sb.Write([]byte(*v))
+			case *[]byte:
+				sb.Write(*v)
+			default:
+				panic("Marshal Error Type")
+			}
 		}
 		*param.out = []byte(sb.String())
 	}
@@ -186,7 +195,7 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 	}
 	params := []struct {
 		in        []byte
-		fnFldAddr func(int) *string
+		fnFldAddr func(int) interface{}
 	}{
 		{
 			in:        dbKey,
@@ -203,7 +212,14 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 					continue
 				}
 			}
-			*param.fnFldAddr(i) = string(seg)
+			switch v := param.fnFldAddr(i).(type) {
+			case *string:
+				*v = string(seg)
+			case *[]byte:
+				*v = seg
+			default:
+				panic("Unmarshal Error Type")
+			}
 		}
 	}
 }
@@ -233,4 +249,16 @@ func (u *User) RmTags(tags ...string) {
 	tagsExs := strings.Split(u.Tags, SEP_TAG)
 	tags = str.Minus(tagsExs, tags)
 	u.Tags = strings.TrimSuffix(strings.Join(tags, SEP_TAG), SEP_TAG)
+}
+
+func (u *User) SetAvatar(r io.Reader) {
+	u.Avatar = tool.StreamToByte(r)
+}
+
+func (u *User) AvatarStdBase64() string {
+	return base64.StdEncoding.EncodeToString(u.Avatar)
+}
+
+func (u *User) AvatarUrlBase64() string {
+	return base64.URLEncoding.EncodeToString(u.Avatar)
 }

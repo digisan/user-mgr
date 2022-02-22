@@ -34,7 +34,7 @@ func main() {
 		Position:   "",
 		Title:      "",
 		Employer:   "",
-		Avatar:     "",
+		Avatar:     []byte(""),
 	}
 
 	lk.FailOnErr("%v", si.UserExists(user))

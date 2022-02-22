@@ -98,3 +98,15 @@ func SelfSHA1() string {
 func SelfSHA256() string {
 	return FileHash(os.Args[0], sha256.New())
 }
+
+func StreamToByte(stream io.Reader) []byte {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(stream)
+	return buf.Bytes()
+}
+
+func StreamToString(stream io.Reader) string {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(stream)
+	return buf.String()
+}

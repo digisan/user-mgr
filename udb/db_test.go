@@ -33,7 +33,7 @@ func TestOpen(t *testing.T) {
 		Title:      "",
 		Employer:   "",
 		Tags:       "",
-		Avatar:     "",
+		Avatar:     []byte(""),
 	}
 	lk.FailOnErr("%v", UserDB.UpdateUser(u))
 

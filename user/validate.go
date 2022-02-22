@@ -15,14 +15,14 @@ var (
 	mFieldValidator = &sync.Map{}
 )
 
-func RegisterValidator(tag string, f func(fv string) bool) {
+func RegisterValidator(tag string, f func(fv interface{}) bool) {
 	mFieldValidator.Store(tag, f)
 }
 
-func fnValidator(tag string) func(fv string) bool {
+func fnValidator(tag string) func(fv interface{}) bool {
 	f, ok := mFieldValidator.Load(tag)
 	lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("missing [%s] validator", tag))
-	return f.(func(fv string) bool)
+	return f.(func(fv interface{}) bool)
 }
 
 func (user *User) Validate() error {

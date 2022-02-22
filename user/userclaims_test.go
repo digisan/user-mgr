@@ -24,7 +24,7 @@ func TestClaims(t *testing.T) {
 		Position:   "",
 		Title:      "",
 		Employer:   "",
-		Avatar:     "",
+		Avatar:     []byte(""),
 		key:        "",
 	}
 	fmt.Println(user)
@@ -52,7 +52,7 @@ func TestClaims(t *testing.T) {
 		Position:   "",
 		Title:      "",
 		Employer:   "",
-		Avatar:     "",
+		Avatar:     []byte(""),
 		key:        "",
 	}
 	fmt.Println(user)

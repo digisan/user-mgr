@@ -35,7 +35,7 @@ func login(c echo.Context) error {
 		Title:      "",
 		Employer:   "",
 		Tags:       "",
-		Avatar:     "",
+		Avatar:     []byte(""),
 	}
 
 	fmt.Println(user)

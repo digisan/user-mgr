@@ -26,7 +26,7 @@ func main() {
 		Name:       "A boy has no name",
 		Password:   "pa55a@aD20TTTTT",
 		Regtime:    "",
-		Phone:      "123456789",
+		Phone:      "12345",
 		Addr:       "",
 		SysRole:    "admin",
 		MemLevel:   "1",
@@ -37,7 +37,7 @@ func main() {
 		Title:      "",
 		Employer:   "",
 		Tags:       "",
-		Avatar:     "abcdefg****************************",
+		Avatar:     []byte("abcdefg**********"),
 	}
 
 	su.SetValidator(nil)

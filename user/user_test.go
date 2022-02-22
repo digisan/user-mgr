@@ -29,7 +29,7 @@ func TestUser(t *testing.T) {
 		Title:      "",
 		Employer:   "",
 		Tags:       "",
-		Avatar:     "******",
+		Avatar:     []byte("******"),
 		key:        "",
 	}
 

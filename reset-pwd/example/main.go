@@ -35,7 +35,7 @@ func main() {
 		Position:   "",
 		Title:      "",
 		Employer:   "",
-		Avatar:     "",
+		Avatar:     []byte(""),
 	}
 
 	if err := rp.UserExists(user); err != nil {
@@ -73,7 +73,7 @@ AGAIN:
 	fmt.Scanf("%s", &pwdUpdated)
 	// get [pwdUpdated] from POST
 
-	if su.ChkPwd(pwdUpdated, su.LetterLen) {
+	if su.ChkPwd(pwdUpdated, su.PwdLen) {
 		user.Password = pwdUpdated
 	} else {
 		fmt.Println("invalid new password")
