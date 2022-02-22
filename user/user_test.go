@@ -28,14 +28,21 @@ func TestUser(t *testing.T) {
 		Position:   "professor",
 		Title:      "",
 		Employer:   "",
+		Tags:       "",
 		Avatar:     "******",
 		key:        "",
 	}
-	fmt.Println(user)
+
+	user.AddTags("abc", "def")
+	fmt.Println("tags:", user.GetTags())
+
+	user.RmTags("abc")
+	fmt.Println("tags:", user.GetTags())
 
 	info, key := user.Marshal()
 	fmt.Println("user.key", user.key)
 
+	fmt.Println(user)
 	fmt.Println()
 
 	// key[1] = '7'

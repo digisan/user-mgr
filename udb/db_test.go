@@ -32,6 +32,7 @@ func TestOpen(t *testing.T) {
 		Position:   "",
 		Title:      "",
 		Employer:   "",
+		Tags:       "",
 		Avatar:     "",
 	}
 	lk.FailOnErr("%v", UserDB.UpdateUser(u))

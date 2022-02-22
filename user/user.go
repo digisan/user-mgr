@@ -11,6 +11,7 @@ import (
 	"github.com/digisan/user-mgr/tool"
 )
 
+// if modified, change 1. MOK_***, 2. mFldAddr, 3. 'auto-tags.go', 4. 'validator.go' in sign-up.
 type User struct {
 	Active     string `json:"active" validate:"active"`         // "T" "F"
 	UName      string `json:"uname" validate:"required,uname"`  // unique, registered name
@@ -28,6 +29,7 @@ type User struct {
 	Position   string `json:"position" validate:"position"`     // optional
 	Title      string `json:"title" validate:"title"`           // optional
 	Employer   string `json:"employer" validate:"employer"`     // optional
+	Tags       string `json:"tags" validate:"tags"`             // optional // linked by '^'
 	Avatar     string `json:"avatar" validate:"avatar"`         // optional
 	key        string
 }
@@ -61,11 +63,9 @@ func ListUserValidator() (tags []string) {
 func (u User) String() string {
 	if u.UName != "" {
 		sb := strings.Builder{}
-		typ := reflect.TypeOf(u)
-		val := reflect.ValueOf(u)
-		for i := 0; i < typ.NumField(); i++ {
-			fld := typ.Field(i)
-			val := val.Field(i)
+		t, v := reflect.TypeOf(u), reflect.ValueOf(u)
+		for i := 0; i < t.NumField(); i++ {
+			fld, val := t.Field(i), v.Field(i)
 			sb.WriteString(fmt.Sprintf("%-12s %v\n", fld.Name+":", val.String()))
 		}
 		return sb.String()
@@ -80,7 +80,10 @@ func (u *User) GenKey() string {
 	return u.key
 }
 
-const SEP = "||"
+const (
+	SEP     = "||"
+	SEP_TAG = "^"
+)
 
 // db key order
 const (
@@ -99,6 +102,7 @@ const (
 	MOK_Position
 	MOK_Title
 	MOK_Employer
+	MOK_Tags
 	MOK_Avatar
 	MOK_PwdBuf
 	MOK_END
@@ -121,6 +125,7 @@ func (u *User) KeyFieldAddr(mok int) *string {
 		MOK_Position:   &u.Position,
 		MOK_Title:      &u.Title,
 		MOK_Employer:   &u.Employer,
+		MOK_Tags:       &u.Tags,
 		MOK_Avatar:     &u.Avatar,
 		MOK_PwdBuf:     &u.Password,
 	}
@@ -211,4 +216,21 @@ func (u *User) IsActive() bool {
 
 func (u *User) StampRegTime() {
 	u.Regtime = time.Now().UTC().Format(time.RFC3339)
+}
+
+func (u *User) GetTags() []string {
+	return strings.Split(u.Tags, SEP_TAG)
+}
+
+func (u *User) AddTags(tags ...string) {
+	tagsExs := strings.Split(u.Tags, SEP_TAG)
+	tags = append(tags, tagsExs...)
+	tags = str.MkSet(tags...)
+	u.Tags = strings.TrimSuffix(strings.Join(tags, SEP_TAG), SEP_TAG)
+}
+
+func (u *User) RmTags(tags ...string) {
+	tagsExs := strings.Split(u.Tags, SEP_TAG)
+	tags = str.Minus(tagsExs, tags)
+	u.Tags = strings.TrimSuffix(strings.Join(tags, SEP_TAG), SEP_TAG)
 }

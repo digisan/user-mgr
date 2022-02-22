@@ -17,5 +17,6 @@ const (
 	Position   = "position"
 	Title      = "title"
 	Employer   = "employer"
+	Tags       = "tags"
 	Avatar     = "avatar"
 )

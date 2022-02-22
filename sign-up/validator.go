@@ -36,6 +36,7 @@ var (
 		vf.Position:   func(v string) bool { return condOper(v != "", len(v) > 3, true).(bool) },
 		vf.Title:      func(v string) bool { return condOper(v != "", len(v) > 3, true).(bool) },
 		vf.Employer:   func(v string) bool { return condOper(v != "", len(v) > 3, true).(bool) },
+		vf.Tags:       func(v string) bool { return condOper(v != "", len(v) > 2, true).(bool) },
 	}
 
 	fEf          = fmt.Errorf
@@ -56,18 +57,19 @@ var (
 		vf.Position:   func(v string) error { return fEf("invalid position") },
 		vf.Title:      func(v string) error { return fEf("invalid title") },
 		vf.Employer:   func(v string) error { return fEf("invalid employer") },
+		vf.Tags:       func(v string) error { return fEf("invalid user tags") },
 		vf.Avatar:     func(v string) error { return fEf("invalid avatar") },
 		"required":    func(v string) error { return fEf("[%s] must be provided", v) },
 	}
 )
 
-func SetValidator(mExtraValidator map[string]func(string) bool) {
+func SetValidator(extraValidator map[string]func(string) bool) {
 	// create temp mFieldValidator
 	mFV := make(map[string]func(string) bool)
 	for f, v := range mFieldValidator {
 		mFV[f] = v
 	}
-	for f, v := range mExtraValidator {
+	for f, v := range extraValidator {
 		mFV[f] = v
 	}
 	// register

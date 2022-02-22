@@ -34,6 +34,7 @@ func login(c echo.Context) error {
 		Position:   "",
 		Title:      "",
 		Employer:   "",
+		Tags:       "",
 		Avatar:     "",
 	}
 

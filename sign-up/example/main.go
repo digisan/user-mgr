@@ -36,6 +36,7 @@ func main() {
 		Position:   "",
 		Title:      "",
 		Employer:   "",
+		Tags:       "",
 		Avatar:     "abcdefg****************************",
 	}
 
