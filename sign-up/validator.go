@@ -5,6 +5,7 @@ import (
 	"unicode"
 
 	"github.com/digisan/go-generics/str"
+	"github.com/digisan/gotk/strs"
 	lk "github.com/digisan/logkit"
 	"github.com/digisan/user-mgr/udb"
 	usr "github.com/digisan/user-mgr/user"
@@ -24,6 +25,7 @@ var (
 		vf.Email:      func(v interface{}) bool { return true },
 		vf.Name:       func(v interface{}) bool { return len(v.(string)) > 0 },
 		vf.Password:   func(v interface{}) bool { return ChkPwd(v.(string), PwdLen) },
+		vf.AvatarType: func(v interface{}) bool { return ChkAvatarType(v.(string)) },
 		vf.Avatar:     func(v interface{}) bool { return true },
 		vf.Regtime:    func(v interface{}) bool { return true },
 		vf.Phone:      func(v interface{}) bool { return v == "" || len(v.(string)) > 6 },
@@ -57,6 +59,7 @@ var (
 		vf.Title:      func(v interface{}) error { return fEf("invalid title") },
 		vf.Employer:   func(v interface{}) error { return fEf("invalid employer") },
 		vf.Tags:       func(v interface{}) error { return fEf("invalid user tags") },
+		vf.AvatarType: func(v interface{}) error { return fEf("invalid avatar type, must be like image/png") },
 		vf.Avatar:     func(v interface{}) error { return fEf("invalid avatar") },
 		"required":    func(v interface{}) error { return fEf("[%s] is required", v) },
 	}
@@ -111,4 +114,9 @@ func ChkPwd(s string, minLenLetter int) bool {
 
 func ChkMemLvl(s string) bool {
 	return str.In(s, "0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+}
+
+// <img src="data:image/png;base64,******/>
+func ChkAvatarType(s string) bool {
+	return strs.HasAnyPrefix(s, "image/")
 }

@@ -18,5 +18,6 @@ const (
 	Title      = "title"
 	Employer   = "employer"
 	Tags       = "tags"
+	AvatarType = "avatartype"
 	Avatar     = "avatar"
 )

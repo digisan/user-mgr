@@ -29,6 +29,7 @@ func TestUser(t *testing.T) {
 		Title:      "",
 		Employer:   "",
 		Tags:       "",
+		AvatarType: "image/png",
 		Avatar:     []byte("******"),
 		key:        "",
 	}

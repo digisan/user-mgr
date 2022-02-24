@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"reflect"
 	"strings"
 	"time"
@@ -32,6 +33,7 @@ type User struct {
 	Title      string `json:"title" validate:"title"`           // optional
 	Employer   string `json:"employer" validate:"employer"`     // optional
 	Tags       string `json:"tags" validate:"tags"`             // optional // linked by '^'
+	AvatarType string `json:"avatartype" validate:"avatartype"` // optional
 	Avatar     []byte `json:"avatar" validate:"avatar"`         // optional
 	key        string
 }
@@ -105,6 +107,7 @@ const (
 	MOK_Title
 	MOK_Employer
 	MOK_Tags
+	MOK_AvatarType
 	MOK_Avatar
 	MOK_PwdBuf
 	MOK_END
@@ -128,6 +131,7 @@ func (u *User) KeyFieldAddr(mok int) interface{} {
 		MOK_Title:      &u.Title,
 		MOK_Employer:   &u.Employer,
 		MOK_Tags:       &u.Tags,
+		MOK_AvatarType: &u.AvatarType,
 		MOK_Avatar:     &u.Avatar,
 		MOK_PwdBuf:     &u.Password,
 	}
@@ -251,14 +255,25 @@ func (u *User) RmTags(tags ...string) {
 	u.Tags = strings.TrimSuffix(strings.Join(tags, SEP_TAG), SEP_TAG)
 }
 
-func (u *User) SetAvatar(r io.Reader) {
+func (u *User) SetAvatar(avatarType string, r io.Reader) {
+	u.AvatarType = avatarType
 	u.Avatar = tool.StreamToByte(r)
 }
 
-func (u *User) AvatarStdBase64() string {
-	return base64.StdEncoding.EncodeToString(u.Avatar)
+// 'fh' --- FormFile('param'), 'avatarType' --- e.g. image/png
+// for example '<img src="data:image/png;base64,******/>'
+func (u *User) SetAvatarByFormFile(avatarType string, fh *multipart.FileHeader) error {
+	file, err := fh.Open()
+	if err != nil {
+		return err
+	}
+	u.SetAvatar(avatarType, file)
+	return file.Close()
 }
 
-func (u *User) AvatarUrlBase64() string {
-	return base64.URLEncoding.EncodeToString(u.Avatar)
+func (u *User) AvatarBase64(urlEnc bool) (avatarType, data string) {
+	if urlEnc {
+		return u.AvatarType, base64.URLEncoding.EncodeToString(u.Avatar)
+	}
+	return u.AvatarType, base64.StdEncoding.EncodeToString(u.Avatar)
 }
