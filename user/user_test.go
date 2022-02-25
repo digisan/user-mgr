@@ -31,10 +31,18 @@ func TestUserFieldValue(t *testing.T) {
 		Tags:       "",
 		AvatarType: "image/png",
 		Avatar:     []byte("******"),
-		key:        "",
+		key:        [16]byte{},
 	}
 
 	fmt.Println(user.FieldValue("UName"))
+	// fmt.Println(user.FieldValue("key")) // panic
+	fmt.Println(user.FieldValue("Avatar"))
+
+	user.AddTags("abc", "def")
+	fmt.Println("tags:", user.GetTags())
+
+	user.RmTags("abc")
+	fmt.Println("tags:", user.GetTags())
 }
 
 func TestUser(t *testing.T) {
@@ -58,22 +66,24 @@ func TestUser(t *testing.T) {
 		Tags:       "",
 		AvatarType: "image/png",
 		Avatar:     []byte("******"),
-		key:        "",
+		key:        [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9},
 	}
 
-	user.AddTags("abc", "def")
-	fmt.Println("tags:", user.GetTags())
-
-	user.RmTags("abc")
-	fmt.Println("tags:", user.GetTags())
+	// ava := make([]byte, 0, 20000000)
+	// for i := 0; i < 20000000; i++ {
+	// 	ava = append(ava, byte(i%100))
+	// }
+	// user.Avatar = ava
 
 	info, key := user.Marshal()
 	fmt.Println("user.key", user.key)
 
+	fmt.Println()
+
 	fmt.Println(user)
 	fmt.Println()
 
-	// key[1] = '7'
+	// key[1] = 2
 
 	user1 := &User{}
 	user1.Unmarshal(info, key)

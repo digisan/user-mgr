@@ -34,8 +34,8 @@ type User struct {
 	Employer   string `json:"employer" validate:"employer"`     // optional
 	Tags       string `json:"tags" validate:"tags"`             // optional // linked by '^'
 	AvatarType string `json:"avatartype" validate:"avatartype"` // optional
-	Avatar     []byte `json:"avatar" validate:"avatar"`         // optional
-	key        string
+	key        [16]byte
+	Avatar     []byte // optional
 }
 
 func ListUserField() (fields []string) {
@@ -83,9 +83,10 @@ func (u User) String() string {
 	return "[Empty User]\n"
 }
 
-func (u *User) GenKey() string {
-	if u.key == "" {
-		u.key = fmt.Sprintf("%d", time.Now().UnixNano())[3:19]
+// [16]byte
+func (u *User) GenKey() [16]byte {
+	if len(u.key) == 0 {
+		u.key = *(*[16]byte)([]byte(fmt.Sprintf("%d", time.Now().UnixNano())[3:19]))
 	}
 	return u.key
 }
@@ -114,7 +115,6 @@ const (
 	MOK_Employer
 	MOK_Tags
 	MOK_AvatarType
-	MOK_Avatar
 	MOK_PwdBuf
 	MOK_END
 )
@@ -138,7 +138,6 @@ func (u *User) KeyFieldAddr(mok int) interface{} {
 		MOK_Employer:   &u.Employer,
 		MOK_Tags:       &u.Tags,
 		MOK_AvatarType: &u.AvatarType,
-		MOK_Avatar:     &u.Avatar,
 		MOK_PwdBuf:     &u.Password,
 	}
 	return mFldAddr[mok]
@@ -147,12 +146,14 @@ func (u *User) KeyFieldAddr(mok int) interface{} {
 // db value order
 const (
 	MOV_Key int = iota
+	MOV_Avatar
 	MOV_END
 )
 
 func (u *User) ValFieldAddr(mov int) interface{} {
 	mFldAddr := map[int]interface{}{
-		MOV_Key: &u.key,
+		MOV_Key:    &u.key,
+		MOV_Avatar: &u.Avatar,
 	}
 	return mFldAddr[mov]
 }
@@ -162,7 +163,7 @@ func (u *User) ValFieldAddr(mov int) interface{} {
 func (u *User) Marshal() (forKey, forValue []byte) {
 
 	key := u.GenKey()
-	forValue = []byte(fmt.Sprint(len(u.UName)) + key) // *** fake key forValue in db ***
+	forValue = append(key[:], u.Avatar...)
 
 	params := []struct {
 		end       int
@@ -174,6 +175,11 @@ func (u *User) Marshal() (forKey, forValue []byte) {
 			fnFldAddr: u.KeyFieldAddr,
 			out:       &forKey,
 		},
+		{
+			end:       MOV_END,
+			fnFldAddr: u.ValFieldAddr,
+			out:       &forValue,
+		},
 	}
 	for _, param := range params {
 		sb := &strings.Builder{}
@@ -182,7 +188,7 @@ func (u *User) Marshal() (forKey, forValue []byte) {
 				sb.WriteString(SEP)
 			}
 			if i == MOK_PwdBuf {
-				sb.Write(tool.Encrypt(u.Password, []byte(key))) // from u.Password
+				sb.Write(tool.Encrypt(u.Password, key[:])) // from u.Password
 				continue
 			}
 			switch v := param.fnFldAddr(i).(type) {
@@ -190,6 +196,8 @@ func (u *User) Marshal() (forKey, forValue []byte) {
 				sb.Write([]byte(*v))
 			case *[]byte:
 				sb.Write(*v)
+			case *[16]byte:
+				sb.Write((*v)[:])
 			default:
 				panic("Marshal Error Type")
 			}
@@ -201,7 +209,7 @@ func (u *User) Marshal() (forKey, forValue []byte) {
 
 func (u *User) Unmarshal(dbKey, dbVal []byte) {
 	if dbVal != nil {
-		u.key = string(dbVal) // *** fake key ***
+		u.key = *(*[16]byte)(dbVal[:16])
 	}
 	params := []struct {
 		in        []byte
@@ -211,14 +219,16 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 			in:        dbKey,
 			fnFldAddr: u.KeyFieldAddr,
 		},
+		{
+			in:        dbVal,
+			fnFldAddr: u.ValFieldAddr,
+		},
 	}
 	for _, param := range params {
 		for i, seg := range bytes.Split(param.in, []byte(SEP)) {
 			if i == MOK_PwdBuf {
-				if u.key != "" {
-					offset := len(fmt.Sprint(len(u.UName)))
-					u.key = u.key[offset:]
-					u.Password = tool.Decrypt(seg, []byte(u.key))
+				if len(u.key) != 0 {
+					u.Password = tool.Decrypt(seg, u.key[:])
 					continue
 				}
 			}
@@ -227,6 +237,8 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 				*v = string(seg)
 			case *[]byte:
 				*v = seg
+			case *[16]byte:
+				*v = *(*[16]byte)(seg)
 			default:
 				panic("Unmarshal Error Type")
 			}

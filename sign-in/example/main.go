@@ -34,6 +34,8 @@ func main() {
 		Position:   "",
 		Title:      "",
 		Employer:   "",
+		Tags:       "",
+		AvatarType: "",
 		Avatar:     []byte(""),
 	}
 
