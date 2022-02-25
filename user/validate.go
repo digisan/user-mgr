@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/digisan/go-generics/str"
 	lk "github.com/digisan/logkit"
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -25,11 +26,15 @@ func fnValidator(tag string) func(fv interface{}) bool {
 	return f.(func(fv interface{}) bool)
 }
 
-func (user *User) Validate() error {
+func (user *User) Validate(exclTags ...string) error {
 	v := validator.New()
 	for _, vTag := range vTags {
-		fn := fnValidator(vTag)
-		_ = v.RegisterValidation(vTag, func(fl validator.FieldLevel) bool {
+		if str.In(vTag, exclTags...) {
+			v.RegisterValidation(vTag, func(fl validator.FieldLevel) bool { return true })
+			continue
+		}
+		fn := fnValidator(vTag) // [fn] must be valued here !
+		v.RegisterValidation(vTag, func(fl validator.FieldLevel) bool {
 			return fn(fl.Field().String())
 		})
 	}

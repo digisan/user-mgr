@@ -64,6 +64,12 @@ func ListUserValidator() (tags []string) {
 	)
 }
 
+func (u *User) FieldValue(field string) interface{} {
+	r := reflect.ValueOf(u).Elem()
+	f := reflect.Indirect(r).FieldByName(field)
+	return f.Interface()
+}
+
 func (u User) String() string {
 	if u.UName != "" {
 		sb := strings.Builder{}

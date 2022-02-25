@@ -10,6 +10,33 @@ import (
 	lk "github.com/digisan/logkit"
 )
 
+func TestUserFieldValue(t *testing.T) {
+	user := &User{
+		Active:     "T",
+		UName:      "unique-user-name",
+		Email:      "hello@abc.com",
+		Name:       "test-name",
+		Password:   "123456789a",
+		Regtime:    "",
+		Phone:      "",
+		Addr:       "",
+		SysRole:    "",
+		MemLevel:   "",
+		MemExpire:  "",
+		NationalID: "9876543210",
+		Gender:     "",
+		Position:   "professor",
+		Title:      "",
+		Employer:   "",
+		Tags:       "",
+		AvatarType: "image/png",
+		Avatar:     []byte("******"),
+		key:        "",
+	}
+
+	fmt.Println(user.FieldValue("UName"))
+}
+
 func TestUser(t *testing.T) {
 	user := &User{
 		Active:     "T",

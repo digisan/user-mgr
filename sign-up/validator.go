@@ -41,27 +41,27 @@ var (
 		vf.Tags:       func(v interface{}) bool { return v == "" || len(v.(string)) > 2 },
 	}
 
-	mFieldValErr = map[string]func(interface{}) error{
-		vf.Active:     func(v interface{}) error { return fEf("active status: 'T'/'F' for true/false") },
-		vf.UName:      func(v interface{}) error { return fEf("[%s] is already existing", v) },
-		vf.Email:      func(v interface{}) error { return fEf("invalid email format") },
-		vf.Name:       func(v interface{}) error { return fEf("invalid user real name") },
-		vf.Password:   func(v interface{}) error { return fEf("password: at least %d letters with UPPER,0-9,symbol", PwdLen) },
-		vf.Regtime:    func(v interface{}) error { return fEf("register time is mandatory when signing up successfully") },
-		vf.Phone:      func(v interface{}) error { return fEf("invalid telephone number") },
-		vf.Addr:       func(v interface{}) error { return fEf("invalid address") },
-		vf.SysRole:    func(v interface{}) error { return fEf("invalid system role") },
-		vf.MemLevel:   func(v interface{}) error { return fEf("invalid membership level, must between 0-9") },
-		vf.MemExpire:  func(v interface{}) error { return fEf("invalid expiry date") },
-		vf.NationalID: func(v interface{}) error { return fEf("invalid national ID") },
-		vf.Gender:     func(v interface{}) error { return fEf("gender: 'M'/'F' for male/female") },
-		vf.Position:   func(v interface{}) error { return fEf("invalid position") },
-		vf.Title:      func(v interface{}) error { return fEf("invalid title") },
-		vf.Employer:   func(v interface{}) error { return fEf("invalid employer") },
-		vf.Tags:       func(v interface{}) error { return fEf("invalid user tags") },
-		vf.AvatarType: func(v interface{}) error { return fEf("invalid avatar type, must be like image/png") },
-		vf.Avatar:     func(v interface{}) error { return fEf("invalid avatar") },
-		"required":    func(v interface{}) error { return fEf("[%s] is required", v) },
+	mFieldValErr = map[string]func(t, v interface{}) error{
+		vf.Active:     func(t, v interface{}) error { return fEf("active status: 'T'/'F' for true/false") },
+		vf.UName:      func(t, v interface{}) error { return fEf("[%v] is already existing", v) },
+		vf.Email:      func(t, v interface{}) error { return fEf("invalid email format") },
+		vf.Name:       func(t, v interface{}) error { return fEf("invalid user real name") },
+		vf.Password:   func(t, v interface{}) error { return fEf("password rule: >=%d letter with UPPER,0-9,symbol", PwdLen) },
+		vf.Regtime:    func(t, v interface{}) error { return fEf("register time is mandatory when signing up successfully") },
+		vf.Phone:      func(t, v interface{}) error { return fEf("invalid telephone number") },
+		vf.Addr:       func(t, v interface{}) error { return fEf("invalid address") },
+		vf.SysRole:    func(t, v interface{}) error { return fEf("invalid system role") },
+		vf.MemLevel:   func(t, v interface{}) error { return fEf("invalid membership level, must between 0-9") },
+		vf.MemExpire:  func(t, v interface{}) error { return fEf("invalid expiry date") },
+		vf.NationalID: func(t, v interface{}) error { return fEf("invalid national ID") },
+		vf.Gender:     func(t, v interface{}) error { return fEf("gender: 'M'/'F' for male/female") },
+		vf.Position:   func(t, v interface{}) error { return fEf("invalid position") },
+		vf.Title:      func(t, v interface{}) error { return fEf("invalid title") },
+		vf.Employer:   func(t, v interface{}) error { return fEf("invalid employer") },
+		vf.Tags:       func(t, v interface{}) error { return fEf("invalid user tags") },
+		vf.AvatarType: func(t, v interface{}) error { return fEf("invalid avatar type, must be like image/png") },
+		vf.Avatar:     func(t, v interface{}) error { return fEf("invalid avatar") },
+		"required":    func(t, v interface{}) error { return fEf("[%v] is required", t) },
 	}
 )
 
@@ -80,11 +80,11 @@ func SetValidator(extraValidator map[string]func(interface{}) bool) {
 	}
 }
 
-func TransInvalidErr(err error) error {
+func TransInvalidErr(user *usr.User, err error) error {
 	field, tag := usr.ErrField(err)
 	fn, ok := mFieldValErr[tag]
 	if ok {
-		return fn(tag)
+		return fn(tag, user.FieldValue(field))
 	}
 	lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("unknown field invalid error @ [%s]", field))
 	return nil
@@ -118,5 +118,5 @@ func ChkMemLvl(s string) bool {
 
 // <img src="data:image/png;base64,******/>
 func ChkAvatarType(s string) bool {
-	return strs.HasAnyPrefix(s, "image/")
+	return s == "" || strs.HasAnyPrefix(s, "image/")
 }

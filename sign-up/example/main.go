@@ -7,6 +7,7 @@ import (
 	su "github.com/digisan/user-mgr/sign-up"
 	"github.com/digisan/user-mgr/udb"
 	usr "github.com/digisan/user-mgr/user"
+	vf "github.com/digisan/user-mgr/user/valfield"
 )
 
 func main() {
@@ -26,7 +27,7 @@ func main() {
 		Name:       "A boy has no name",
 		Password:   "pa55a@aD20TTTTT",
 		Regtime:    "",
-		Phone:      "12345",
+		Phone:      "1",
 		Addr:       "",
 		SysRole:    "admin",
 		MemLevel:   "1",
@@ -37,12 +38,13 @@ func main() {
 		Title:      "",
 		Employer:   "",
 		Tags:       "",
+		AvatarType: "",
 		Avatar:     []byte("abcdefg**********"),
 	}
 
 	su.SetValidator(nil)
 
-	if err := su.ChkInput(user); err != nil {
+	if err := su.ChkInput(user, vf.Phone); err != nil { // vf.Phone
 		lk.WarnOnErr("%v", err)
 		return
 	}

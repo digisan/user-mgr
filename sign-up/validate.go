@@ -27,9 +27,9 @@ func SetCodeEmail(email, password string) {
 }
 
 // POST 1
-func ChkInput(user *usr.User) error {
-	if err := user.Validate(); err != nil {
-		return TransInvalidErr(err)
+func ChkInput(user *usr.User, exclTags ...string) error {
+	if err := user.Validate(exclTags...); err != nil {
+		return TransInvalidErr(user, err)
 	}
 	return nil
 }
