@@ -210,7 +210,7 @@ func (db *UDB) ListUsers(filter func(*usr.User) bool) (users []*usr.User, err er
 		defer it.Close()
 		for it.Rewind(); it.Valid(); it.Next() {
 			u := &usr.User{}
-			u.Unmarshal(it.Item().KeyCopy(nil), nil)
+			u.Unmarshal(it.Item().Key(), nil)
 			if filter(u) {
 				users = append(users, u)
 			}

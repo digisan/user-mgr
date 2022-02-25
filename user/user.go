@@ -225,22 +225,24 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 		},
 	}
 	for _, param := range params {
-		for i, seg := range bytes.Split(param.in, []byte(SEP)) {
-			if i == MOK_PwdBuf {
-				if len(u.key) != 0 {
-					u.Password = tool.Decrypt(seg, u.key[:])
-					continue
+		if len(param.in) > 0 {
+			for i, seg := range bytes.Split(param.in, []byte(SEP)) {
+				if i == MOK_PwdBuf {
+					if len(u.key) != 0 {
+						u.Password = tool.Decrypt(seg, u.key[:])
+						continue
+					}
 				}
-			}
-			switch v := param.fnFldAddr(i).(type) {
-			case *string:
-				*v = string(seg)
-			case *[]byte:
-				*v = seg
-			case *[16]byte:
-				*v = *(*[16]byte)(seg)
-			default:
-				panic("Unmarshal Error Type")
+				switch v := param.fnFldAddr(i).(type) {
+				case *string:
+					*v = string(seg)
+				case *[]byte:
+					*v = seg
+				case *[16]byte:
+					*v = *(*[16]byte)(seg)
+				default:
+					panic("Unmarshal Error Type")
+				}
 			}
 		}
 	}
