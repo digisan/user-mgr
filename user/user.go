@@ -92,7 +92,7 @@ func (u *User) GenKey() [16]byte {
 }
 
 const (
-	SEP     = "||"
+	SEP     = "^^"
 	SEP_TAG = "^"
 )
 
