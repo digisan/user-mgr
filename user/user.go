@@ -85,7 +85,7 @@ func (u User) String() string {
 
 // [16]byte
 func (u *User) GenKey() [16]byte {
-	if len(u.key) == 0 {
+	if u.key == [16]byte{} {
 		u.key = *(*[16]byte)([]byte(fmt.Sprintf("%d", time.Now().UnixNano())[3:19]))
 	}
 	return u.key
@@ -163,7 +163,6 @@ func (u *User) ValFieldAddr(mov int) interface{} {
 func (u *User) Marshal() (forKey, forValue []byte) {
 
 	key := u.GenKey()
-	forValue = append(key[:], u.Avatar...)
 
 	params := []struct {
 		end       int
@@ -224,16 +223,16 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 			fnFldAddr: u.ValFieldAddr,
 		},
 	}
-	for _, param := range params {
+	for idx, param := range params {
 		if len(param.in) > 0 {
 			for i, seg := range bytes.Split(param.in, []byte(SEP)) {
 				if i == MOK_PwdBuf {
-					if len(u.key) != 0 {
+					if u.key != [16]byte{} {
 						u.Password = tool.Decrypt(seg, u.key[:])
 						continue
 					}
 				}
-				if i == MOK_END || i == MOV_END {
+				if (idx == 0 && i == MOK_END) || (idx == 1 && i == MOV_END) {
 					break
 				}
 				switch v := param.fnFldAddr(i).(type) {
