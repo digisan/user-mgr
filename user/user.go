@@ -233,6 +233,9 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 						continue
 					}
 				}
+				if i == MOK_END || i == MOV_END {
+					break
+				}
 				switch v := param.fnFldAddr(i).(type) {
 				case *string:
 					*v = string(seg)
