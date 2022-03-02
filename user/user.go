@@ -23,6 +23,8 @@ type User struct {
 	Password   string `json:"password" validate:"required,pwd"` // <-- a custom validation rule, plaintext!
 	Regtime    string `json:"regtime" validate:"regtime"`       // register time
 	Phone      string `json:"phone" validate:"phone"`           // optional
+	Country    string `json:"country" validate:"country"`       // optional
+	City       string `json:"city" validate:"city"`             // optional
 	Addr       string `json:"addr" validate:"addr"`             // optional
 	SysRole    string `json:"role" validate:"sysRole"`          // optional
 	MemLevel   string `json:"level" validate:"memLevel"`        // optional
@@ -35,7 +37,7 @@ type User struct {
 	Tags       string `json:"tags" validate:"tags"`             // optional // linked by '^'
 	AvatarType string `json:"avatartype" validate:"avatartype"` // optional
 	key        [16]byte
-	Avatar     []byte // optional
+	Avatar     []byte `json:"avatar" validate:"avatar"` // optional
 }
 
 func ListUserField() (fields []string) {
@@ -104,6 +106,8 @@ const (
 	MOK_Name
 	MOK_Regtime
 	MOK_Phone
+	MOK_Country
+	MOK_City
 	MOK_Addr
 	MOK_SysRole
 	MOK_MemLevel
@@ -127,6 +131,8 @@ func (u *User) KeyFieldAddr(mok int) interface{} {
 		MOK_Name:       &u.Name,
 		MOK_Regtime:    &u.Regtime,
 		MOK_Phone:      &u.Phone,
+		MOK_Country:    &u.Country,
+		MOK_City:       &u.City,
 		MOK_Addr:       &u.Addr,
 		MOK_SysRole:    &u.SysRole,
 		MOK_MemLevel:   &u.MemLevel,
@@ -282,7 +288,7 @@ func (u *User) SetAvatar(avatarType string, r io.Reader) {
 	u.Avatar = tool.StreamToByte(r)
 }
 
-// 'fh' --- FormFile('param'), 'avatarType' --- e.g. image/png
+// 'avatarType' --- e.g. image/png, 'fh' --- FormFile('param')
 // for example '<img src="data:image/png;base64,******/>'
 func (u *User) SetAvatarByFormFile(avatarType string, fh *multipart.FileHeader) error {
 	file, err := fh.Open()

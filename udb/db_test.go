@@ -16,13 +16,13 @@ func TestOpen(t *testing.T) {
 	defer CloseUserStorage()
 
 	u := &usr.User{
-		Active:     "T",
+		Active:     "F",
 		UName:      "unique-name",
 		Email:      "hello@abc.net",
 		Name:       "test-name",
 		Password:   "this is my password",
 		Regtime:    "",
-		Phone:      "123",
+		Phone:      "1234567",
 		Addr:       "",
 		SysRole:    "",
 		MemLevel:   "",
@@ -37,8 +37,19 @@ func TestOpen(t *testing.T) {
 	}
 	lk.FailOnErr("%v", UserDB.UpdateUser(u))
 
-	done, err := UserDB.ActivateUser("unique-name", false)
-	lk.FailOnErr("%v - %v", done, err)
+	u, done, err := UserDB.ActivateUser("unique-name", true)
+	lk.WarnOnErr("------: %v - %v", done, err)
+	fmt.Println(u)
+
+	fmt.Println()
+
+	u1, ok, err := UserDB.LoadActiveUserByEmail("hello@abc.net")
+	fmt.Println(u1, ok, err)
+
+	fmt.Println()
+
+	u2, ok, err := UserDB.LoadActiveUserByPhone("1234567")
+	fmt.Println(u2, ok, err)
 }
 
 func TestRemove(t *testing.T) {

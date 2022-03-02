@@ -8,6 +8,8 @@ const (
 	Password   = "pwd"
 	Regtime    = "regtime"
 	Phone      = "phone"
+	Country    = "country"
+	City       = "city"
 	Addr       = "addr"
 	SysRole    = "sysRole"
 	MemLevel   = "memLevel"

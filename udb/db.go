@@ -155,10 +155,25 @@ func (db *UDB) LoadActiveUser(uname string) (*usr.User, bool, error) {
 	return db.LoadUser(uname, true)
 }
 
-func (db *UDB) LoadUserByEmail(email string, active bool) (*usr.User, bool, error) {
-	db.Lock()
-	defer db.Unlock()
+func (db *UDB) LoadAnyUser(uname string) (*usr.User, bool, error) {
+	uA, okA, errA := db.LoadUser(uname, true)
+	uD, okD, errD := db.LoadUser(uname, false)
+	var u *usr.User
+	if uA != nil {
+		u = uA
+	} else if uD != nil {
+		u = uD
+	}
+	var err error
+	if errA != nil {
+		err = errA
+	} else if errD != nil {
+		err = errD
+	}
+	return u, okA || okD, err
+}
 
+func (db *UDB) LoadUserByEmail(email string, active bool) (*usr.User, bool, error) {
 	users, err := db.ListUsers(func(u *usr.User) bool {
 		if active {
 			return u.IsActive() && u.Email == email
@@ -173,6 +188,23 @@ func (db *UDB) LoadUserByEmail(email string, active bool) (*usr.User, bool, erro
 
 func (db *UDB) LoadActiveUserByEmail(email string) (*usr.User, bool, error) {
 	return db.LoadUserByEmail(email, true)
+}
+
+func (db *UDB) LoadUserByPhone(phone string, active bool) (*usr.User, bool, error) {
+	users, err := db.ListUsers(func(u *usr.User) bool {
+		if active {
+			return u.IsActive() && u.Phone == phone
+		}
+		return !u.IsActive() && u.Phone == phone
+	})
+	if len(users) > 0 {
+		return users[0], true, err
+	}
+	return &usr.User{}, false, err
+}
+
+func (db *UDB) LoadActiveUserByPhone(phone string) (*usr.User, bool, error) {
+	return db.LoadUserByPhone(phone, true)
 }
 
 func (db *UDB) RemoveUser(uname string, lock bool) error {
@@ -233,16 +265,17 @@ func (db *UDB) IsExisting(uname string, onlyActive bool) bool {
 	return okActive || okDorm
 }
 
-func (db *UDB) ActivateUser(uname string, flag bool) (bool, error) {
+func (db *UDB) ActivateUser(uname string, flag bool) (*usr.User, bool, error) {
 	u, ok, err := db.LoadUser(uname, !flag)
 	if err == nil {
 		if ok {
 			u.Active = strings.ToUpper(fmt.Sprint(flag))[:1]
-			return true, db.UpdateUser(u)
+			return u, true, db.UpdateUser(u)
 		}
 		if !ok {
-			return false, fmt.Errorf("no action applied for [%s]", uname)
+			u, _, _ = db.LoadAnyUser(uname)
+			return u, false, fmt.Errorf("no action applied to [%s]", uname)
 		}
 	}
-	return false, err
+	return nil, false, err
 }

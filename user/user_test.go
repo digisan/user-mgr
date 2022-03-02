@@ -19,6 +19,8 @@ func TestUserFieldValue(t *testing.T) {
 		Password:   "123456789a",
 		Regtime:    "",
 		Phone:      "",
+		Country:    "",
+		City:       "",
 		Addr:       "",
 		SysRole:    "",
 		MemLevel:   "",
@@ -30,8 +32,8 @@ func TestUserFieldValue(t *testing.T) {
 		Employer:   "",
 		Tags:       "",
 		AvatarType: "image/png",
-		Avatar:     []byte("******"),
 		key:        [16]byte{},
+		Avatar:     []byte("******"),
 	}
 
 	fmt.Println(user.FieldValue("UName"))
@@ -54,6 +56,8 @@ func TestUser(t *testing.T) {
 		Password:   "123456789a",
 		Regtime:    "",
 		Phone:      "",
+		Country:    "",
+		City:       "",
 		Addr:       "",
 		SysRole:    "",
 		MemLevel:   "",
@@ -65,8 +69,8 @@ func TestUser(t *testing.T) {
 		Employer:   "",
 		Tags:       "",
 		AvatarType: "image/png",
-		Avatar:     []byte("******"),
 		key:        [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9},
+		Avatar:     []byte("******"),
 	}
 
 	// ava := make([]byte, 0, 20000000)
