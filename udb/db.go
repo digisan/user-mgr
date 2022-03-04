@@ -56,7 +56,7 @@ func (db *UDB) close() {
 
 ///////////////////////////////////////////////////////////////
 
-func (db *UDB) LoadOnlineUser(uname string) (time.Time, error) {
+func (db *UDB) GetOnline(uname string) (time.Time, error) {
 	db.Lock()
 	defer db.Unlock()
 
@@ -73,7 +73,7 @@ func (db *UDB) LoadOnlineUser(uname string) (time.Time, error) {
 	return *tm, err
 }
 
-func (db *UDB) RefreshOnlineUser(uname string) error {
+func (db *UDB) RefreshOnline(uname string) error {
 	db.Lock()
 	defer db.Unlock()
 
@@ -86,16 +86,28 @@ func (db *UDB) RefreshOnlineUser(uname string) error {
 	})
 }
 
-func (db *UDB) RemoveOnlineUser(uname string) error {
+func (db *UDB) RmOnline(uname string) (err error) {
+	// remove users cache when removing online user
+	defer func() {
+		if err == nil {
+			if u, ok, err := db.LoadAnyUser(uname); err == nil && ok {
+				tmpUserPool.Delete(u.UName)
+				tmpUserPool.Delete(u.Email)
+				tmpUserPool.Delete(u.Phone)
+			}
+		}
+	}()
+
 	db.Lock()
 	defer db.Unlock()
 
-	return db.dbOnline.Update(func(txn *badger.Txn) (err error) {
+	err = db.dbOnline.Update(func(txn *badger.Txn) (err error) {
 		return txn.Delete([]byte(uname))
 	})
+	return
 }
 
-func (db *UDB) ListOnlineUsers() (unames []string, err error) {
+func (db *UDB) OnlineUsers() (unames []string, err error) {
 	db.Lock()
 	defer db.Unlock()
 

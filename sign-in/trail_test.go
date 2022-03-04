@@ -23,7 +23,7 @@ func TestInactiveMonitor(t *testing.T) {
 	go func() {
 		for rm := range removed {
 			fmt.Println("offline:", rm)
-			lk.WarnOnErr("%v", udb.UserDB.RemoveOnlineUser(rm))
+			lk.WarnOnErr("%v", udb.UserDB.RmOnline(rm))
 		}
 	}()
 

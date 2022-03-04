@@ -117,17 +117,17 @@ func TestUpdateOnlineUser(t *testing.T) {
 	OpenUserStorage(dbPath)
 	defer CloseUserStorage()
 
-	UserDB.RefreshOnlineUser("a")
-	UserDB.RefreshOnlineUser("b")
-	UserDB.RefreshOnlineUser("c")
+	UserDB.RefreshOnline("a")
+	UserDB.RefreshOnline("b")
+	UserDB.RefreshOnline("c")
 
-	users, err := UserDB.ListOnlineUsers()
+	users, err := UserDB.OnlineUsers()
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(users)
 
-	tm, _ := UserDB.LoadOnlineUser("a")
+	tm, _ := UserDB.GetOnline("a")
 	fmt.Println(tm)
 
 	time.Sleep(3 * time.Second)

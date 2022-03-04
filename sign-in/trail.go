@@ -13,7 +13,7 @@ const (
 )
 
 func Trail(uname string) error {
-	return udb.UserDB.RefreshOnlineUser(uname)
+	return udb.UserDB.RefreshOnline(uname)
 }
 
 func MonitorInactive(ctx context.Context, inactive chan<- string, offlineTimeout time.Duration) {
@@ -27,10 +27,10 @@ func MonitorInactive(ctx context.Context, inactive chan<- string, offlineTimeout
 		for {
 			select {
 			case <-ticker.C:
-				unames, err := udb.UserDB.ListOnlineUsers()
+				unames, err := udb.UserDB.OnlineUsers()
 				lk.WarnOnErr("%v", err)
 				for _, uname := range unames {
-					lastTm, err := udb.UserDB.LoadOnlineUser(uname)
+					lastTm, err := udb.UserDB.GetOnline(uname)
 					lk.WarnOnErr("%v", err)
 					if time.Since(lastTm) > offlineTimeout {
 						// lk.WarnOnErr("%v", udb.UserDB.RemoveOnlineUser(uname)) // *** let invoker to do more
