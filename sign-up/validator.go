@@ -21,8 +21,8 @@ var (
 
 	mFieldValidator = map[string]func(interface{}) bool{
 		vf.Active:     func(v interface{}) bool { return v == "T" || v == "F" },
-		vf.UName:      func(v interface{}) bool { return !udb.UserDB.IsExisting(v.(string), "", false) },
-		vf.Email:      func(v interface{}) bool { return !udb.UserDB.IsExisting("", v.(string), false) },
+		vf.UName:      func(v interface{}) bool { return !udb.UserDB.UserExists(v.(string), "", false) },
+		vf.Email:      func(v interface{}) bool { return !udb.UserDB.UserExists("", v.(string), false) },
 		vf.Name:       func(v interface{}) bool { return len(v.(string)) > 0 },
 		vf.Password:   func(v interface{}) bool { return ChkPwd(v.(string), PwdLen) },
 		vf.AvatarType: func(v interface{}) bool { return ChkAvatarType(v.(string)) },

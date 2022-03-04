@@ -11,6 +11,9 @@ import (
 	usr "github.com/digisan/user-mgr/user"
 )
 
+// cache for fast fetching
+var tmpUserPool = &sync.Map{}
+
 var once sync.Once
 
 type UDB struct {
@@ -111,20 +114,53 @@ func (db *UDB) ListOnlineUsers() (unames []string, err error) {
 
 ///////////////////////////////////////////////////////////////
 
-func (db *UDB) UpdateUser(user *usr.User) error {
+func (db *UDB) UpdateUser(user *usr.User) (err error) {
+	// update cache
+	defer func() {
+		if err == nil {
+			tmpUserPool.Store(user.UName, user)
+			tmpUserPool.Store(user.Email, user)
+			tmpUserPool.Store(user.Phone, user)
+		}
+	}()
+
 	db.Lock()
 	defer db.Unlock()
 
 	// remove all existing items
-	if err := db.RemoveUser(user.UName, false); err != nil {
+	if err = db.RemoveUser(user.UName, false, false); err != nil {
 		return err
 	}
-	return db.dbReg.Update(func(txn *badger.Txn) error {
+	err = db.dbReg.Update(func(txn *badger.Txn) error {
 		return txn.Set(user.Marshal())
 	})
+	return err
 }
 
 func (db *UDB) LoadUser(uname string, active bool) (*usr.User, bool, error) {
+
+	// cache fetch & update
+	if user, ok := tmpUserPool.Load(uname); ok {
+		if u := user.(*usr.User); u.Email != "" {
+			if (active && u.IsActive()) || (!active && !u.IsActive()) {
+				return u, ok, nil
+			}
+		}
+	}
+
+	u := &usr.User{}
+	var err error
+
+	defer func() {
+		if err == nil && u.Email != "" {
+			tmpUserPool.Store(u.UName, u)
+			tmpUserPool.Store(u.Email, u)
+			tmpUserPool.Store(u.Phone, u)
+		}
+	}()
+
+	///////////////////////////////////////////////////
+
 	db.Lock()
 	defer db.Unlock()
 
@@ -133,8 +169,7 @@ func (db *UDB) LoadUser(uname string, active bool) (*usr.User, bool, error) {
 		prefix = []byte("F" + usr.SEP + uname + usr.SEP)
 	}
 
-	u := &usr.User{}
-	err := db.dbReg.View(func(txn *badger.Txn) error {
+	err = db.dbReg.View(func(txn *badger.Txn) error {
 		it := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer it.Close()
 		if it.Seek(prefix); it.ValidForPrefix(prefix) {
@@ -173,9 +208,60 @@ func (db *UDB) LoadAnyUser(uname string) (*usr.User, bool, error) {
 	return u, okA || okD, err
 }
 
-func (db *UDB) LoadAnyUserByEmail(email string) (*usr.User, bool, error) {
-	uA, okA, errA := db.LoadUserByEmail(email, true)
-	uD, okD, errD := db.LoadUserByEmail(email, false)
+func (db *UDB) LoadUserByUniProp(propName, propVal string, active bool) (*usr.User, bool, error) {
+
+	// cache fetch & update
+	if user, ok := tmpUserPool.Load(propVal); ok {
+		if u := user.(*usr.User); u.Email != "" {
+			if (active && u.IsActive()) || (!active && !u.IsActive()) {
+				return u, ok, nil
+			}
+		}
+	}
+
+	u := &usr.User{}
+	var err error
+
+	defer func() {
+		if err == nil && u.Email != "" {
+			tmpUserPool.Store(u.UName, u)
+			tmpUserPool.Store(u.Email, u)
+			tmpUserPool.Store(u.Phone, u)
+		}
+	}()
+
+	///////////////////////////////////////////////////
+
+	users, err := db.ListUsers(func(u *usr.User) bool {
+		flag := u.IsActive()
+		if !active {
+			flag = !u.IsActive()
+		}
+		switch propName {
+		case "uname", "Uname":
+			return flag && u.UName == propVal
+		case "email", "Email":
+			return flag && u.Email == propVal
+		case "phone", "Phone":
+			return flag && u.Phone == propVal
+		default:
+			return false
+		}
+	})
+	if len(users) > 0 {
+		u = users[0]
+		return u, true, err
+	}
+	return u, false, err
+}
+
+func (db *UDB) LoadActiveUserByUniProp(propName, propVal string) (*usr.User, bool, error) {
+	return db.LoadUserByUniProp(propName, propVal, true)
+}
+
+func (db *UDB) LoadAnyUserByUniProp(propName, propVal string) (*usr.User, bool, error) {
+	uA, okA, errA := db.LoadUserByUniProp(propName, propVal, true)
+	uD, okD, errD := db.LoadUserByUniProp(propName, propVal, false)
 	var u *usr.User
 	if uA != nil {
 		u = uA
@@ -191,41 +277,17 @@ func (db *UDB) LoadAnyUserByEmail(email string) (*usr.User, bool, error) {
 	return u, okA || okD, err
 }
 
-func (db *UDB) LoadUserByEmail(email string, active bool) (*usr.User, bool, error) {
-	users, err := db.ListUsers(func(u *usr.User) bool {
-		if active {
-			return u.IsActive() && u.Email == email
-		}
-		return !u.IsActive() && u.Email == email
-	})
-	if len(users) > 0 {
-		return users[0], true, err
+func (db *UDB) RemoveUser(uname string, lock, rmCache bool) error {
+	if rmCache {
+		defer func() {
+			if u, ok, err := db.LoadAnyUser(uname); err == nil && ok {
+				tmpUserPool.Delete(u.UName)
+				tmpUserPool.Delete(u.Email)
+				tmpUserPool.Delete(u.Phone)
+			}
+		}()
 	}
-	return &usr.User{}, false, err
-}
 
-func (db *UDB) LoadActiveUserByEmail(email string) (*usr.User, bool, error) {
-	return db.LoadUserByEmail(email, true)
-}
-
-func (db *UDB) LoadUserByPhone(phone string, active bool) (*usr.User, bool, error) {
-	users, err := db.ListUsers(func(u *usr.User) bool {
-		if active {
-			return u.IsActive() && u.Phone == phone
-		}
-		return !u.IsActive() && u.Phone == phone
-	})
-	if len(users) > 0 {
-		return users[0], true, err
-	}
-	return &usr.User{}, false, err
-}
-
-func (db *UDB) LoadActiveUserByPhone(phone string) (*usr.User, bool, error) {
-	return db.LoadUserByPhone(phone, true)
-}
-
-func (db *UDB) RemoveUser(uname string, lock bool) error {
 	if lock {
 		db.Lock()
 		defer db.Unlock()
@@ -270,27 +332,31 @@ func (db *UDB) ListUsers(filter func(*usr.User) bool) (users []*usr.User, err er
 	return
 }
 
-func (db *UDB) IsExisting(uname, email string, activeOnly bool) bool {
-	if uname != "" {
-		if activeOnly {
-			_, okA, err := db.LoadUser(uname, true)
-			lk.WarnOnErr("%v", err)
-			return okA
+func (db *UDB) UserExists(uname, email string, activeOnly bool) bool {
+	if activeOnly {
+		// check uname
+		_, ok, err := db.LoadUser(uname, true)
+		lk.WarnOnErr("%v", err)
+		if ok {
+			return ok
 		}
-		_, ok, err := db.LoadAnyUser(uname)
+		// check email
+		_, ok, err = db.LoadActiveUserByUniProp("email", email)
 		lk.WarnOnErr("%v", err)
 		return ok
-	} else if email != "" {
-		if activeOnly {
-			_, okA, err := db.LoadUserByEmail(email, true)
-			lk.WarnOnErr("%v", err)
-			return okA
+
+	} else {
+		// check uname
+		_, ok, err := db.LoadAnyUser(uname)
+		lk.WarnOnErr("%v", err)
+		if ok {
+			return ok
 		}
-		_, ok, err := db.LoadAnyUserByEmail(email)
+		// check email
+		_, ok, err = db.LoadAnyUserByUniProp("email", email)
 		lk.WarnOnErr("%v", err)
 		return ok
 	}
-	return false
 }
 
 func (db *UDB) ActivateUser(uname string, flag bool) (*usr.User, bool, error) {

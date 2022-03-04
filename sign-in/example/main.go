@@ -39,7 +39,7 @@ func main() {
 		Avatar:     []byte(""),
 	}
 
-	lk.FailOnErr("%v", si.UserExists(user))
+	lk.FailOnErr("%v", si.CheckUserExists(user))
 	lk.FailOnErrWhen(!si.PwdOK(user), "%v", fmt.Errorf("incorrect password"))
 	lk.FailOnErr("%v", si.Trail(user.UName))
 

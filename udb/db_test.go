@@ -37,18 +37,20 @@ func TestOpen(t *testing.T) {
 	}
 	lk.FailOnErr("%v", UserDB.UpdateUser(u))
 
+	fmt.Println("---------------------------")
+
 	u, done, err := UserDB.ActivateUser("unique-name", true)
 	lk.WarnOnErr("------: %v - %v", done, err)
 	fmt.Println(u)
 
 	fmt.Println()
 
-	u1, ok, err := UserDB.LoadActiveUserByEmail("hello@abc.net")
+	u1, ok, err := UserDB.LoadActiveUserByUniProp("email", "hello@abc.net")
 	fmt.Println(u1, ok, err)
 
 	fmt.Println()
 
-	u2, ok, err := UserDB.LoadActiveUserByPhone("1234567")
+	u2, ok, err := UserDB.LoadActiveUserByUniProp("phone", "1234567")
 	fmt.Println(u2, ok, err)
 }
 
@@ -56,21 +58,32 @@ func TestRemove(t *testing.T) {
 	OpenUserStorage(dbPath)
 	defer CloseUserStorage()
 
-	lk.FailOnErr("%v", UserDB.RemoveUser("unique-name", true))
+	lk.FailOnErr("%v", UserDB.RemoveUser("unique-name", true, true))
+
+	u1, ok, err := UserDB.LoadActiveUserByUniProp("email", "hello@abc.net")
+	fmt.Println(u1, ok, err)
+
+	fmt.Println()
+
+	u2, ok, err := UserDB.LoadActiveUserByUniProp("phone", "1234567")
+	fmt.Println(u2, ok, err)
 }
 
 func TestLoad(t *testing.T) {
 	OpenUserStorage(dbPath)
 	defer CloseUserStorage()
 
-	user, ok, err := UserDB.LoadUser("unique-name", false)
+	user0, ok, err := UserDB.LoadUser("unique-name", true)
 	lk.FailOnErr("%v", err)
-
 	fmt.Println(ok)
-	fmt.Println(user)
 
-	// check sign in
-	// user.Password == "abc"
+	fmt.Println(user0)
+
+	user1, ok, err := UserDB.LoadUserByUniProp("uname", "unique-name", true)
+	lk.FailOnErr("%v", err)
+	fmt.Println(ok)
+
+	fmt.Println("=====", user0 == user1)
 }
 
 func TestListUsers(t *testing.T) {
@@ -94,8 +107,8 @@ func TestExisting(t *testing.T) {
 	OpenUserStorage(dbPath)
 	defer CloseUserStorage()
 
-	fmt.Println("---", UserDB.IsExisting("unique-name", "", false))
-	fmt.Println("---", UserDB.IsExisting("", "hello@abc.net", false))
+	fmt.Println("---", UserDB.UserExists("unique-name", "", false))
+	fmt.Println("---", UserDB.UserExists("", "hello@abc.net", false))
 }
 
 ///////////////////////////////////////////////////////////////

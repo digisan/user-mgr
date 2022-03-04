@@ -38,7 +38,7 @@ func main() {
 		Avatar:     []byte(""),
 	}
 
-	if err := rp.UserExists(user); err != nil {
+	if err := rp.CheckUserExists(user); err != nil {
 		lk.Log("%v", err)
 		return
 	}

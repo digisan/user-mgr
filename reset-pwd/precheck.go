@@ -7,11 +7,11 @@ import (
 	usr "github.com/digisan/user-mgr/user"
 )
 
-func UserExists(login *usr.User) error {
-	if udb.UserDB.IsExisting(login.UName, login.Email, true) {
+func CheckUserExists(login *usr.User) error {
+	if udb.UserDB.UserExists(login.UName, login.Email, true) {
 		return nil
 	}
-	if udb.UserDB.IsExisting(login.UName, login.Email, false) {
+	if udb.UserDB.UserExists(login.UName, login.Email, false) {
 		return fmt.Errorf("[%v] is dormant", login.UName)
 	}
 	return fmt.Errorf("[%v] is not existing", login.UName)
