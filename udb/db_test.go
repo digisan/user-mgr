@@ -94,7 +94,8 @@ func TestExisting(t *testing.T) {
 	OpenUserStorage(dbPath)
 	defer CloseUserStorage()
 
-	fmt.Println(UserDB.IsExisting("unique-name", false))
+	fmt.Println("---", UserDB.IsExisting("unique-name", "", false))
+	fmt.Println("---", UserDB.IsExisting("", "hello@abc.net", false))
 }
 
 ///////////////////////////////////////////////////////////////

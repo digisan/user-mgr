@@ -173,6 +173,24 @@ func (db *UDB) LoadAnyUser(uname string) (*usr.User, bool, error) {
 	return u, okA || okD, err
 }
 
+func (db *UDB) LoadAnyUserByEmail(email string) (*usr.User, bool, error) {
+	uA, okA, errA := db.LoadUserByEmail(email, true)
+	uD, okD, errD := db.LoadUserByEmail(email, false)
+	var u *usr.User
+	if uA != nil {
+		u = uA
+	} else if uD != nil {
+		u = uD
+	}
+	var err error
+	if errA != nil {
+		err = errA
+	} else if errD != nil {
+		err = errD
+	}
+	return u, okA || okD, err
+}
+
 func (db *UDB) LoadUserByEmail(email string, active bool) (*usr.User, bool, error) {
 	users, err := db.ListUsers(func(u *usr.User) bool {
 		if active {
@@ -252,17 +270,27 @@ func (db *UDB) ListUsers(filter func(*usr.User) bool) (users []*usr.User, err er
 	return
 }
 
-func (db *UDB) IsExisting(uname string, onlyActive bool) bool {
-	if onlyActive {
-		_, okActive, err := db.LoadUser(uname, true)
+func (db *UDB) IsExisting(uname, email string, activeOnly bool) bool {
+	if uname != "" {
+		if activeOnly {
+			_, okA, err := db.LoadUser(uname, true)
+			lk.WarnOnErr("%v", err)
+			return okA
+		}
+		_, ok, err := db.LoadAnyUser(uname)
 		lk.WarnOnErr("%v", err)
-		return okActive
+		return ok
+	} else if email != "" {
+		if activeOnly {
+			_, okA, err := db.LoadUserByEmail(email, true)
+			lk.WarnOnErr("%v", err)
+			return okA
+		}
+		_, ok, err := db.LoadAnyUserByEmail(email)
+		lk.WarnOnErr("%v", err)
+		return ok
 	}
-	_, okActive, err := db.LoadUser(uname, true)
-	lk.WarnOnErr("%v", err)
-	_, okDorm, err := db.LoadUser(uname, false)
-	lk.WarnOnErr("%v", err)
-	return okActive || okDorm
+	return false
 }
 
 func (db *UDB) ActivateUser(uname string, flag bool) (*usr.User, bool, error) {

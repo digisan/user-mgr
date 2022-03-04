@@ -8,10 +8,10 @@ import (
 )
 
 func UserExists(login *usr.User) error {
-	if udb.UserDB.IsExisting(login.UName, true) {
+	if udb.UserDB.IsExisting(login.UName, login.Email, true) {
 		return nil
 	}
-	if udb.UserDB.IsExisting(login.UName, false) {
+	if udb.UserDB.IsExisting(login.UName, login.Email, false) {
 		return fmt.Errorf("[%v] is dormant", login.UName)
 	}
 	return fmt.Errorf("[%v] is not existing", login.UName)
