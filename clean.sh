@@ -10,6 +10,7 @@ rm -rf ./reset-pwd/example/data
 rm -rf ./reset-pwd/example/udb
 rm -rf ./udb/data
 rm -rf ./data
+rm -rf ./relation/data
 
 # delete all binary files
 find . -type f -executable -exec sh -c "file -i '{}' | grep -q 'x-executable; charset=binary'" \; -print | xargs rm -f

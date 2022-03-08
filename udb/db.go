@@ -313,7 +313,7 @@ func (db *UDB) RemoveUser(uname string, lock, rmCache bool) error {
 		it := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer it.Close()
 		for _, prefix := range prefixList {
-			for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+			if it.Seek(prefix); it.ValidForPrefix(prefix) {
 				if err = txn.Delete(it.Item().KeyCopy(nil)); err != nil {
 					return err
 				}
