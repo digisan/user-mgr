@@ -102,7 +102,10 @@ func (db *RDB) UpdateRel(flag int, rel *Rel) (err error) {
 		return err
 	}
 	return db.dbRel.Update(func(txn *badger.Txn) error {
-		return txn.Set(rel.MarshalTo(flag))
+		if forKey, forValue := rel.MarshalTo(flag); len(forKey) > 0 && len(forValue) > 0 {
+			return txn.Set(forKey, forValue)
+		}
+		return nil
 	})
 }
 
@@ -118,7 +121,7 @@ func (db *RDB) LoadRel(flag int, uname string) (*Rel, bool, error) {
 	}
 
 	prefix, ok := mPrefix[flag]
-	lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("invalid flag"))
+	lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("invalid flag, only accept [FOLLOWING FOLLOWER BLOCKED MUTED]"))
 
 	r := &Rel{}
 	err := db.dbRel.View(func(txn *badger.Txn) error {
@@ -128,7 +131,6 @@ func (db *RDB) LoadRel(flag int, uname string) (*Rel, bool, error) {
 			item := it.Item()
 			k := item.Key()
 			return item.Value(func(v []byte) error {
-				// fmt.Printf("key=%s, value=%s\n", k, v)
 				r.UnmarshalFrom(k, v)
 				return nil
 			})

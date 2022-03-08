@@ -12,16 +12,27 @@ func TestRelAction(t *testing.T) {
 	defer CloseRelStorage()
 
 	RelAction(DO_FOLLOW, "qing", "musk")
-	// RelAction(DO_FOLLOW, "qing", "trump")
-	// RelAction(DO_UNFOLLOW, "qing", "musk")
-	// RelAction(DO_FOLLOW, "qing", "musk")
+	RelAction(DO_FOLLOW, "qing", "trump")
+	RelAction(DO_UNFOLLOW, "qing", "musk")
+	RelAction(DO_FOLLOW, "qing", "musk")
 
-	relQing := RelMgr(FOLLOWING, "qing")
-	fmt.Println(relQing)
+	fmt.Println(RelMgr(FOLLOWING, "qing"))
 
-	fmt.Print("-----------------------")
+	fmt.Println("-----------------------")
 
-	relMusk := RelMgr(FOLLOWER, "trump")
-	fmt.Println(relMusk)
+	fmt.Println(RelMgr(FOLLOWER, "musk"))
+
+	fmt.Println("-----------------------")
+
+	fmt.Println(RelMgr(FOLLOWER, "trump"))
+
+	fmt.Println(" unfollow -----------------------")
+
+	RelAction(DO_UNFOLLOW, "qing", "musk")
+	RelAction(DO_UNFOLLOW, "qing", "trump")
+
+	fmt.Println(RelMgr(FOLLOWING, "qing"))
+	fmt.Println(RelMgr(FOLLOWER, "musk"))
+	fmt.Println(RelMgr(FOLLOWER, "trump"))
 
 }

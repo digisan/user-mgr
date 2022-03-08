@@ -37,7 +37,7 @@ func (r *Rel) MarshalTo(flag int) (forKey, forValue []byte) {
 		forKey = []byte("M" + SEP + r.uname)
 		forValue = []byte(strings.Join(r.muted, SEP))
 	default:
-		lk.FailOnErr("invalid flag [%d], only accept [enum.FOLLOWING enum.FOLLOWER enum.BLOCK enum.MUTED]", flag)
+		lk.FailOnErr("invalid flag [%d], only accept [FOLLOWING FOLLOWER BLOCK MUTED]", flag)
 	}
 	return
 }
@@ -61,7 +61,7 @@ func (r *Rel) UnmarshalFrom(dbKey, dbVal []byte) int {
 			r.muted = others
 			return MUTED
 		default:
-			lk.FailOnErr("invalid dbKey storage flag [%s], only accept ['FI' 'FR' 'B' 'M']", unames[0])
+			lk.FailOnErr("invalid dbKey storage flag [%s], MUST be ['FI' 'FR' 'B' 'M']", unames[0])
 		}
 	}
 	panic("fatal error in dbKey for user relation")
@@ -140,8 +140,12 @@ func RelAction(doFlag int, me, him string) (err error) {
 			}
 
 		default:
-			panic("invalid doFlag")
+			panic("invalid doFlag, only accept [DO_FOLLOW DO_UNFOLLOW DO_BLOCK DO_UNBLOCK DO_MUTE DO_UNMUTE]")
 		}
+
+	} else {
+		return fmt.Errorf("RelDB is nil")
 	}
-	return fmt.Errorf("RelDB is nil")
+
+	return nil
 }
