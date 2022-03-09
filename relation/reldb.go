@@ -142,12 +142,23 @@ func (db *RDB) LoadRel(flag int, uname string) (*Rel, bool, error) {
 
 ////////////////////////////////////////////////////////////////////////
 
-func RelMgr(flag int, uname string) *Rel {
+func RelContent(uname string, flag int) []string {
 	if RelDB != nil {
 		if rel, ok, err := RelDB.LoadRel(flag, uname); err == nil && ok {
-			return rel
+			switch flag {
+			case FOLLOWING:
+				return rel.following
+			case FOLLOWER:
+				return rel.follower
+			case BLOCKED:
+				return rel.blocked
+			case MUTED:
+				return rel.muted
+			default:
+				panic("error in flag")
+			}
 		}
-		return &Rel{uname: uname}
+		return []string{}
 	}
 	return nil
 }

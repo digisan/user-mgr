@@ -11,28 +11,43 @@ func TestRelAction(t *testing.T) {
 	OpenRelStorage("./data")
 	defer CloseRelStorage()
 
-	RelAction(DO_FOLLOW, "qing", "musk")
-	RelAction(DO_FOLLOW, "qing", "trump")
-	RelAction(DO_UNFOLLOW, "qing", "musk")
-	RelAction(DO_FOLLOW, "qing", "musk")
+	RelAction("qing", DO_FOLLOW, "musk")
 
-	fmt.Println(RelMgr(FOLLOWING, "qing"))
+	RelAction("qing", DO_FOLLOW, "trump")
+	RelAction("qing", DO_UNFOLLOW, "musk")
+	RelAction("qing", DO_FOLLOW, "musk")
+
+	// content := RelContent("qing", FOLLOWING)
+	// fmt.Println(content)
+
+	rel := RelMgr("qing")
+	fmt.Println(rel.HasFollowing("musk"))
 
 	fmt.Println("-----------------------")
 
-	fmt.Println(RelMgr(FOLLOWER, "musk"))
+	fmt.Println(RelMgr("musk"))
 
 	fmt.Println("-----------------------")
 
-	fmt.Println(RelMgr(FOLLOWER, "trump"))
+	fmt.Println(RelMgr("trump"))
 
 	fmt.Println(" unfollow -----------------------")
 
-	RelAction(DO_UNFOLLOW, "qing", "musk")
-	RelAction(DO_UNFOLLOW, "qing", "trump")
+	RelAction("qing", DO_UNFOLLOW, "musk")
+	// RelAction(DO_UNFOLLOW, "qing", "trump")
 
-	fmt.Println(RelMgr(FOLLOWING, "qing"))
-	fmt.Println(RelMgr(FOLLOWER, "musk"))
-	fmt.Println(RelMgr(FOLLOWER, "trump"))
+	fmt.Println(RelMgr("qing"))
+	fmt.Println(RelMgr("musk"))
 
+	RelAction("musk", DO_FOLLOW, "trump")
+
+	// fmt.Println(RelContent("trump", FOLLOWER))
+
+	fmt.Println(RelMgr("trump"))
+
+	RelAction("qing", DO_FOLLOW, "biden")
+	fmt.Println(RelMgr("qing"))
+	
+	RelAction("qing", DO_BLOCK, "biden")
+	fmt.Println(RelMgr("qing"))
 }

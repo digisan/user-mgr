@@ -22,6 +22,14 @@ type Rel struct {
 	muted     []string
 }
 
+func (r Rel) String() string {
+	return fmt.Sprintf("me: %v\n", r.uname) +
+		fmt.Sprintf("following: %v\n", r.following) +
+		fmt.Sprintf("follower: %v\n", r.follower) +
+		fmt.Sprintf("blocked: %v\n", r.blocked) +
+		fmt.Sprintf("muted: %v\n", r.muted)
+}
+
 func (r *Rel) MarshalTo(flag int) (forKey, forValue []byte) {
 	switch flag {
 	case FOLLOWING:
@@ -71,72 +79,114 @@ var (
 	mtx sync.Mutex
 )
 
-func RelAction(doFlag int, me, him string) (err error) {
-	mtx.Lock()
-	defer mtx.Unlock()
+func (r *Rel) HasFollowing(uname string) bool {
+	return str.In(uname, r.following...)
+}
+
+func (r *Rel) HasFollower(uname string) bool {
+	return str.In(uname, r.follower...)
+}
+
+func (r *Rel) HasBlocked(uname string) bool {
+	return str.In(uname, r.blocked...)
+}
+
+func (r *Rel) HasMuted(uname string) bool {
+	return str.In(uname, r.muted...)
+}
+
+func RelMgr(uname string, flags ...int) *Rel {
+	rel := &Rel{uname: uname}
+	m := map[int]*[]string{
+		FOLLOWING: &rel.following,
+		FOLLOWER:  &rel.follower,
+		BLOCKED:   &rel.blocked,
+		MUTED:     &rel.muted,
+	}
+	if len(flags) == 0 {
+		flags = []int{FOLLOWING, FOLLOWER, BLOCKED, MUTED}
+	}
+	for _, flag := range flags {
+		ptr, ok := m[flag]
+		lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("invalid flag"))
+		*ptr = RelContent(uname, flag)
+	}
+	return rel
+}
+
+func relAction(me string, doFlag int, him string, lock bool) (err error) {
+	if lock {
+		mtx.Lock()
+		defer mtx.Unlock()
+	}
 
 	if RelDB != nil {
+
 		switch doFlag {
-		case DO_FOLLOW:
-			relMe, relHim := RelMgr(FOLLOWING, me), RelMgr(FOLLOWER, him)
-			if str.NotIn(him, relMe.following...) {
-				relMe.following = append(relMe.following, him)
-				relHim.follower = append(relHim.follower, me)
-				if err = RelDB.UpdateRel(FOLLOWING, relMe); err != nil {
+		case DO_FOLLOW, DO_UNFOLLOW:
+
+			meFollowing := RelContent(me, FOLLOWING)
+			himFollower := RelContent(him, FOLLOWER)
+			did := false
+
+			if doFlag == DO_FOLLOW && str.NotIn(him, meFollowing...) {
+				meFollowing = append(meFollowing, him)
+				himFollower = append(himFollower, me)
+				did = true
+			} else if doFlag == DO_UNFOLLOW && str.In(him, meFollowing...) {
+				str.DelOneEle(&meFollowing, him)
+				str.DelOneEle(&himFollower, me)
+				did = true
+			}
+			if did {
+				if err = RelDB.UpdateRel(FOLLOWING, &Rel{uname: me, following: meFollowing}); err != nil {
 					return
 				}
-				if err = RelDB.UpdateRel(FOLLOWER, relHim); err != nil {
+				if err = RelDB.UpdateRel(FOLLOWER, &Rel{uname: him, follower: himFollower}); err != nil {
 					return
 				}
 			}
 
-		case DO_UNFOLLOW:
-			relMe, relHim := RelMgr(FOLLOWING, me), RelMgr(FOLLOWER, him)
-			if str.In(him, relMe.following...) {
-				str.DelOneEle(&relMe.following, him)
-				str.DelOneEle(&relHim.follower, me)
-				if err = RelDB.UpdateRel(FOLLOWING, relMe); err != nil {
-					return
+		case DO_BLOCK, DO_UNBLOCK:
+
+			blocked := RelContent(me, BLOCKED)
+			did := false
+
+			if doFlag == DO_BLOCK && str.NotIn(him, blocked...) {
+				blocked = append(blocked, him)
+				// other actions
+				{
+					relAction(me, DO_UNFOLLOW, him, false)
 				}
-				if err = RelDB.UpdateRel(FOLLOWER, relHim); err != nil {
-					return
-				}
+				//
+				did = true
+			} else if doFlag == DO_UNBLOCK && str.In(him, blocked...) {
+				str.DelOneEle(&blocked, him)
+				did = true
+			}
+			if did {
+				return RelDB.UpdateRel(BLOCKED, &Rel{uname: me, blocked: blocked})
 			}
 
-		case DO_BLOCK:
-			relMe := RelMgr(BLOCKED, me)
-			if str.NotIn(him, relMe.blocked...) {
-				relMe.blocked = append(relMe.blocked, him)
-				if err = RelDB.UpdateRel(FOLLOWING, relMe); err != nil {
-					return
-				}
-			}
+		case DO_MUTE, DO_UNMUTE:
 
-		case DO_UNBLOCK:
-			relMe := RelMgr(BLOCKED, me)
-			if str.In(him, relMe.blocked...) {
-				str.DelOneEle(&relMe.blocked, him)
-				if err = RelDB.UpdateRel(FOLLOWING, relMe); err != nil {
-					return
-				}
-			}
+			muted := RelContent(me, MUTED)
+			did := false
 
-		case DO_MUTE:
-			relMe := RelMgr(MUTED, me)
-			if str.NotIn(him, relMe.muted...) {
-				relMe.muted = append(relMe.muted, him)
-				if err = RelDB.UpdateRel(FOLLOWING, relMe); err != nil {
-					return
-				}
-			}
+			if doFlag == DO_MUTE && str.NotIn(him, muted...) {
+				muted = append(muted, him)
+				// other actions
+				{
 
-		case DO_UNMUTE:
-			relMe := RelMgr(MUTED, me)
-			if str.In(him, relMe.muted...) {
-				str.DelOneEle(&relMe.muted, him)
-				if err = RelDB.UpdateRel(FOLLOWING, relMe); err != nil {
-					return
 				}
+				//
+				did = true
+			} else if doFlag == DO_UNMUTE && str.In(him, muted...) {
+				str.DelOneEle(&muted, him)
+				did = true
+			}
+			if did {
+				return RelDB.UpdateRel(MUTED, &Rel{uname: me, muted: muted})
 			}
 
 		default:
@@ -147,5 +197,9 @@ func RelAction(doFlag int, me, him string) (err error) {
 		return fmt.Errorf("RelDB is nil")
 	}
 
-	return nil
+	return
+}
+
+func RelAction(me string, doFlag int, him string) (err error) {
+	return relAction(me, doFlag, him, true)
 }
