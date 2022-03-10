@@ -63,14 +63,14 @@ func main() {
 	fmt.Scanf("%s", &incode)
 	// get [incode] from POST
 
-	if err := su.VerifyCode(user.UName, incode); err != nil {
+	user, err := su.VerifyCode(user.UName, incode)
+	if err != nil {
 		fmt.Println("Email verification failed:", err)
 		return
 	}
 
-	user, _, err := udb.UserDB.LoadActiveUser(user.UName)
-	lk.FailOnErr("%v", err)
-
+	// user, _, err = udb.UserDB.LoadActiveUser(user.UName)
+	// lk.FailOnErr("%v", err)
 	/////
 
 AGAIN:

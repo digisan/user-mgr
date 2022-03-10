@@ -63,7 +63,7 @@ func main() {
 	fmt.Scanf("%s", &incode)
 
 	// get [incode] from POST
-	if err := su.VerifyCode(user.UName, incode); err != nil {
+	if _, err := su.VerifyCode(user.UName, incode); err != nil {
 		fmt.Println("Sign-Up failed:", err)
 		return
 	}

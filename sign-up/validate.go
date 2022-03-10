@@ -53,12 +53,13 @@ func ChkEmail(user *usr.User) error {
 	mUserCodeTm.Store(user.UName, struct {
 		Code string
 		Tm   time.Time
-	}{code, time.Now()})
+		user *usr.User
+	}{code, time.Now(), user})
 	return nil
 }
 
 // POST 2
-func VerifyCode(uname, incode string) error {
+func VerifyCode(uname, incode string) (*usr.User, error) {
 
 	// fmt.Println("Input your code sent to you email")
 	// incode := ""
@@ -66,22 +67,23 @@ func VerifyCode(uname, incode string) error {
 
 	val, ok := mUserCodeTm.Load(uname)
 	if !ok {
-		return fmt.Errorf("no email code exists")
+		return nil, fmt.Errorf("no email code exists")
 	}
 
-	ct := val.(struct {
+	ctu := val.(struct {
 		Code string
 		Tm   time.Time
+		user *usr.User
 	})
 
-	if time.Since(ct.Tm) > timeoutVerify {
-		return fmt.Errorf("email verification code is expired")
+	if time.Since(ctu.Tm) > timeoutVerify {
+		return nil, fmt.Errorf("email verification code is expired")
 	}
 
-	if ct.Code != incode {
-		return fmt.Errorf("email couldn't be verified")
+	if ctu.Code != incode {
+		return nil, fmt.Errorf("email couldn't be verified")
 	}
 
 	mUserCodeTm.Delete(uname)
-	return nil
+	return ctu.user, nil
 }
