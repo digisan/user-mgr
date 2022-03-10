@@ -37,9 +37,11 @@ var (
 		vf.MemExpire:  func(v interface{}) bool { return v == "" || len(v.(string)) > 6 },
 		vf.NationalID: func(v interface{}) bool { return v == "" || len(v.(string)) > 6 },
 		vf.Gender:     func(v interface{}) bool { return v == "" || v == "M" || v == "F" },
+		vf.DOB:        func(v interface{}) bool { return v == "" || len(v.(string)) > 7 },
 		vf.Position:   func(v interface{}) bool { return v == "" || len(v.(string)) > 3 },
 		vf.Title:      func(v interface{}) bool { return v == "" || len(v.(string)) > 3 },
 		vf.Employer:   func(v interface{}) bool { return v == "" || len(v.(string)) > 3 },
+		vf.Bio:        func(v interface{}) bool { return v == "" || len(v.(string)) > 3 },
 		vf.Tags:       func(v interface{}) bool { return v == "" || len(v.(string)) > 2 },
 	}
 
@@ -59,9 +61,11 @@ var (
 		vf.MemExpire:  func(t, v interface{}) error { return fEf("invalid expiry date") },
 		vf.NationalID: func(t, v interface{}) error { return fEf("invalid national ID") },
 		vf.Gender:     func(t, v interface{}) error { return fEf("gender: 'M'/'F' for male/female") },
+		vf.DOB:        func(t, v interface{}) error { return fEf("invalid date of birth") },
 		vf.Position:   func(t, v interface{}) error { return fEf("invalid position") },
 		vf.Title:      func(t, v interface{}) error { return fEf("invalid title") },
 		vf.Employer:   func(t, v interface{}) error { return fEf("invalid employer") },
+		vf.Bio:        func(t, v interface{}) error { return fEf("more words please") },
 		vf.Tags:       func(t, v interface{}) error { return fEf("invalid user tags") },
 		vf.AvatarType: func(t, v interface{}) error { return fEf("invalid avatar type, must be like image/png") },
 		vf.Avatar:     func(t, v interface{}) error { return fEf("invalid avatar") },

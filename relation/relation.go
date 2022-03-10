@@ -8,6 +8,7 @@ import (
 	"github.com/digisan/go-generics/str"
 	lk "github.com/digisan/logkit"
 	. "github.com/digisan/user-mgr/relation/enum"
+	"github.com/digisan/user-mgr/udb"
 )
 
 const (
@@ -114,92 +115,98 @@ func RelMgr(uname string, flags ...int) *Rel {
 	return rel
 }
 
-func relAction(me string, doFlag int, him string, lock bool) (err error) {
+func relAction(me string, doFlag int, whom string, lock bool) (err error) {
 	if lock {
 		mtx.Lock()
 		defer mtx.Unlock()
 	}
 
-	if RelDB != nil {
+	if RelDB != nil && udb.UserDB != nil {
 
-		switch doFlag {
-		case DO_FOLLOW, DO_UNFOLLOW:
+		if udb.UserDB.UserExists(whom, "", false) {
 
-			meFollowing := RelContent(me, FOLLOWING)
-			himFollower := RelContent(him, FOLLOWER)
-			did := false
+			switch doFlag {
+			case DO_FOLLOW, DO_UNFOLLOW:
 
-			if doFlag == DO_FOLLOW && str.NotIn(him, meFollowing...) {
-				meFollowing = append(meFollowing, him)
-				himFollower = append(himFollower, me)
-				did = true
-			} else if doFlag == DO_UNFOLLOW && str.In(him, meFollowing...) {
-				str.DelOneEle(&meFollowing, him)
-				str.DelOneEle(&himFollower, me)
-				did = true
-			}
-			if did {
-				if err = RelDB.UpdateRel(FOLLOWING, &Rel{uname: me, following: meFollowing}); err != nil {
-					return
+				meFollowing := RelContent(me, FOLLOWING)
+				whomFollower := RelContent(whom, FOLLOWER)
+				did := false
+
+				if doFlag == DO_FOLLOW && str.NotIn(whom, meFollowing...) {
+					meFollowing = append(meFollowing, whom)
+					whomFollower = append(whomFollower, me)
+					did = true
+				} else if doFlag == DO_UNFOLLOW && str.In(whom, meFollowing...) {
+					str.DelOneEle(&meFollowing, whom)
+					str.DelOneEle(&whomFollower, me)
+					did = true
 				}
-				if err = RelDB.UpdateRel(FOLLOWER, &Rel{uname: him, follower: himFollower}); err != nil {
-					return
+				if did {
+					if err = RelDB.UpdateRel(FOLLOWING, &Rel{uname: me, following: meFollowing}); err != nil {
+						return
+					}
+					if err = RelDB.UpdateRel(FOLLOWER, &Rel{uname: whom, follower: whomFollower}); err != nil {
+						return
+					}
 				}
-			}
 
-		case DO_BLOCK, DO_UNBLOCK:
+			case DO_BLOCK, DO_UNBLOCK:
 
-			blocked := RelContent(me, BLOCKED)
-			did := false
+				blocked := RelContent(me, BLOCKED)
+				did := false
 
-			if doFlag == DO_BLOCK && str.NotIn(him, blocked...) {
-				blocked = append(blocked, him)
-				// other actions
-				{
-					relAction(me, DO_UNFOLLOW, him, false)
+				if doFlag == DO_BLOCK && str.NotIn(whom, blocked...) {
+					blocked = append(blocked, whom)
+					// other actions
+					{
+						relAction(me, DO_UNFOLLOW, whom, false)
+					}
+					//
+					did = true
+				} else if doFlag == DO_UNBLOCK && str.In(whom, blocked...) {
+					str.DelOneEle(&blocked, whom)
+					did = true
 				}
-				//
-				did = true
-			} else if doFlag == DO_UNBLOCK && str.In(him, blocked...) {
-				str.DelOneEle(&blocked, him)
-				did = true
-			}
-			if did {
-				return RelDB.UpdateRel(BLOCKED, &Rel{uname: me, blocked: blocked})
-			}
-
-		case DO_MUTE, DO_UNMUTE:
-
-			muted := RelContent(me, MUTED)
-			did := false
-
-			if doFlag == DO_MUTE && str.NotIn(him, muted...) {
-				muted = append(muted, him)
-				// other actions
-				{
-
+				if did {
+					return RelDB.UpdateRel(BLOCKED, &Rel{uname: me, blocked: blocked})
 				}
-				//
-				did = true
-			} else if doFlag == DO_UNMUTE && str.In(him, muted...) {
-				str.DelOneEle(&muted, him)
-				did = true
-			}
-			if did {
-				return RelDB.UpdateRel(MUTED, &Rel{uname: me, muted: muted})
+
+			case DO_MUTE, DO_UNMUTE:
+
+				muted := RelContent(me, MUTED)
+				did := false
+
+				if doFlag == DO_MUTE && str.NotIn(whom, muted...) {
+					muted = append(muted, whom)
+					// other actions
+					{
+
+					}
+					//
+					did = true
+				} else if doFlag == DO_UNMUTE && str.In(whom, muted...) {
+					str.DelOneEle(&muted, whom)
+					did = true
+				}
+				if did {
+					return RelDB.UpdateRel(MUTED, &Rel{uname: me, muted: muted})
+				}
+
+			default:
+				panic("invalid doFlag, only accept [DO_FOLLOW DO_UNFOLLOW DO_BLOCK DO_UNBLOCK DO_MUTE DO_UNMUTE]")
 			}
 
-		default:
-			panic("invalid doFlag, only accept [DO_FOLLOW DO_UNFOLLOW DO_BLOCK DO_UNBLOCK DO_MUTE DO_UNMUTE]")
+		} else {
+			return fmt.Errorf("%s is not registered", whom)
 		}
 
 	} else {
-		return fmt.Errorf("RelDB is nil")
+		return fmt.Errorf("RelDB or UserDB is nil")
 	}
 
 	return
 }
 
-func RelAction(me string, doFlag int, him string) (err error) {
-	return relAction(me, doFlag, him, true)
+func RelAction(me string, doFlag int, whom string) (err error) {
+	return relAction(me, doFlag, whom, true)
 }

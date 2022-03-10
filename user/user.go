@@ -31,9 +31,11 @@ type User struct {
 	MemExpire  string `json:"expire" validate:"memExpire"`      // optional
 	NationalID string `json:"nationalid" validate:"nationalid"` // optional
 	Gender     string `json:"gender" validate:"gender"`         // optional
+	DOB        string `json:"dob" validate:"dob"`               // optional
 	Position   string `json:"position" validate:"position"`     // optional
 	Title      string `json:"title" validate:"title"`           // optional
 	Employer   string `json:"employer" validate:"employer"`     // optional
+	Bio        string `json:"bio" validate:"bio"`               // optional
 	Tags       string `json:"tags" validate:"tags"`             // optional // linked by '^'
 	AvatarType string `json:"avatartype" validate:"avatartype"` // optional
 	key        [16]byte
@@ -114,9 +116,11 @@ const (
 	MOK_MemExpire
 	MOK_NationalID
 	MOK_Gender
+	MOK_DOB
 	MOK_Position
 	MOK_Title
 	MOK_Employer
+	MOK_Bio
 	MOK_Tags
 	MOK_AvatarType
 	MOK_PwdBuf
@@ -139,9 +143,11 @@ func (u *User) KeyFieldAddr(mok int) interface{} {
 		MOK_MemExpire:  &u.MemExpire,
 		MOK_NationalID: &u.NationalID,
 		MOK_Gender:     &u.Gender,
+		MOK_DOB:        &u.DOB,
 		MOK_Position:   &u.Position,
 		MOK_Title:      &u.Title,
 		MOK_Employer:   &u.Employer,
+		MOK_Bio:        &u.Bio,
 		MOK_Tags:       &u.Tags,
 		MOK_AvatarType: &u.AvatarType,
 		MOK_PwdBuf:     &u.Password,
