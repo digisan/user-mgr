@@ -28,15 +28,19 @@ func main() {
 		Password:   "pa55a@aD20TTTTT",
 		Regtime:    "",
 		Phone:      "1",
+		Country:    "",
+		City:       "",
 		Addr:       "",
 		SysRole:    "admin",
 		MemLevel:   "1",
 		MemExpire:  "",
 		NationalID: "",
 		Gender:     "",
+		DOB:        "",
 		Position:   "",
 		Title:      "",
 		Employer:   "",
+		Bio:        "",
 		Tags:       "",
 		AvatarType: "",
 		Avatar:     []byte("abcdefg**********"),
@@ -59,7 +63,7 @@ func main() {
 	fmt.Scanf("%s", &incode)
 
 	// get [incode] from POST
-	if err := su.VerifyCode(user, incode); err != nil {
+	if err := su.VerifyCode(user.UName, incode); err != nil {
 		fmt.Println("Sign-Up failed:", err)
 		return
 	}

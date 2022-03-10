@@ -26,15 +26,21 @@ func main() {
 		Password:   "",
 		Regtime:    "",
 		Phone:      "",
+		Country:    "",
+		City:       "",
 		Addr:       "",
 		SysRole:    "",
 		MemLevel:   "",
 		MemExpire:  "",
 		NationalID: "",
 		Gender:     "",
+		DOB:        "",
 		Position:   "",
 		Title:      "",
 		Employer:   "",
+		Bio:        "",
+		Tags:       "",
+		AvatarType: "",
 		Avatar:     []byte(""),
 	}
 
@@ -57,7 +63,7 @@ func main() {
 	fmt.Scanf("%s", &incode)
 	// get [incode] from POST
 
-	if err := su.VerifyCode(user, incode); err != nil {
+	if err := su.VerifyCode(user.UName, incode); err != nil {
 		fmt.Println("Email verification failed:", err)
 		return
 	}

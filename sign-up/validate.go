@@ -13,7 +13,7 @@ import (
 
 var (
 	timeoutSend   = 45 * time.Second
-	timeoutVerify = 30 * time.Minute
+	timeoutVerify = 10 * time.Minute
 	mUserCodeTm   = &sync.Map{}
 )
 
@@ -58,13 +58,13 @@ func ChkEmail(user *usr.User) error {
 }
 
 // POST 2
-func VerifyCode(user *usr.User, incode string) error {
+func VerifyCode(uname, incode string) error {
 
 	// fmt.Println("Input your code sent to you email")
 	// incode := ""
 	// fmt.Scanf("%s", &incode)
 
-	val, ok := mUserCodeTm.LoadAndDelete(user.UName)
+	val, ok := mUserCodeTm.Load(uname)
 	if !ok {
 		return fmt.Errorf("no email code exists")
 	}
@@ -82,5 +82,6 @@ func VerifyCode(user *usr.User, incode string) error {
 		return fmt.Errorf("email couldn't be verified")
 	}
 
+	mUserCodeTm.Delete(uname)
 	return nil
 }
