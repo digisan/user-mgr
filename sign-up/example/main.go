@@ -27,6 +27,7 @@ func main() {
 		Name:       "A boy has no name",
 		Password:   "pa55a@aD20TTTTT",
 		Regtime:    "",
+		Official:   "F",
 		Phone:      "1",
 		Country:    "",
 		City:       "",

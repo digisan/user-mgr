@@ -375,10 +375,26 @@ func (db *UDB) UserExists(uname, email string, activeOnly bool) bool {
 }
 
 func (db *UDB) ActivateUser(uname string, flag bool) (*usr.User, bool, error) {
+	return db.SetUserBoolField(uname, "active", flag)
+}
+
+func (db *UDB) OfficializeUser(uname string, flag bool) (*usr.User, bool, error) {
+	return db.SetUserBoolField(uname, "official", flag)
+}
+
+func (db *UDB) SetUserBoolField(uname, field string, flag bool) (*usr.User, bool, error) {
 	u, ok, err := db.LoadUser(uname, !flag)
 	if err == nil {
 		if ok {
-			u.Active = strings.ToUpper(fmt.Sprint(flag))[:1]
+			val := strings.ToUpper(fmt.Sprint(flag))[:1]
+			switch field {
+			case "Active", "active", "ACTIVE":
+				u.Active = val
+			case "Official", "official", "OFFICIAL":
+				u.Official = val
+			default:
+				lk.FailOnErr("%v", fmt.Errorf("[%s] is unsupported setting BoolField", field))
+			}
 			return u, true, db.UpdateUser(u)
 		}
 		if !ok {

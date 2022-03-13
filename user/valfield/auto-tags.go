@@ -7,6 +7,7 @@ const (
 	Name       = "name"
 	Password   = "pwd"
 	Regtime    = "regtime"
+	Official   = "official"
 	Phone      = "phone"
 	Country    = "country"
 	City       = "city"

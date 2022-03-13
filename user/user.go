@@ -22,6 +22,7 @@ type User struct {
 	Name       string `json:"name" validate:"required,name"`    // real name
 	Password   string `json:"password" validate:"required,pwd"` // <-- a custom validation rule, plaintext!
 	Regtime    string `json:"regtime" validate:"regtime"`       // register time
+	Official   string `json:"official" validate:"official"`     // official account? "T" "F"
 	Phone      string `json:"phone" validate:"phone"`           // optional
 	Country    string `json:"country" validate:"country"`       // optional
 	City       string `json:"city" validate:"city"`             // optional
@@ -107,6 +108,7 @@ const (
 	MOK_Email
 	MOK_Name
 	MOK_Regtime
+	MOK_Official
 	MOK_Phone
 	MOK_Country
 	MOK_City
@@ -134,6 +136,7 @@ func (u *User) KeyFieldAddr(mok int) interface{} {
 		MOK_Email:      &u.Email,
 		MOK_Name:       &u.Name,
 		MOK_Regtime:    &u.Regtime,
+		MOK_Official:   &u.Official,
 		MOK_Phone:      &u.Phone,
 		MOK_Country:    &u.Country,
 		MOK_City:       &u.City,

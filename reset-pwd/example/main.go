@@ -25,6 +25,7 @@ func main() {
 		Name:       "",
 		Password:   "",
 		Regtime:    "",
+		Official:   "",
 		Phone:      "",
 		Country:    "",
 		City:       "",
