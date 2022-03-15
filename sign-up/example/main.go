@@ -25,7 +25,7 @@ func main() {
 		UName:      "Qing Miao",
 		Email:      "4987346@qq.com",
 		Name:       "A boy has no name",
-		Password:   "pa55a@aD20TTTTT",
+		Password:   "*pa55a@aD20TTTTT",
 		Regtime:    "",
 		Official:   "F",
 		Phone:      "1",
