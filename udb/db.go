@@ -209,9 +209,9 @@ func (db *UDB) LoadAnyUser(uname string) (*usr.User, bool, error) {
 	uA, okA, errA := db.LoadUser(uname, true)
 	uD, okD, errD := db.LoadUser(uname, false)
 	var u *usr.User
-	if uA != nil {
+	if okA {
 		u = uA
-	} else if uD != nil {
+	} else if okD {
 		u = uD
 	}
 	var err error
@@ -278,9 +278,9 @@ func (db *UDB) LoadAnyUserByUniProp(propName, propVal string) (*usr.User, bool, 
 	uA, okA, errA := db.LoadUserByUniProp(propName, propVal, true)
 	uD, okD, errD := db.LoadUserByUniProp(propName, propVal, false)
 	var u *usr.User
-	if uA != nil {
+	if okA {
 		u = uA
-	} else if uD != nil {
+	} else if okD {
 		u = uD
 	}
 	var err error
