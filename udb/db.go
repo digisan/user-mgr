@@ -383,10 +383,10 @@ func (db *UDB) OfficializeUser(uname string, flag bool) (*usr.User, bool, error)
 }
 
 func (db *UDB) SetUserBoolField(uname, field string, flag bool) (*usr.User, bool, error) {
-	u, ok, err := db.LoadUser(uname, !flag)
+	val := strings.ToUpper(fmt.Sprint(flag))[:1]
+	u, ok, err := db.LoadAnyUser(uname)
 	if err == nil {
 		if ok {
-			val := strings.ToUpper(fmt.Sprint(flag))[:1]
 			switch field {
 			case "Active", "active", "ACTIVE":
 				u.Active = val
@@ -397,10 +397,7 @@ func (db *UDB) SetUserBoolField(uname, field string, flag bool) (*usr.User, bool
 			}
 			return u, true, db.UpdateUser(u)
 		}
-		if !ok {
-			u, _, _ = db.LoadAnyUser(uname)
-			return u, false, fmt.Errorf("no action applied to [%s]", uname)
-		}
+		return nil, false, fmt.Errorf("couldn't find [%s] for setting [%s]", uname, field)
 	}
 	return nil, false, err
 }
