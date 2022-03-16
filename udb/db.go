@@ -198,7 +198,7 @@ func (db *UDB) LoadUser(uname string, active bool) (*usr.User, bool, error) {
 		}
 		return nil
 	})
-	return u, u.Email != "", err
+	return u, err == nil && u.Email != "", err
 }
 
 func (db *UDB) LoadActiveUser(uname string) (*usr.User, bool, error) {
@@ -220,7 +220,7 @@ func (db *UDB) LoadAnyUser(uname string) (*usr.User, bool, error) {
 	} else if errD != nil {
 		err = errD
 	}
-	return u, okA || okD, err
+	return u, err == nil && (okA || okD), err
 }
 
 func (db *UDB) LoadUserByUniProp(propName, propVal string, active bool) (*usr.User, bool, error) {
@@ -265,7 +265,7 @@ func (db *UDB) LoadUserByUniProp(propName, propVal string, active bool) (*usr.Us
 	})
 	if len(users) > 0 {
 		u = users[0]
-		return u, true, err
+		return u, err == nil, err
 	}
 	return u, false, err
 }
@@ -289,7 +289,7 @@ func (db *UDB) LoadAnyUserByUniProp(propName, propVal string) (*usr.User, bool, 
 	} else if errD != nil {
 		err = errD
 	}
-	return u, okA || okD, err
+	return u, err == nil && (okA || okD), err
 }
 
 func (db *UDB) RemoveUser(uname string, lock, rmCache bool) error {
@@ -395,7 +395,8 @@ func (db *UDB) SetUserBoolField(uname, field string, flag bool) (*usr.User, bool
 			default:
 				lk.FailOnErr("%v", fmt.Errorf("[%s] is unsupported setting BoolField", field))
 			}
-			return u, true, db.UpdateUser(u)
+			err = db.UpdateUser(u)
+			return u, err == nil, err
 		}
 		return nil, false, fmt.Errorf("couldn't find [%s] for setting [%s]", uname, field)
 	}
