@@ -16,7 +16,7 @@ func TestFieldValue(t *testing.T) {
 			UName:    "unique-user-name",
 			Email:    "hello@abc.com",
 			Password: "123456789a",
-			Key:      [16]byte{},
+			key:      [16]byte{},
 		},
 		Profile{
 			Name:       "test-name",
@@ -63,7 +63,7 @@ func TestUser(t *testing.T) {
 			UName:    "unique-user-name",
 			Email:    "hello@abc.com",
 			Password: "123456789a",
-			Key:      [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9},
+			key:      [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
 		},
 		Profile{
 			Name:       "test-name",
@@ -99,7 +99,7 @@ func TestUser(t *testing.T) {
 	// user.Avatar = ava
 
 	info, key := user.Marshal()
-	fmt.Println("user.key", user.Key)
+	fmt.Println("user.key", user.key)
 
 	fmt.Println()
 
@@ -113,9 +113,9 @@ func TestUser(t *testing.T) {
 	fmt.Println(user1)
 
 	fmt.Println("user == user1 :", user == user1)
-	fmt.Println("reflect.DeepEqual(*user, *user1) :", reflect.DeepEqual(user.Core, user1.Core))
-	fmt.Println("reflect.DeepEqual(*user, *user1) :", reflect.DeepEqual(user.Profile, user1.Profile))
-	fmt.Println("reflect.DeepEqual(*user, *user1) :", reflect.DeepEqual(user.Admin, user1.Admin))
+	fmt.Println("reflect.DeepEqual(*user.COre, *user1.Core) :", reflect.DeepEqual(user.Core, user1.Core))
+	fmt.Println("reflect.DeepEqual(*user.Profile, *user1.Profile) :", reflect.DeepEqual(user.Profile, user1.Profile))
+	fmt.Println("reflect.DeepEqual(*user.Admin, *user1.Admin) :", reflect.DeepEqual(user.Admin, user1.Admin))
 	lk.FailOnErrWhen(!reflect.DeepEqual(*user, *user1), "%v", fmt.Errorf("Marshal-Unmarshal ERROR"))
 }
 

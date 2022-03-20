@@ -36,6 +36,7 @@ const (
 	MOK_UName
 	MOK_Email
 	MOK_Password
+	MOK_Key
 	// Profile
 	MOK_Name
 	MOK_Phone
@@ -63,10 +64,8 @@ const (
 
 // db value order
 const (
-	// Core
-	MOV_Key int = iota
 	// Profile
-	MOV_Avatar
+	MOV_Avatar int = iota
 	//
 	MOV_END
 )
@@ -77,6 +76,7 @@ func (u *User) KeyFieldAddr(mok int) interface{} {
 		MOK_UName:    &u.UName,
 		MOK_Email:    &u.Email,
 		MOK_Password: &u.Password,
+		MOK_Key:      &u.key,
 		// Profile
 		MOK_Name:       &u.Name,
 		MOK_Phone:      &u.Phone,
@@ -105,8 +105,6 @@ func (u *User) KeyFieldAddr(mok int) interface{} {
 
 func (u *User) ValFieldAddr(mov int) interface{} {
 	mFldAddr := map[int]interface{}{
-		// Core
-		MOV_Key: &u.Key,
 		// Profile
 		MOV_Avatar: &u.Avatar,
 	}
@@ -162,9 +160,7 @@ func (u *User) Marshal() (forKey, forValue []byte) {
 }
 
 func (u *User) Unmarshal(dbKey, dbVal []byte) {
-	if dbVal != nil {
-		u.Key = *(*[16]byte)(dbVal[:16])
-	}
+
 	params := []struct {
 		in        []byte
 		fnFldAddr func(int) interface{}
@@ -180,10 +176,20 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 	}
 	for idx, param := range params {
 		if len(param.in) > 0 {
-			for i, seg := range bytes.Split(param.in, []byte(SEP)) {
+
+			var segs [][]byte
+
+			if idx == 0 {
+				segs = bytes.Split(param.in, []byte(SEP))
+				u.key = *(*[16]byte)(segs[MOK_Key])
+			} else if idx == 1 {
+				segs = [][]byte{param.in} // dbVal is one whole block
+			}
+
+			for i, seg := range segs {
 				if i == MOK_Password {
-					if u.Key != [16]byte{} {
-						u.Password = tool.Decrypt(seg, u.Key[:])
+					if u.key != [16]byte{} {
+						u.Password = tool.Decrypt(seg, u.key[:])
 						continue
 					}
 				}

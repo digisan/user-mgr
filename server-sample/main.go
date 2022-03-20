@@ -23,7 +23,6 @@ func login(c echo.Context) error {
 			UName:    c.FormValue("name"),
 			Email:    c.FormValue("name"),
 			Password: "*pa55a@aD20TTTTT",
-			Key:      [16]byte{},
 		},
 		usr.Profile{
 			Name:       "",

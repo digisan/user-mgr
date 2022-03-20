@@ -37,7 +37,6 @@ func TestOpen(t *testing.T) {
 			UName:    "unique-user-name",
 			Email:    "hello@abc.com",
 			Password: "123456789a",
-			Key:      [16]byte{},
 		},
 		usr.Profile{
 			Name:       "test-name",

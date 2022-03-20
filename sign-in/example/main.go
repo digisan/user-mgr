@@ -22,7 +22,6 @@ func main() {
 			UName:    "Qing Miao",
 			Email:    "4987346@qq.com",
 			Password: "*pa55a@aD20TTTTT",
-			Key:      [16]byte{},
 		},
 		usr.Profile{
 			Name:       "A boy has no name",

@@ -23,7 +23,6 @@ func main() {
 			UName:    "QMiao",
 			Email:    "cdutwhu@outlook.com",
 			Password: "",
-			Key:      [16]byte{},
 		},
 		usr.Profile{
 			Name:       "",

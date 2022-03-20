@@ -12,7 +12,7 @@ func TestClaims(t *testing.T) {
 			UName:    "unique-user-name",
 			Email:    "hello@abc.com",
 			Password: "123456789a",
-			Key:      [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9},
+			key:      [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9},
 		},
 		Profile{
 			Name:       "test-name",
@@ -53,7 +53,7 @@ func TestClaims(t *testing.T) {
 			UName:    "unique-user-name",
 			Email:    "hello@abc.com",
 			Password: "123456789a",
-			Key:      [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9},
+			key:      [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9},
 		},
 		Profile{
 			Name:       "test-name",
