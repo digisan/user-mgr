@@ -84,7 +84,7 @@ func VerifyCode(uname, incode string) (*usr.User, error) {
 
 	val, ok := mUserCodeTm.Load(uname)
 	if !ok {
-		return nil, fmt.Errorf("no email code exists")
+		return nil, fmt.Errorf("there is no email verification code for [%s]", uname)
 	}
 
 	ctu := val.(struct {

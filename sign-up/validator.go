@@ -49,7 +49,7 @@ var (
 	mFieldValErr = map[string]func(t, v interface{}) error{
 		vf.Active:     func(t, v interface{}) error { return fEf("active status: 'T'/'F' for true/false") },
 		vf.UName:      func(t, v interface{}) error { return fEf("[%v] is already existing", v) },
-		vf.Email:      func(t, v interface{}) error { return fEf("invalid email format") },
+		vf.Email:      func(t, v interface{}) error { return fEf("invalid email format OR [%v] is already registered") },
 		vf.Name:       func(t, v interface{}) error { return fEf("invalid user real name") },
 		vf.Password:   func(t, v interface{}) error { return fEf("password rule: >=%d letter with UPPER,0-9,symbol", PwdLen) },
 		vf.Regtime:    func(t, v interface{}) error { return fEf("register time is mandatory when signing up successfully") },
