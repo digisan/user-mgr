@@ -101,7 +101,8 @@ func (db *UDB) RmOnline(uname string) (err error) {
 	db.Lock()
 	defer db.Unlock()
 
-	err = db.dbOnline.Update(func(txn *badger.Txn) (err error) {
+	// we need err in defer()
+	err = db.dbOnline.Update(func(txn *badger.Txn) error {
 		return txn.Delete([]byte(uname))
 	})
 	return
@@ -265,7 +266,7 @@ func (db *UDB) LoadUserByUniProp(propName, propVal string, active bool) (*usr.Us
 	})
 	if len(users) > 0 {
 		u = users[0]
-		return u, err == nil, err
+		return u, err == nil && u.Email != "", err
 	}
 	return u, false, err
 }
@@ -312,17 +313,17 @@ func (db *UDB) RemoveUser(uname string, lock, rmCache bool) error {
 		[]byte("T" + usr.SEP + uname + usr.SEP),
 		[]byte("F" + usr.SEP + uname + usr.SEP),
 	}
-	return db.dbReg.Update(func(txn *badger.Txn) (err error) {
+	return db.dbReg.Update(func(txn *badger.Txn) error {
 		it := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer it.Close()
 		for _, prefix := range prefixList {
 			if it.Seek(prefix); it.ValidForPrefix(prefix) {
-				if err = txn.Delete(it.Item().KeyCopy(nil)); err != nil {
+				if err := txn.Delete(it.Item().KeyCopy(nil)); err != nil {
 					return err
 				}
 			}
 		}
-		return err
+		return nil
 	})
 }
 

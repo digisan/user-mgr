@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
-	"reflect"
 	"strings"
 	"time"
 
@@ -16,106 +15,33 @@ import (
 
 // if modified, change 1. MOK_***, 2. mFldAddr, 3. 'auto-tags.go', 4. 'validator.go' in sign-up.
 type User struct {
-	Active     string `json:"active" validate:"active"`         // "T" "F"
-	UName      string `json:"uname" validate:"required,uname"`  // unique, registered name
-	Email      string `json:"email" validate:"required,email"`  // unique
-	Name       string `json:"name" validate:"required,name"`    // real name
-	Password   string `json:"password" validate:"required,pwd"` // <-- a custom validation rule, plaintext!
-	Regtime    string `json:"regtime" validate:"regtime"`       // register time
-	Official   string `json:"official" validate:"official"`     // official account? "T" "F"
-	Phone      string `json:"phone" validate:"phone"`           // optional
-	Country    string `json:"country" validate:"country"`       // optional
-	City       string `json:"city" validate:"city"`             // optional
-	Addr       string `json:"addr" validate:"addr"`             // optional
-	SysRole    string `json:"role" validate:"sysRole"`          // optional
-	MemLevel   string `json:"level" validate:"memLevel"`        // optional
-	MemExpire  string `json:"expire" validate:"memExpire"`      // optional
-	NationalID string `json:"nationalid" validate:"nationalid"` // optional
-	Gender     string `json:"gender" validate:"gender"`         // optional
-	DOB        string `json:"dob" validate:"dob"`               // optional
-	Position   string `json:"position" validate:"position"`     // optional
-	Title      string `json:"title" validate:"title"`           // optional
-	Employer   string `json:"employer" validate:"employer"`     // optional
-	Bio        string `json:"bio" validate:"bio"`               // optional
-	Tags       string `json:"tags" validate:"tags"`             // optional // linked by '^'
-	AvatarType string `json:"avatartype" validate:"avatartype"` // optional
-	key        [16]byte
-	Avatar     []byte `json:"avatar" validate:"avatar"` // optional
-}
-
-func ListUserField() (fields []string) {
-	typ := reflect.TypeOf(User{})
-	// fmt.Println("Type:", typ.Name(), "Kind:", typ.Kind())
-	for i := 0; i < typ.NumField(); i++ {
-		field := typ.Field(i)
-		fields = append(fields, field.Name)
-	}
-	return
-}
-
-func ListUserValidator() (tags []string) {
-	typ := reflect.TypeOf(User{})
-	for i := 0; i < typ.NumField(); i++ {
-		field := typ.Field(i)
-		tag := field.Tag.Get("validate")
-		// fmt.Printf("%d. %v (%v), tag: '%v'\n", i+1, field.Name, field.Type.Name(), tag)
-		tags = append(tags, strings.Split(tag, ",")...)
-	}
-	return str.FM(str.MkSet(tags...),
-		func(i int, e string) bool {
-			return len(e) > 0 && str.NotIn(e, "required", "email") // exclude internal validate tags
-		},
-		nil,
-	)
-}
-
-func (u *User) FieldValue(field string) interface{} {
-	r := reflect.ValueOf(u).Elem()
-	f := reflect.Indirect(r).FieldByName(field)
-	return f.Interface()
+	Core
+	Profile
+	Admin
 }
 
 func (u User) String() string {
-	if u.UName != "" {
-		sb := strings.Builder{}
-		t, v := reflect.TypeOf(u), reflect.ValueOf(u)
-		for i := 0; i < t.NumField(); i++ {
-			fld, val := t.Field(i), v.Field(i)
-			sb.WriteString(fmt.Sprintf("%-12s %v\n", fld.Name+":", val.String()))
-		}
-		return sb.String()
+	strCore := u.Core.String()
+	if strings.Contains(strCore, "Empty") {
+		return "[Empty User]\n"
 	}
-	return "[Empty User]\n"
+	return fmt.Sprintf("%s%s%s\n", strCore, u.Profile.String(), u.Admin.String())
 }
-
-// [16]byte
-func (u *User) GenKey() [16]byte {
-	if u.key == [16]byte{} {
-		u.key = *(*[16]byte)([]byte(fmt.Sprintf("%d", time.Now().UnixNano())[3:19]))
-	}
-	return u.key
-}
-
-const (
-	SEP     = "^^"
-	SEP_TAG = "^"
-)
 
 // db key order
 const (
+	// Admin
 	MOK_Active int = iota
+	// Core
 	MOK_UName
 	MOK_Email
+	MOK_Password
+	// Profile
 	MOK_Name
-	MOK_Regtime
-	MOK_Official
 	MOK_Phone
 	MOK_Country
 	MOK_City
 	MOK_Addr
-	MOK_SysRole
-	MOK_MemLevel
-	MOK_MemExpire
 	MOK_NationalID
 	MOK_Gender
 	MOK_DOB
@@ -123,27 +49,40 @@ const (
 	MOK_Title
 	MOK_Employer
 	MOK_Bio
-	MOK_Tags
 	MOK_AvatarType
-	MOK_PwdBuf
+	// Admin
+	MOK_Regtime
+	MOK_SysRole
+	MOK_MemLevel
+	MOK_MemExpire
+	MOK_Official
+	MOK_Tags
+	//
 	MOK_END
+)
+
+// db value order
+const (
+	// Core
+	MOV_Key int = iota
+	// Profile
+	MOV_Avatar
+	//
+	MOV_END
 )
 
 func (u *User) KeyFieldAddr(mok int) interface{} {
 	mFldAddr := map[int]interface{}{
-		MOK_Active:     &u.Active,
-		MOK_UName:      &u.UName,
-		MOK_Email:      &u.Email,
+		// Core
+		MOK_UName:    &u.UName,
+		MOK_Email:    &u.Email,
+		MOK_Password: &u.Password,
+		// Profile
 		MOK_Name:       &u.Name,
-		MOK_Regtime:    &u.Regtime,
-		MOK_Official:   &u.Official,
 		MOK_Phone:      &u.Phone,
 		MOK_Country:    &u.Country,
 		MOK_City:       &u.City,
 		MOK_Addr:       &u.Addr,
-		MOK_SysRole:    &u.SysRole,
-		MOK_MemLevel:   &u.MemLevel,
-		MOK_MemExpire:  &u.MemExpire,
 		MOK_NationalID: &u.NationalID,
 		MOK_Gender:     &u.Gender,
 		MOK_DOB:        &u.DOB,
@@ -151,23 +90,24 @@ func (u *User) KeyFieldAddr(mok int) interface{} {
 		MOK_Title:      &u.Title,
 		MOK_Employer:   &u.Employer,
 		MOK_Bio:        &u.Bio,
-		MOK_Tags:       &u.Tags,
 		MOK_AvatarType: &u.AvatarType,
-		MOK_PwdBuf:     &u.Password,
+		// Admin
+		MOK_Active:    &u.Active,
+		MOK_Regtime:   &u.Regtime,
+		MOK_SysRole:   &u.SysRole,
+		MOK_MemLevel:  &u.MemLevel,
+		MOK_MemExpire: &u.MemExpire,
+		MOK_Official:  &u.Official,
+		MOK_Tags:      &u.Tags,
 	}
 	return mFldAddr[mok]
 }
 
-// db value order
-const (
-	MOV_Key int = iota
-	MOV_Avatar
-	MOV_END
-)
-
 func (u *User) ValFieldAddr(mov int) interface{} {
 	mFldAddr := map[int]interface{}{
-		MOV_Key:    &u.key,
+		// Core
+		MOV_Key: &u.Key,
+		// Profile
 		MOV_Avatar: &u.Avatar,
 	}
 	return mFldAddr[mov]
@@ -201,7 +141,7 @@ func (u *User) Marshal() (forKey, forValue []byte) {
 			if i > 0 {
 				sb.WriteString(SEP)
 			}
-			if i == MOK_PwdBuf {
+			if i == MOK_Password {
 				sb.Write(tool.Encrypt(u.Password, key[:])) // from u.Password
 				continue
 			}
@@ -223,7 +163,7 @@ func (u *User) Marshal() (forKey, forValue []byte) {
 
 func (u *User) Unmarshal(dbKey, dbVal []byte) {
 	if dbVal != nil {
-		u.key = *(*[16]byte)(dbVal[:16])
+		u.Key = *(*[16]byte)(dbVal[:16])
 	}
 	params := []struct {
 		in        []byte
@@ -241,9 +181,9 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 	for idx, param := range params {
 		if len(param.in) > 0 {
 			for i, seg := range bytes.Split(param.in, []byte(SEP)) {
-				if i == MOK_PwdBuf {
-					if u.key != [16]byte{} {
-						u.Password = tool.Decrypt(seg, u.key[:])
+				if i == MOK_Password {
+					if u.Key != [16]byte{} {
+						u.Password = tool.Decrypt(seg, u.Key[:])
 						continue
 					}
 				}

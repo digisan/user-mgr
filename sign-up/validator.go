@@ -94,7 +94,7 @@ func TransInvalidErr(user *usr.User, err error) error {
 	field, tag := usr.ErrField(err)
 	fn, ok := mFieldValErr[tag]
 	if ok {
-		return fn(tag, user.FieldValue(field))
+		return fn(tag, usr.FieldValue(user, field))
 	}
 	lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("unknown field invalid error @ [%s]", field))
 	return nil

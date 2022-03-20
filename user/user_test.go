@@ -10,38 +10,44 @@ import (
 	lk "github.com/digisan/logkit"
 )
 
-func TestUserFieldValue(t *testing.T) {
+func TestFieldValue(t *testing.T) {
 	user := &User{
-		Active:     "T",
-		UName:      "unique-user-name",
-		Email:      "hello@abc.com",
-		Name:       "test-name",
-		Password:   "123456789a",
-		Regtime:    "",
-		Official:   "",
-		Phone:      "",
-		Country:    "",
-		City:       "",
-		Addr:       "",
-		SysRole:    "",
-		MemLevel:   "",
-		MemExpire:  "",
-		NationalID: "9876543210",
-		Gender:     "",
-		DOB:        "",
-		Position:   "professor",
-		Title:      "",
-		Employer:   "",
-		Bio:        "",
-		Tags:       "",
-		AvatarType: "image/png",
-		key:        [16]byte{},
-		Avatar:     []byte("******"),
+		Core{
+			UName:    "unique-user-name",
+			Email:    "hello@abc.com",
+			Password: "123456789a",
+			Key:      [16]byte{},
+		},
+		Profile{
+			Name:       "test-name",
+			Phone:      "",
+			Country:    "",
+			City:       "",
+			Addr:       "",
+			NationalID: "9876543210",
+			Gender:     "",
+			DOB:        "",
+			Position:   "professor",
+			Title:      "",
+			Employer:   "",
+			Bio:        "",
+			AvatarType: "image/png",
+			Avatar:     []byte("******"),
+		},
+		Admin{
+			Active:    "T",
+			SysRole:   "",
+			MemLevel:  "",
+			MemExpire: "",
+			Regtime:   "",
+			Official:  "",
+			Tags:      "",
+		},
 	}
 
-	fmt.Println(user.FieldValue("UName"))
+	fmt.Println(FieldValue(user, "UName"))
 	// fmt.Println(user.FieldValue("key")) // panic
-	fmt.Println(user.FieldValue("Avatar"))
+	fmt.Println(FieldValue(user, "Avatar"))
 
 	user.AddTags("abc", "def")
 	fmt.Println("tags:", user.GetTags())
@@ -51,32 +57,39 @@ func TestUserFieldValue(t *testing.T) {
 }
 
 func TestUser(t *testing.T) {
+
 	user := &User{
-		Active:     "T",
-		UName:      "unique-user-name",
-		Email:      "hello@abc.com",
-		Name:       "test-name",
-		Password:   "123456789a",
-		Regtime:    "",
-		Official:   "F",
-		Phone:      "",
-		Country:    "",
-		City:       "",
-		Addr:       "",
-		SysRole:    "",
-		MemLevel:   "",
-		MemExpire:  "",
-		NationalID: "9876543210",
-		Gender:     "",
-		DOB:        "",
-		Position:   "professor",
-		Title:      "",
-		Employer:   "",
-		Bio:        "",
-		Tags:       "",
-		AvatarType: "image/png",
-		key:        [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9},
-		Avatar:     []byte("******"),
+		Core{
+			UName:    "unique-user-name",
+			Email:    "hello@abc.com",
+			Password: "123456789a",
+			Key:      [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9},
+		},
+		Profile{
+			Name:       "test-name",
+			Phone:      "",
+			Country:    "",
+			City:       "",
+			Addr:       "",
+			NationalID: "9876543210",
+			Gender:     "",
+			DOB:        "",
+			Position:   "professor",
+			Title:      "",
+			Employer:   "",
+			Bio:        "",
+			AvatarType: "image/png",
+			Avatar:     []byte("******"),
+		},
+		Admin{
+			Active:    "T",
+			SysRole:   "",
+			MemLevel:  "",
+			MemExpire: "",
+			Regtime:   "",
+			Official:  "",
+			Tags:      "",
+		},
 	}
 
 	// ava := make([]byte, 0, 20000000)
@@ -86,7 +99,7 @@ func TestUser(t *testing.T) {
 	// user.Avatar = ava
 
 	info, key := user.Marshal()
-	fmt.Println("user.key", user.key)
+	fmt.Println("user.key", user.Key)
 
 	fmt.Println()
 
@@ -100,13 +113,15 @@ func TestUser(t *testing.T) {
 	fmt.Println(user1)
 
 	fmt.Println("user == user1 :", user == user1)
-	fmt.Println("reflect.DeepEqual(*user, *user1) :", reflect.DeepEqual(*user, *user1))
+	fmt.Println("reflect.DeepEqual(*user, *user1) :", reflect.DeepEqual(user.Core, user1.Core))
+	fmt.Println("reflect.DeepEqual(*user, *user1) :", reflect.DeepEqual(user.Profile, user1.Profile))
+	fmt.Println("reflect.DeepEqual(*user, *user1) :", reflect.DeepEqual(user.Admin, user1.Admin))
 	lk.FailOnErrWhen(!reflect.DeepEqual(*user, *user1), "%v", fmt.Errorf("Marshal-Unmarshal ERROR"))
 }
 
 func TestIterTags(t *testing.T) {
-	fmt.Println(ListUserField())
-	fmt.Println(ListUserValidator())
+	fmt.Println(ListField(User{}, User{}.Core, User{}.Profile, User{}.Admin))
+	fmt.Println(ListValidator(User{}, User{}.Core, User{}.Profile, User{}.Admin))
 }
 
 // *** Auto Generate Validate Field Tag Const *** //
@@ -121,15 +136,18 @@ func TestMakeUserFieldTag(t *testing.T) {
 	// r := regexp.MustCompile(`((required),?)|((email),?)`) // exclude default validator tags
 	r := regexp.MustCompile(`(required),?`)
 
-	typ := reflect.TypeOf(User{})
-	for i := 0; i < typ.NumField(); i++ {
-		field := typ.Field(i)
-		tag := field.Tag.Get(TAG)
-		// fmt.Printf("%d. %v (%v), tag: '%v'\n", i+1, field.Name, field.Type.Name(), tag)
-		tag = r.ReplaceAllString(tag, "")
-		if len(tag) > 0 {
-			line := fmt.Sprintf("\t%s = \"%s\"", field.Name, tag)
-			gio.MustAppendFile(file, []byte(line), true)
+	for _, obj := range []interface{}{Core{}, Profile{}, Admin{}} {
+		typ := reflect.TypeOf(obj)
+		for i := 0; i < typ.NumField(); i++ {
+			field := typ.Field(i)
+			tag := field.Tag.Get(TAG)
+			// fmt.Printf("%d. %v (%v), tag: '%v'\n", i+1, field.Name, field.Type.Name(), tag)
+			tag = r.ReplaceAllString(tag, "")
+			if len(tag) > 0 {
+				line := fmt.Sprintf("\t%s = \"%s\"", field.Name, tag)
+				gio.MustAppendFile(file, []byte(line), true)
+			}
 		}
 	}
+
 }

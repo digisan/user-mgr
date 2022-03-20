@@ -10,7 +10,7 @@ import (
 )
 
 type UserClaims struct {
-	User
+	Core
 	jwt.StandardClaims
 }
 
@@ -26,7 +26,7 @@ func TokenKey() string {
 // invoke in 'login'
 func MakeUserClaims(user *User) *UserClaims {
 	return &UserClaims{
-		*user,
+		user.Core,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
 		},

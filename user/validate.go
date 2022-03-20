@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	vTags           = ListUserValidator()
+	vTags           = ListValidator(User{}.Core, User{}.Profile, User{}.Admin)
 	mFieldValidator = &sync.Map{}
 )
 

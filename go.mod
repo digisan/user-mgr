@@ -4,11 +4,11 @@ go 1.18
 
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.2
-	github.com/digisan/go-generics v0.0.12
-	github.com/digisan/gotk v0.0.49
-	github.com/digisan/logkit v0.0.5
+	github.com/digisan/go-generics v0.1.0
+	github.com/digisan/gotk v0.0.50
+	github.com/digisan/logkit v0.0.6
 	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/labstack/echo/v4 v4.7.1
+	github.com/labstack/echo/v4 v4.7.2
 	gopkg.in/go-playground/validator.v9 v9.31.0
 	gopkg.in/mail.v2 v2.3.1
 )

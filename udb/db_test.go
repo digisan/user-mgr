@@ -11,52 +11,77 @@ import (
 
 const dbPath = "../data/user"
 
+func TestLoad(t *testing.T) {
+	OpenUserStorage(dbPath)
+	defer CloseUserStorage()
+
+	user0, ok, err := UserDB.LoadUser("unique-user-name", true)
+	lk.FailOnErr("%v", err)
+	fmt.Println(ok)
+
+	fmt.Println(user0)
+
+	user1, ok, err := UserDB.LoadUserByUniProp("uname", "unique-user-name", true)
+	lk.FailOnErr("%v", err)
+	fmt.Println(ok)
+
+	fmt.Println("=====", user0 == user1)
+}
+
 func TestOpen(t *testing.T) {
 	OpenUserStorage(dbPath)
 	defer CloseUserStorage()
 
 	u := &usr.User{
-		Active:     "F",
-		UName:      "unique-name",
-		Email:      "hello@abc.net",
-		Name:       "test-name",
-		Password:   "this is my password",
-		Regtime:    "",
-		Official:   "",
-		Phone:      "1234567",
-		Country:    "",
-		City:       "",
-		Addr:       "",
-		SysRole:    "",
-		MemLevel:   "",
-		MemExpire:  "",
-		NationalID: "",
-		Gender:     "",
-		DOB:        "",
-		Position:   "",
-		Title:      "",
-		Employer:   "",
-		Bio:        "",
-		Tags:       "",
-		AvatarType: "",
-		Avatar:     []byte(""),
+		usr.Core{
+			UName:    "unique-user-name",
+			Email:    "hello@abc.com",
+			Password: "123456789a",
+			Key:      [16]byte{},
+		},
+		usr.Profile{
+			Name:       "test-name",
+			Phone:      "111111111",
+			Country:    "",
+			City:       "",
+			Addr:       "",
+			NationalID: "9876543210",
+			Gender:     "",
+			DOB:        "",
+			Position:   "professor",
+			Title:      "",
+			Employer:   "",
+			Bio:        "",
+			AvatarType: "image/png",
+			Avatar:     []byte("******"),
+		},
+		usr.Admin{
+			Regtime:   "",
+			Active:    "T",
+			SysRole:   "",
+			MemLevel:  "",
+			MemExpire: "",
+			Official:  "",
+			Tags:      "",
+		},
 	}
+
 	lk.FailOnErr("%v", UserDB.UpdateUser(u))
 
 	fmt.Println("---------------------------")
 
-	u, done, err := UserDB.ActivateUser("unique-name", true)
+	u, done, err := UserDB.ActivateUser("unique-user-name", true)
 	lk.WarnOnErr("------: %v - %v", done, err)
 	fmt.Println(u)
 
 	fmt.Println()
 
-	u1, ok, err := UserDB.LoadActiveUserByUniProp("email", "hello@abc.net")
+	u1, ok, err := UserDB.LoadActiveUserByUniProp("email", "hello@abc.com")
 	fmt.Println(u1, ok, err)
 
 	fmt.Println()
 
-	u2, ok, err := UserDB.LoadActiveUserByUniProp("phone", "1234567")
+	u2, ok, err := UserDB.LoadActiveUserByUniProp("phone", "111111111")
 	fmt.Println(u2, ok, err)
 }
 
@@ -64,32 +89,15 @@ func TestRemove(t *testing.T) {
 	OpenUserStorage(dbPath)
 	defer CloseUserStorage()
 
-	lk.FailOnErr("%v", UserDB.RemoveUser("unique-name", true, true))
+	lk.FailOnErr("%v", UserDB.RemoveUser("unique-user-name", true, true))
 
-	u1, ok, err := UserDB.LoadActiveUserByUniProp("email", "hello@abc.net")
+	u1, ok, err := UserDB.LoadActiveUserByUniProp("email", "hello@abc.com")
 	fmt.Println(u1, ok, err)
 
 	fmt.Println()
 
-	u2, ok, err := UserDB.LoadActiveUserByUniProp("phone", "1234567")
+	u2, ok, err := UserDB.LoadActiveUserByUniProp("phone", "111111111")
 	fmt.Println(u2, ok, err)
-}
-
-func TestLoad(t *testing.T) {
-	OpenUserStorage(dbPath)
-	defer CloseUserStorage()
-
-	user0, ok, err := UserDB.LoadUser("unique-name", true)
-	lk.FailOnErr("%v", err)
-	fmt.Println(ok)
-
-	fmt.Println(user0)
-
-	user1, ok, err := UserDB.LoadUserByUniProp("uname", "unique-name", true)
-	lk.FailOnErr("%v", err)
-	fmt.Println(ok)
-
-	fmt.Println("=====", user0 == user1)
 }
 
 func TestListUsers(t *testing.T) {
@@ -113,8 +121,8 @@ func TestExisting(t *testing.T) {
 	OpenUserStorage(dbPath)
 	defer CloseUserStorage()
 
-	fmt.Println("---", UserDB.UserExists("unique-name", "", false))
-	fmt.Println("---", UserDB.UserExists("", "hello@abc.net", false))
+	fmt.Println("---", UserDB.UserExists("unique-user-name", "", false))
+	fmt.Println("---", UserDB.UserExists("", "hello@abc.com", false))
 }
 
 ///////////////////////////////////////////////////////////////

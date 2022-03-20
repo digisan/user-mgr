@@ -17,31 +17,39 @@ import (
 
 func login(c echo.Context) error {
 	// [POST] Form to fill user info
+
 	user := &usr.User{
-		Active:     "T",
-		UName:      c.FormValue("name"),
-		Email:      "hello@abc.com",
-		Name:       c.FormValue("name"),
-		Password:   "*pa55a@aD20TTTTT",
-		Regtime:    "",
-		Official:   "F",
-		Phone:      "",
-		Country:    "",
-		City:       "",
-		Addr:       "",
-		SysRole:    "",
-		MemLevel:   "",
-		MemExpire:  "",
-		NationalID: "",
-		Gender:     "",
-		DOB:        "",
-		Position:   "",
-		Title:      "",
-		Employer:   "",
-		Bio:        "",
-		Tags:       "",
-		AvatarType: "",
-		Avatar:     []byte(""),
+		usr.Core{
+			UName:    c.FormValue("name"),
+			Email:    c.FormValue("name"),
+			Password: "*pa55a@aD20TTTTT",
+			Key:      [16]byte{},
+		},
+		usr.Profile{
+			Name:       "",
+			Phone:      "",
+			Country:    "",
+			City:       "",
+			Addr:       "",
+			NationalID: "",
+			Gender:     "",
+			DOB:        "",
+			Position:   "",
+			Title:      "",
+			Employer:   "",
+			Bio:        "",
+			AvatarType: "",
+			Avatar:     []byte{},
+		},
+		usr.Admin{
+			Regtime:   "",
+			Active:    "T",
+			SysRole:   "",
+			MemLevel:  "",
+			MemExpire: "",
+			Official:  "F",
+			Tags:      "",
+		},
 	}
 
 	fmt.Println(user)
@@ -66,14 +74,14 @@ func accessible(c echo.Context) error {
 func restricted(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(*usr.UserClaims)
-	return c.String(http.StatusOK, "Welcome "+claims.Name+"!")
+	return c.String(http.StatusOK, "Welcome "+claims.UName+"!")
 }
 
 func logout(c echo.Context) error {
 	userTkn := c.Get("user").(*jwt.Token)
 	claims := userTkn.Claims.(*usr.UserClaims)
 	claims.DeleteToken()
-	return c.String(http.StatusOK, "See you "+claims.Name+"!")
+	return c.String(http.StatusOK, "See you "+claims.UName+"!")
 }
 
 func ValidateToken(next echo.HandlerFunc) echo.HandlerFunc {
