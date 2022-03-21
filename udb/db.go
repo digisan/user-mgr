@@ -248,7 +248,7 @@ func (db *UDB) LoadUserByUniProp(propName, propVal string, active bool) (*usr.Us
 
 	///////////////////////////////////////////////////
 
-	users, err := db.ListUsers(func(u *usr.User) bool {
+	users, err := db.ListUser(func(u *usr.User) bool {
 		flag := u.IsActive()
 		if !active {
 			flag = !u.IsActive()
@@ -327,7 +327,7 @@ func (db *UDB) RemoveUser(uname string, lock, rmCache bool) error {
 	})
 }
 
-func (db *UDB) ListUsers(filter func(*usr.User) bool) (users []*usr.User, err error) {
+func (db *UDB) ListUser(filter func(*usr.User) bool) (users []*usr.User, err error) {
 	db.Lock()
 	defer db.Unlock()
 
@@ -340,6 +340,9 @@ func (db *UDB) ListUsers(filter func(*usr.User) bool) (users []*usr.User, err er
 			u := &usr.User{}
 			u.Unmarshal(it.Item().Key(), nil)
 			if filter(u) {
+				{
+					u.Password = strings.Repeat("*", len(u.Password)) // hide real password
+				}
 				users = append(users, u)
 			}
 		}

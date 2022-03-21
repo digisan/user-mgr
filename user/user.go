@@ -218,7 +218,13 @@ func (u *User) IsActive() bool {
 }
 
 func (u *User) StampRegTime() {
-	u.Regtime = time.Now().UTC().Format(time.RFC3339)
+	u.Regtime = time.Now().Format(time.RFC3339)
+}
+
+func (u *User) SinceJoined() time.Duration {
+	t := &time.Time{}
+	t.UnmarshalText([]byte(u.Regtime))
+	return time.Since(*t)
 }
 
 func (u *User) GetTags() []string {

@@ -75,6 +75,12 @@ func main() {
 		return
 	}
 
+	// double check input before storing
+	if err := su.ChkInput(user); err != nil {
+		lk.WarnOnErr("%v", err)
+		return
+	}
+
 	// store into db
 	if err := su.Store(user); err != nil {
 		fmt.Println(err)

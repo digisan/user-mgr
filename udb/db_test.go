@@ -55,7 +55,7 @@ func TestOpen(t *testing.T) {
 			Avatar:     []byte("******"),
 		},
 		usr.Admin{
-			Regtime:   "",
+			Regtime:   time.Now().Format(time.RFC3339),
 			Active:    "T",
 			SysRole:   "",
 			MemLevel:  "",
@@ -99,20 +99,18 @@ func TestRemove(t *testing.T) {
 	fmt.Println(u2, ok, err)
 }
 
-func TestListUsers(t *testing.T) {
+func TestListUser(t *testing.T) {
 	OpenUserStorage(dbPath)
 	defer CloseUserStorage()
 
-	users, err := UserDB.ListUsers(func(u *usr.User) bool {
+	users, err := UserDB.ListUser(func(u *usr.User) bool {
 		return u.IsActive() || !u.IsActive()
 	})
 	lk.FailOnErr("%v", err)
 
 	for _, u := range users {
 		fmt.Println(u)
-		t := &time.Time{}
-		t.UnmarshalText([]byte(u.Regtime))
-		fmt.Println("been regstered for", time.Since(*t))
+		fmt.Printf("regstered for %v\n\n", u.SinceJoined())
 	}
 }
 
