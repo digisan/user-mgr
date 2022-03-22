@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/digisan/go-generics/i64"
 	"github.com/digisan/go-generics/str"
 	"github.com/digisan/user-mgr/tool"
 )
@@ -113,6 +114,22 @@ func (u *User) ValFieldAddr(mov int) interface{} {
 
 ////////////////////////////////////////////////////
 
+var secret = []int{
+	MOK_Email,
+	MOK_Password,
+	MOK_Name,
+	MOK_Phone,
+	MOK_Country,
+	MOK_City,
+	MOK_Addr,
+	MOK_NationalID,
+	MOK_Gender,
+	MOK_DOB,
+	MOK_Position,
+	MOK_Title,
+	MOK_Employer,
+}
+
 func (u *User) Marshal() (forKey, forValue []byte) {
 
 	key := u.GenKey()
@@ -133,14 +150,14 @@ func (u *User) Marshal() (forKey, forValue []byte) {
 			out:       &forValue,
 		},
 	}
-	for _, param := range params {
+	for ip, param := range params {
 		sb := &strings.Builder{}
 		for i := 0; i < param.end; i++ {
 			if i > 0 {
 				sb.WriteString(SEP)
 			}
-			if i == MOK_Password {
-				sb.Write(tool.Encrypt(u.Password, key[:])) // from u.Password
+			if ip == 0 && i64.In(i, secret...) {
+				sb.Write(tool.Encrypt((*param.fnFldAddr(i).(*string)), key[:]))
 				continue
 			}
 			switch v := param.fnFldAddr(i).(type) {
@@ -174,27 +191,27 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 			fnFldAddr: u.ValFieldAddr,
 		},
 	}
-	for idx, param := range params {
+	for ip, param := range params {
 		if len(param.in) > 0 {
 
 			var segs [][]byte
 
-			if idx == 0 {
+			if ip == 0 {
 				segs = bytes.Split(param.in, []byte(SEP))
 				u.key = *(*[16]byte)(segs[MOK_Key])
-			} else if idx == 1 {
+			} else if ip == 1 {
 				segs = [][]byte{param.in} // dbVal is one whole block
 			}
 
 			for i, seg := range segs {
-				if i == MOK_Password {
+				if (ip == 0 && i == MOK_END) || (ip == 1 && i == MOV_END) {
+					break
+				}
+				if ip == 0 && i64.In(i, secret...) {
 					if u.key != [16]byte{} {
-						u.Password = tool.Decrypt(seg, u.key[:])
+						*param.fnFldAddr(i).(*string) = tool.Decrypt(seg, u.key[:])
 						continue
 					}
-				}
-				if (idx == 0 && i == MOK_END) || (idx == 1 && i == MOV_END) {
-					break
 				}
 				switch v := param.fnFldAddr(i).(type) {
 				case *string:
