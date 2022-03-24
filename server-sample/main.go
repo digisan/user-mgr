@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	usr "github.com/digisan/user-mgr/user"
 	"github.com/golang-jwt/jwt"
@@ -25,28 +26,30 @@ func login(c echo.Context) error {
 			Password: "*pa55a@aD20TTTTT",
 		},
 		usr.Profile{
-			Name:       "",
-			Phone:      "",
-			Country:    "",
-			City:       "",
-			Addr:       "",
-			NationalID: "",
-			Gender:     "",
-			DOB:        "",
-			Position:   "",
-			Title:      "",
-			Employer:   "",
-			Bio:        "",
-			AvatarType: "",
-			Avatar:     []byte{},
+			Name:           "",
+			Phone:          "",
+			Country:        "",
+			City:           "",
+			Addr:           "",
+			PersonalIDType: "",
+			PersonalID:     "",
+			Gender:         "",
+			DOB:            "",
+			Position:       "",
+			Title:          "",
+			Employer:       "",
+			Bio:            "",
+			AvatarType:     "",
+			Avatar:         []byte{},
 		},
 		usr.Admin{
-			Regtime:   "",
-			Active:    "T",
+			Regtime:   time.Now().Truncate(time.Second),
+			Active:    true,
+			Certified: false,
+			Official:  false,
 			SysRole:   "",
 			MemLevel:  "",
-			MemExpire: "",
-			Official:  "F",
+			MemExpire: time.Time{},
 			Tags:      "",
 		},
 	}

@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"regexp"
 	"testing"
+	"time"
 
 	gio "github.com/digisan/gotk/io"
 	lk "github.com/digisan/logkit"
@@ -24,7 +25,7 @@ func TestFieldValue(t *testing.T) {
 			Country:    "",
 			City:       "",
 			Addr:       "",
-			NationalID: "9876543210",
+			PersonalID: "9876543210",
 			Gender:     "",
 			DOB:        "",
 			Position:   "professor",
@@ -35,12 +36,12 @@ func TestFieldValue(t *testing.T) {
 			Avatar:     []byte("******"),
 		},
 		Admin{
-			Active:    "T",
+			Active:    true,
 			SysRole:   "",
 			MemLevel:  "",
-			MemExpire: "",
-			Regtime:   "",
-			Official:  "",
+			MemExpire: time.Time{},
+			Regtime:   time.Now(),
+			Official:  false,
 			Tags:      "",
 		},
 	}
@@ -71,7 +72,7 @@ func TestUser(t *testing.T) {
 			Country:    "",
 			City:       "",
 			Addr:       "",
-			NationalID: "987654321011",
+			PersonalID: "987654321011",
 			Gender:     "",
 			DOB:        "",
 			Position:   "professor",
@@ -82,12 +83,12 @@ func TestUser(t *testing.T) {
 			Avatar:     []byte("******"),
 		},
 		Admin{
-			Active:    "T",
+			Active:    true,
 			SysRole:   "",
 			MemLevel:  "",
-			MemExpire: "",
-			Regtime:   "",
-			Official:  "",
+			MemExpire: time.Time{},
+			Regtime:   time.Now().Truncate(time.Second), // must Truncate, otherwise Unmarshal error
+			Official:  false,
 			Tags:      "",
 		},
 	}

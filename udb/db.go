@@ -387,15 +387,16 @@ func (db *UDB) OfficializeUser(uname string, flag bool) (*usr.User, bool, error)
 }
 
 func (db *UDB) SetUserBoolField(uname, field string, flag bool) (*usr.User, bool, error) {
-	val := strings.ToUpper(fmt.Sprint(flag))[:1]
 	u, ok, err := db.LoadAnyUser(uname)
 	if err == nil {
 		if ok {
 			switch field {
 			case "Active", "active", "ACTIVE":
-				u.Active = val
+				u.Active = flag
 			case "Official", "official", "OFFICIAL":
-				u.Official = val
+				u.Official = flag
+			case "Certified", "certified", "CERTIFIED":
+				u.Certified = flag
 			default:
 				lk.FailOnErr("%v", fmt.Errorf("[%s] is unsupported setting BoolField", field))
 			}

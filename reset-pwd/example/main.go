@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	lk "github.com/digisan/logkit"
 	rp "github.com/digisan/user-mgr/reset-pwd"
@@ -25,28 +26,30 @@ func main() {
 			Password: "",
 		},
 		usr.Profile{
-			Name:       "",
-			Phone:      "",
-			Country:    "",
-			City:       "",
-			Addr:       "",
-			NationalID: "",
-			Gender:     "",
-			DOB:        "",
-			Position:   "",
-			Title:      "",
-			Employer:   "",
-			Bio:        "",
-			AvatarType: "",
-			Avatar:     []byte{},
+			Name:           "",
+			Phone:          "",
+			Country:        "",
+			City:           "",
+			Addr:           "",
+			PersonalIDType: "",
+			PersonalID:     "",
+			Gender:         "",
+			DOB:            "",
+			Position:       "",
+			Title:          "",
+			Employer:       "",
+			Bio:            "",
+			AvatarType:     "",
+			Avatar:         []byte{},
 		},
 		usr.Admin{
-			Regtime:   "",
-			Active:    "",
+			Regtime:   time.Now().Truncate(time.Second),
+			Active:    true,
+			Certified: false,
+			Official:  false,
 			SysRole:   "",
 			MemLevel:  "",
-			MemExpire: "",
-			Official:  "",
+			MemExpire: time.Time{},
 			Tags:      "",
 		},
 	}

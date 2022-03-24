@@ -35,7 +35,7 @@ func (user *User) Validate(exclTags ...string) error {
 		}
 		fn := fnValidator(vTag) // [fn] must be valued here !
 		v.RegisterValidation(vTag, func(fl validator.FieldLevel) bool {
-			return fn(fl.Field().String())
+			return fn(fl.Field().Interface())
 		})
 	}
 	if err := v.Struct(user); err != nil {

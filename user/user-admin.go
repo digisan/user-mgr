@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 )
 
 type Admin struct {
-	Regtime   string `json:"regtime" validate:"regtime"`   // register time
-	Active    string `json:"active" validate:"active"`     // "T" "F"
-	SysRole   string `json:"role" validate:"sysRole"`      // optional
-	MemLevel  string `json:"level" validate:"memLevel"`    // optional
-	MemExpire string `json:"expire" validate:"memExpire"`  // optional
-	Official  string `json:"official" validate:"official"` // official account? "T" "F"
-	Tags      string `json:"tags" validate:"tags"`         // optional // linked by '^'
+	Regtime   time.Time `json:"regtime" validate:"regtime"`     // register time
+	Active    bool      `json:"active" validate:"active"`       // true/false
+	Certified bool      `json:"certified" validate:"certified"` // true/false
+	Official  bool      `json:"official" validate:"official"`   // official account? true/false
+	SysRole   string    `json:"role" validate:"sysRole"`        // optional
+	MemLevel  string    `json:"level" validate:"memLevel"`      // optional
+	MemExpire time.Time `json:"expire" validate:"memExpire"`    // optional
+	Tags      string    `json:"tags" validate:"tags"`           // optional, linked by '^^'
 }
 
 func (a Admin) String() string {
@@ -21,7 +23,7 @@ func (a Admin) String() string {
 	t, v := reflect.TypeOf(a), reflect.ValueOf(a)
 	for i := 0; i < t.NumField(); i++ {
 		fld, val := t.Field(i), v.Field(i)
-		sb.WriteString(fmt.Sprintf("%-12s %v\n", fld.Name+":", val.String()))
+		sb.WriteString(fmt.Sprintf("%-12s %v\n", fld.Name+":", val.Interface()))
 	}
 	return sb.String()
 }

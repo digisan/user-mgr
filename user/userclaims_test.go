@@ -3,6 +3,7 @@ package user
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestClaims(t *testing.T) {
@@ -15,28 +16,29 @@ func TestClaims(t *testing.T) {
 			key:      [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9},
 		},
 		Profile{
-			Name:       "test-name",
-			Phone:      "",
-			Country:    "",
-			City:       "",
-			Addr:       "",
-			NationalID: "9876543210",
-			Gender:     "",
-			DOB:        "",
-			Position:   "professor",
-			Title:      "",
-			Employer:   "",
-			Bio:        "",
-			AvatarType: "image/png",
-			Avatar:     []byte("******"),
+			Name:           "test-name",
+			Phone:          "",
+			Country:        "",
+			City:           "",
+			Addr:           "",
+			PersonalIDType: "",
+			PersonalID:     "9876543210",
+			Gender:         "",
+			DOB:            "",
+			Position:       "professor",
+			Title:          "",
+			Employer:       "",
+			Bio:            "",
+			AvatarType:     "image/png",
+			Avatar:         []byte("******"),
 		},
 		Admin{
-			Active:    "T",
+			Active:    true,
 			SysRole:   "",
 			MemLevel:  "",
-			MemExpire: "",
-			Regtime:   "",
-			Official:  "",
+			MemExpire: time.Time{},
+			Regtime:   time.Now(),
+			Official:  false,
 			Tags:      "",
 		},
 	}
@@ -61,7 +63,7 @@ func TestClaims(t *testing.T) {
 			Country:    "",
 			City:       "",
 			Addr:       "",
-			NationalID: "9876543210",
+			PersonalID: "9876543210",
 			Gender:     "",
 			DOB:        "",
 			Position:   "professor",
@@ -72,12 +74,12 @@ func TestClaims(t *testing.T) {
 			Avatar:     []byte("******"),
 		},
 		Admin{
-			Active:    "T",
+			Active:    true,
 			SysRole:   "",
 			MemLevel:  "",
-			MemExpire: "",
-			Regtime:   "",
-			Official:  "",
+			MemExpire: time.Time{},
+			Regtime:   time.Now(),
+			Official:  false,
 			Tags:      "",
 		},
 	}

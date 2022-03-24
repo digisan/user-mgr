@@ -23,7 +23,7 @@ func (c Core) String() string {
 		for i := 0; i < t.NumField(); i++ {
 			fld, val := t.Field(i), v.Field(i)
 			if str.NotIn(fld.Name, "Password", "key") {
-				sb.WriteString(fmt.Sprintf("%-12s %v\n", fld.Name+":", val.String()))
+				sb.WriteString(fmt.Sprintf("%-12s %v\n", fld.Name+":", val.Interface()))
 			}
 		}
 		return sb.String()

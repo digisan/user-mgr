@@ -11,6 +11,7 @@ import (
 
 	"github.com/digisan/go-generics/i64"
 	"github.com/digisan/go-generics/str"
+	lk "github.com/digisan/logkit"
 	"github.com/digisan/user-mgr/tool"
 )
 
@@ -44,7 +45,8 @@ const (
 	MOK_Country
 	MOK_City
 	MOK_Addr
-	MOK_NationalID
+	MOK_PersonalIDType
+	MOK_PersonalID
 	MOK_Gender
 	MOK_DOB
 	MOK_Position
@@ -79,19 +81,20 @@ func (u *User) KeyFieldAddr(mok int) interface{} {
 		MOK_Password: &u.Password,
 		MOK_Key:      &u.key,
 		// Profile
-		MOK_Name:       &u.Name,
-		MOK_Phone:      &u.Phone,
-		MOK_Country:    &u.Country,
-		MOK_City:       &u.City,
-		MOK_Addr:       &u.Addr,
-		MOK_NationalID: &u.NationalID,
-		MOK_Gender:     &u.Gender,
-		MOK_DOB:        &u.DOB,
-		MOK_Position:   &u.Position,
-		MOK_Title:      &u.Title,
-		MOK_Employer:   &u.Employer,
-		MOK_Bio:        &u.Bio,
-		MOK_AvatarType: &u.AvatarType,
+		MOK_Name:           &u.Name,
+		MOK_Phone:          &u.Phone,
+		MOK_Country:        &u.Country,
+		MOK_City:           &u.City,
+		MOK_Addr:           &u.Addr,
+		MOK_PersonalIDType: &u.PersonalIDType,
+		MOK_PersonalID:     &u.PersonalID,
+		MOK_Gender:         &u.Gender,
+		MOK_DOB:            &u.DOB,
+		MOK_Position:       &u.Position,
+		MOK_Title:          &u.Title,
+		MOK_Employer:       &u.Employer,
+		MOK_Bio:            &u.Bio,
+		MOK_AvatarType:     &u.AvatarType,
 		// Admin
 		MOK_Active:    &u.Active,
 		MOK_Regtime:   &u.Regtime,
@@ -122,7 +125,8 @@ var secret = []int{
 	MOK_Country,
 	MOK_City,
 	MOK_Addr,
-	MOK_NationalID,
+	MOK_PersonalIDType,
+	MOK_PersonalID,
 	MOK_Gender,
 	MOK_DOB,
 	MOK_Position,
@@ -162,11 +166,18 @@ func (u *User) Marshal() (forKey, forValue []byte) {
 			}
 			switch v := param.fnFldAddr(i).(type) {
 			case *string:
-				sb.Write([]byte(*v))
+				sb.WriteString(*v)
 			case *[]byte:
 				sb.Write(*v)
 			case *[16]byte:
 				sb.Write((*v)[:])
+			case *bool:
+				sb.WriteString(strings.ToUpper(fmt.Sprintf("%v", *v)[0:1]))
+			case *time.Time:
+				encoding, err := (*v).MarshalBinary()
+				// lk.Debug(" --------------- encoding len: %d", len(encoding))
+				lk.FailOnErr("%v", err)
+				sb.Write(encoding)
 			default:
 				panic("Marshal Error Type")
 			}
@@ -220,6 +231,17 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 					*v = seg
 				case *[16]byte:
 					*v = *(*[16]byte)(seg)
+				case *bool:
+					if seg[0] == 'T' {
+						*v = true
+					} else {
+						*v = false
+					}
+				case *time.Time:
+					// lk.Debug(" --------------- seg len: %d", len(seg))
+					t := &time.Time{}
+					lk.FailOnErr("%v @ %v", t.UnmarshalBinary(seg), seg)
+					*v = *t
 				default:
 					panic("Unmarshal Error Type")
 				}
@@ -231,16 +253,16 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 ///////////////////////////////////////////////////
 
 func (u *User) IsActive() bool {
-	return u.Active == "T"
+	return u.Active
 }
 
 func (u *User) StampRegTime() {
-	u.Regtime = time.Now().Format(time.RFC3339)
+	u.Regtime = time.Now()
 }
 
 func (u *User) SinceJoined() time.Duration {
 	t := &time.Time{}
-	t.UnmarshalText([]byte(u.Regtime))
+	t.UnmarshalText([]byte(u.Regtime.Format(time.RFC3339)))
 	return time.Since(*t)
 }
 

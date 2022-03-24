@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	lk "github.com/digisan/logkit"
 	su "github.com/digisan/user-mgr/sign-up"
@@ -27,28 +28,30 @@ func main() {
 			Password: "*pa55a@aD20TTTTT",
 		},
 		usr.Profile{
-			Name:       "A boy has no name",
-			Phone:      "11",
-			Country:    "",
-			City:       "",
-			Addr:       "",
-			NationalID: "",
-			Gender:     "",
-			DOB:        "",
-			Position:   "",
-			Title:      "",
-			Employer:   "",
-			Bio:        "",
-			AvatarType: "",
-			Avatar:     []byte("abcdefg**********"),
+			Name:           "A boy has no name",
+			Phone:          "111111111",
+			Country:        "",
+			City:           "",
+			Addr:           "",
+			PersonalIDType: "",
+			PersonalID:     "",
+			Gender:         "",
+			DOB:            "",
+			Position:       "",
+			Title:          "",
+			Employer:       "",
+			Bio:            "",
+			AvatarType:     "",
+			Avatar:         []byte("abcdefg**********"),
 		},
 		usr.Admin{
-			Regtime:   "",
-			Active:    "T",
+			Regtime:   time.Now().Truncate(time.Second),
+			Active:    true,
+			Certified: false,
+			Official:  false,
 			SysRole:   "admin",
 			MemLevel:  "1",
-			MemExpire: "",
-			Official:  "F",
+			MemExpire: time.Time{},
 			Tags:      "",
 		},
 	}
@@ -71,7 +74,7 @@ func main() {
 
 	// get [incode] from POST
 	if _, err := su.VerifyCode(user.UName, incode); err != nil {
-		fmt.Println("Sign-Up failed:", err)
+		lk.Warn("Sign-Up failed: ", err)
 		return
 	}
 
@@ -82,9 +85,7 @@ func main() {
 	}
 
 	// store into db
-	if err := su.Store(user); err != nil {
-		fmt.Println(err)
-	}
+	lk.FailOnErr("%v", su.Store(user))
 
-	fmt.Println("Sign-up OK")
+	lk.Log("Sign-up OK")
 }
