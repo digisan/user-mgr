@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/digisan/go-generics/str"
+	. "github.com/digisan/go-generics/v2"
 )
 
 type Core struct {
@@ -22,7 +22,7 @@ func (c Core) String() string {
 		t, v := reflect.TypeOf(c), reflect.ValueOf(c)
 		for i := 0; i < t.NumField(); i++ {
 			fld, val := t.Field(i), v.Field(i)
-			if str.NotIn(fld.Name, "Password", "key") {
+			if NotIn(fld.Name, "Password", "key") {
 				sb.WriteString(fmt.Sprintf("%-12s %v\n", fld.Name+":", val.Interface()))
 			}
 		}

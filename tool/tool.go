@@ -22,7 +22,7 @@ var (
 	mu       sync.Mutex
 )
 
-func CondOper(condition bool, ifTrue, ifFalse interface{}) interface{} {
+func CondOper(condition bool, ifTrue, ifFalse any) any {
 	if condition {
 		return ifTrue
 	}

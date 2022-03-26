@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/digisan/go-generics/str"
+	. "github.com/digisan/go-generics/v2"
 	lk "github.com/digisan/logkit"
 	. "github.com/digisan/user-mgr/relation/enum"
 	"github.com/digisan/user-mgr/udb"
@@ -81,19 +81,19 @@ var (
 )
 
 func (r *Rel) HasFollowing(uname string) bool {
-	return str.In(uname, r.following...)
+	return In(uname, r.following...)
 }
 
 func (r *Rel) HasFollower(uname string) bool {
-	return str.In(uname, r.follower...)
+	return In(uname, r.follower...)
 }
 
 func (r *Rel) HasBlocked(uname string) bool {
-	return str.In(uname, r.blocked...)
+	return In(uname, r.blocked...)
 }
 
 func (r *Rel) HasMuted(uname string) bool {
-	return str.In(uname, r.muted...)
+	return In(uname, r.muted...)
 }
 
 func RelMgr(uname string, flags ...int) *Rel {
@@ -132,13 +132,13 @@ func relAction(me string, doFlag int, whom string, lock bool) (err error) {
 				whomFollower := RelContent(whom, FOLLOWER)
 				did := false
 
-				if doFlag == DO_FOLLOW && str.NotIn(whom, meFollowing...) {
+				if doFlag == DO_FOLLOW && NotIn(whom, meFollowing...) {
 					meFollowing = append(meFollowing, whom)
 					whomFollower = append(whomFollower, me)
 					did = true
-				} else if doFlag == DO_UNFOLLOW && str.In(whom, meFollowing...) {
-					str.DelOneEle(&meFollowing, whom)
-					str.DelOneEle(&whomFollower, me)
+				} else if doFlag == DO_UNFOLLOW && In(whom, meFollowing...) {
+					DelOneEle(&meFollowing, whom)
+					DelOneEle(&whomFollower, me)
 					did = true
 				}
 				if did {
@@ -155,7 +155,7 @@ func relAction(me string, doFlag int, whom string, lock bool) (err error) {
 				blocked := RelContent(me, BLOCKED)
 				did := false
 
-				if doFlag == DO_BLOCK && str.NotIn(whom, blocked...) {
+				if doFlag == DO_BLOCK && NotIn(whom, blocked...) {
 					blocked = append(blocked, whom)
 					// other actions
 					{
@@ -163,8 +163,8 @@ func relAction(me string, doFlag int, whom string, lock bool) (err error) {
 					}
 					//
 					did = true
-				} else if doFlag == DO_UNBLOCK && str.In(whom, blocked...) {
-					str.DelOneEle(&blocked, whom)
+				} else if doFlag == DO_UNBLOCK && In(whom, blocked...) {
+					DelOneEle(&blocked, whom)
 					did = true
 				}
 				if did {
@@ -176,7 +176,7 @@ func relAction(me string, doFlag int, whom string, lock bool) (err error) {
 				muted := RelContent(me, MUTED)
 				did := false
 
-				if doFlag == DO_MUTE && str.NotIn(whom, muted...) {
+				if doFlag == DO_MUTE && NotIn(whom, muted...) {
 					muted = append(muted, whom)
 					// other actions
 					{
@@ -184,8 +184,8 @@ func relAction(me string, doFlag int, whom string, lock bool) (err error) {
 					}
 					//
 					did = true
-				} else if doFlag == DO_UNMUTE && str.In(whom, muted...) {
-					str.DelOneEle(&muted, whom)
+				} else if doFlag == DO_UNMUTE && In(whom, muted...) {
+					DelOneEle(&muted, whom)
 					did = true
 				}
 				if did {

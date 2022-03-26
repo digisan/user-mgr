@@ -93,7 +93,7 @@ func ValidateToken(next echo.HandlerFunc) echo.HandlerFunc {
 		if claims.ValidateToken(userTkn.Raw) {
 			return next(c)
 		}
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message": "invalid or expired jwt",
 		})
 	}

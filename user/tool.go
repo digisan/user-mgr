@@ -4,10 +4,10 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/digisan/go-generics/str"
+	. "github.com/digisan/go-generics/v2"
 )
 
-func ListField(objs ...interface{}) (fields []string) {
+func ListField(objs ...any) (fields []string) {
 	for _, obj := range objs {
 		typ := reflect.TypeOf(obj)
 		// fmt.Println("Type:", typ.Name(), "Kind:", typ.Kind())
@@ -19,13 +19,13 @@ func ListField(objs ...interface{}) (fields []string) {
 	return
 }
 
-func FieldValue(ptr interface{}, field string) interface{} {
+func FieldValue(ptr any, field string) any {
 	r := reflect.ValueOf(ptr).Elem()
 	f := reflect.Indirect(r).FieldByName(field)
 	return f.Interface()
 }
 
-func ListValidator(objs ...interface{}) (tags []string) {
+func ListValidator(objs ...any) (tags []string) {
 	for _, obj := range objs {
 		typ := reflect.TypeOf(obj)
 		for i := 0; i < typ.NumField(); i++ {
@@ -35,10 +35,10 @@ func ListValidator(objs ...interface{}) (tags []string) {
 			tags = append(tags, strings.Split(tag, ",")...)
 		}
 	}
-	return str.FM(str.MkSet(tags...),
+	tags = Settify(tags...)
+	return Filter(&tags,
 		func(i int, e string) bool {
-			return len(e) > 0 && str.NotIn(e, "required", "email") // exclude internal validate tags
+			return len(e) > 0 && NotIn(e, "required", "email") // exclude internal validate tags
 		},
-		nil,
 	)
 }

@@ -11,6 +11,11 @@ import (
 	lk "github.com/digisan/logkit"
 )
 
+func TestIterTags(t *testing.T) {
+	fmt.Println(ListField(User{}, User{}.Core, User{}.Profile, User{}.Admin))
+	fmt.Println(ListValidator(User{}, User{}.Core, User{}.Profile, User{}.Admin))
+}
+
 func TestFieldValue(t *testing.T) {
 	user := &User{
 		Core{
@@ -120,11 +125,6 @@ func TestUser(t *testing.T) {
 	lk.FailOnErrWhen(!reflect.DeepEqual(*user, *user1), "%v", fmt.Errorf("Marshal-Unmarshal ERROR"))
 }
 
-func TestIterTags(t *testing.T) {
-	fmt.Println(ListField(User{}, User{}.Core, User{}.Profile, User{}.Admin))
-	fmt.Println(ListValidator(User{}, User{}.Core, User{}.Profile, User{}.Admin))
-}
-
 // *** Auto Generate Validate Field Tag Const *** //
 func TestMakeUserFieldTag(t *testing.T) {
 	const pkg = "valfield"
@@ -137,7 +137,7 @@ func TestMakeUserFieldTag(t *testing.T) {
 	// r := regexp.MustCompile(`((required),?)|((email),?)`) // exclude default validator tags
 	r := regexp.MustCompile(`(required),?`)
 
-	for _, obj := range []interface{}{Core{}, Profile{}, Admin{}} {
+	for _, obj := range []any{Core{}, Profile{}, Admin{}} {
 		typ := reflect.TypeOf(obj)
 		for i := 0; i < typ.NumField(); i++ {
 			field := typ.Field(i)

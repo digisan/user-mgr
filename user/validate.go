@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/digisan/go-generics/str"
+	. "github.com/digisan/go-generics/v2"
 	lk "github.com/digisan/logkit"
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -16,20 +16,20 @@ var (
 	mFieldValidator = &sync.Map{}
 )
 
-func RegisterValidator(tag string, f func(fv interface{}) bool) {
+func RegisterValidator(tag string, f func(fv any) bool) {
 	mFieldValidator.Store(tag, f)
 }
 
-func fnValidator(tag string) func(fv interface{}) bool {
+func fnValidator(tag string) func(fv any) bool {
 	f, ok := mFieldValidator.Load(tag)
 	lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("missing [%s] validator", tag))
-	return f.(func(fv interface{}) bool)
+	return f.(func(fv any) bool)
 }
 
 func (user *User) Validate(exclTags ...string) error {
 	v := validator.New()
 	for _, vTag := range vTags {
-		if str.In(vTag, exclTags...) {
+		if In(vTag, exclTags...) {
 			v.RegisterValidation(vTag, func(fl validator.FieldLevel) bool { return true })
 			continue
 		}

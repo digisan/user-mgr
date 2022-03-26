@@ -91,7 +91,7 @@ func TestClaims(t *testing.T) {
 
 	fmt.Println()
 
-	mUserToken.Range(func(key, value interface{}) bool {
+	mUserToken.Range(func(key, value any) bool {
 		fmt.Println(key, value)
 		return true
 	})

@@ -9,8 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/digisan/go-generics/i64"
-	"github.com/digisan/go-generics/str"
+	. "github.com/digisan/go-generics/v2"
 	lk "github.com/digisan/logkit"
 	"github.com/digisan/user-mgr/tool"
 )
@@ -73,8 +72,8 @@ const (
 	MOV_END
 )
 
-func (u *User) KeyFieldAddr(mok int) interface{} {
-	mFldAddr := map[int]interface{}{
+func (u *User) KeyFieldAddr(mok int) any {
+	mFldAddr := map[int]any{
 		// Core
 		MOK_UName:    &u.UName,
 		MOK_Email:    &u.Email,
@@ -107,8 +106,8 @@ func (u *User) KeyFieldAddr(mok int) interface{} {
 	return mFldAddr[mok]
 }
 
-func (u *User) ValFieldAddr(mov int) interface{} {
-	mFldAddr := map[int]interface{}{
+func (u *User) ValFieldAddr(mov int) any {
+	mFldAddr := map[int]any{
 		// Profile
 		MOV_Avatar: &u.Avatar,
 	}
@@ -140,7 +139,7 @@ func (u *User) Marshal() (forKey, forValue []byte) {
 
 	params := []struct {
 		end       int
-		fnFldAddr func(int) interface{}
+		fnFldAddr func(int) any
 		out       *[]byte
 	}{
 		{
@@ -160,7 +159,7 @@ func (u *User) Marshal() (forKey, forValue []byte) {
 			if i > 0 {
 				sb.WriteString(SEP)
 			}
-			if ip == 0 && i64.In(i, secret...) {
+			if ip == 0 && In(i, secret...) {
 				sb.Write(tool.Encrypt((*param.fnFldAddr(i).(*string)), key[:]))
 				continue
 			}
@@ -191,7 +190,7 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 
 	params := []struct {
 		in        []byte
-		fnFldAddr func(int) interface{}
+		fnFldAddr func(int) any
 	}{
 		{
 			in:        dbKey,
@@ -218,7 +217,7 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 				if (ip == 0 && i == MOK_END) || (ip == 1 && i == MOV_END) {
 					break
 				}
-				if ip == 0 && i64.In(i, secret...) {
+				if ip == 0 && In(i, secret...) {
 					if u.key != [16]byte{} {
 						*param.fnFldAddr(i).(*string) = tool.Decrypt(seg, u.key[:])
 						continue
@@ -273,13 +272,13 @@ func (u *User) GetTags() []string {
 func (u *User) AddTags(tags ...string) {
 	tagsExs := strings.Split(u.Tags, SEP_TAG)
 	tags = append(tags, tagsExs...)
-	tags = str.MkSet(tags...)
+	tags = Settify(tags...)
 	u.Tags = strings.TrimSuffix(strings.Join(tags, SEP_TAG), SEP_TAG)
 }
 
 func (u *User) RmTags(tags ...string) {
 	tagsExs := strings.Split(u.Tags, SEP_TAG)
-	tags = str.Minus(tagsExs, tags)
+	tags = Minus(tagsExs, tags)
 	u.Tags = strings.TrimSuffix(strings.Join(tags, SEP_TAG), SEP_TAG)
 }
 
