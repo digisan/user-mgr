@@ -11,9 +11,6 @@ import (
 	usr "github.com/digisan/user-mgr/user"
 )
 
-// cache for fast fetching
-var tmpUserPool = &sync.Map{}
-
 var once sync.Once
 
 type UDB struct {
@@ -87,17 +84,6 @@ func (db *UDB) RefreshOnline(uname string) error {
 }
 
 func (db *UDB) RmOnline(uname string) (err error) {
-	// remove users cache when removing online user
-	defer func() {
-		if err == nil {
-			if u, ok, err := db.LoadAnyUser(uname); err == nil && ok {
-				tmpUserPool.Delete(u.UName)
-				tmpUserPool.Delete(u.Email)
-				tmpUserPool.Delete(u.Phone)
-			}
-		}
-	}()
-
 	db.Lock()
 	defer db.Unlock()
 
@@ -128,20 +114,11 @@ func (db *UDB) OnlineUsers() (unames []string, err error) {
 ///////////////////////////////////////////////////////////////
 
 func (db *UDB) UpdateUser(user *usr.User) (err error) {
-	// update cache
-	defer func() {
-		if err == nil {
-			tmpUserPool.Store(user.UName, user)
-			tmpUserPool.Store(user.Email, user)
-			tmpUserPool.Store(user.Phone, user)
-		}
-	}()
-
 	db.Lock()
 	defer db.Unlock()
 
 	// remove all existing items
-	if err = db.RemoveUser(user.UName, false, false); err != nil {
+	if err = db.RemoveUser(user.UName, false); err != nil {
 		return err
 	}
 	err = db.dbReg.Update(func(txn *badger.Txn) error {
@@ -155,30 +132,11 @@ func (db *UDB) UpdateUser(user *usr.User) (err error) {
 
 func (db *UDB) LoadUser(uname string, active bool) (*usr.User, bool, error) {
 
-	// cache fetch & update
-	if user, ok := tmpUserPool.Load(uname); ok {
-		if u := user.(*usr.User); u.Email != "" {
-			if (active && u.IsActive()) || (!active && !u.IsActive()) {
-				return u, ok, nil
-			}
-		}
-	}
+	db.Lock()
+	defer db.Unlock()
 
 	u := &usr.User{}
 	var err error
-
-	defer func() {
-		if err == nil && u.Email != "" {
-			tmpUserPool.Store(u.UName, u)
-			tmpUserPool.Store(u.Email, u)
-			tmpUserPool.Store(u.Phone, u)
-		}
-	}()
-
-	///////////////////////////////////////////////////
-
-	db.Lock()
-	defer db.Unlock()
 
 	prefix := []byte("T" + usr.SEP + uname + usr.SEP)
 	if !active {
@@ -226,27 +184,8 @@ func (db *UDB) LoadAnyUser(uname string) (*usr.User, bool, error) {
 
 func (db *UDB) LoadUserByUniProp(propName, propVal string, active bool) (*usr.User, bool, error) {
 
-	// cache fetch & update
-	if user, ok := tmpUserPool.Load(propVal); ok {
-		if u := user.(*usr.User); u.Email != "" {
-			if (active && u.IsActive()) || (!active && !u.IsActive()) {
-				return u, ok, nil
-			}
-		}
-	}
-
 	u := &usr.User{}
 	var err error
-
-	defer func() {
-		if err == nil && u.Email != "" {
-			tmpUserPool.Store(u.UName, u)
-			tmpUserPool.Store(u.Email, u)
-			tmpUserPool.Store(u.Phone, u)
-		}
-	}()
-
-	///////////////////////////////////////////////////
 
 	users, err := db.ListUser(func(u *usr.User) bool {
 		flag := u.IsActive()
@@ -293,16 +232,7 @@ func (db *UDB) LoadAnyUserByUniProp(propName, propVal string) (*usr.User, bool, 
 	return u, err == nil && (okA || okD), err
 }
 
-func (db *UDB) RemoveUser(uname string, lock, rmCache bool) error {
-	if rmCache {
-		defer func() {
-			if u, ok, err := db.LoadAnyUser(uname); err == nil && ok {
-				tmpUserPool.Delete(u.UName)
-				tmpUserPool.Delete(u.Email)
-				tmpUserPool.Delete(u.Phone)
-			}
-		}()
-	}
+func (db *UDB) RemoveUser(uname string, lock bool) error {
 
 	if lock {
 		db.Lock()

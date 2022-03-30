@@ -90,7 +90,7 @@ func TestRemove(t *testing.T) {
 	OpenUserStorage(dbPath)
 	defer CloseUserStorage()
 
-	lk.FailOnErr("%v", UserDB.RemoveUser("unique-user-name", true, true))
+	lk.FailOnErr("%v", UserDB.RemoveUser("unique-user-name", true))
 
 	u1, ok, err := UserDB.LoadActiveUserByUniProp("email", "hello@abc.com")
 	fmt.Println(u1, ok, err)
