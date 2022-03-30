@@ -36,9 +36,10 @@ func ListValidator(objs ...any) (tags []string) {
 		}
 	}
 	tags = Settify(tags...)
-	return Filter(&tags,
+	Filter(&tags,
 		func(i int, e string) bool {
 			return len(e) > 0 && NotIn(e, "required", "email") // exclude internal validate tags
 		},
 	)
+	return
 }
