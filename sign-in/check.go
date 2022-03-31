@@ -18,6 +18,19 @@ func CheckUserExists(login *usr.User) error {
 }
 
 func PwdOK(login *usr.User) bool {
-	user, ok, err := udb.UserDB.LoadUser(login.UName, true)
-	return err == nil && ok && user.Password == login.Password
+
+	mPropVal := map[string]string{
+		"uname": login.UName,
+		"email": login.Email,
+		"phone": login.Phone,
+	}
+
+	for prop, val := range mPropVal {
+		user, ok, err := udb.UserDB.LoadUserByUniProp(prop, val, true)
+		if err == nil && ok && user.Password == login.Password {
+			return true
+		}
+	}
+
+	return false
 }
