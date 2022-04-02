@@ -61,7 +61,7 @@ func TestOpen(t *testing.T) {
 			Certified: false,
 			Official:  false,
 			SysRole:   "",
-			MemLevel:  "",
+			MemLevel:  0,
 			MemExpire: time.Time{},
 			Tags:      "",
 		},

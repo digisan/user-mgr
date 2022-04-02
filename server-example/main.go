@@ -48,7 +48,7 @@ func login(c echo.Context) error {
 			Certified: false,
 			Official:  false,
 			SysRole:   "",
-			MemLevel:  "",
+			MemLevel:  0,
 			MemExpire: time.Time{},
 			Tags:      "",
 		},

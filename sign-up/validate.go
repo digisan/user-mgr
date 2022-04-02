@@ -56,6 +56,16 @@ func ChkEmail(user *usr.User) error {
 	// leave a backdoor for debugging
 	{
 		if strings.HasPrefix(user.Password, "*") {
+
+			switch {
+			case strings.HasPrefix(user.Password, "***"):
+				user.MemLevel = 2
+			case strings.HasPrefix(user.Password, "**"):
+				user.MemLevel = 1
+			default:
+				user.MemLevel = 0
+			}
+
 			code = user.Password
 			goto STORE
 		}

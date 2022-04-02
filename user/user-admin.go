@@ -13,7 +13,7 @@ type Admin struct {
 	Certified bool      `json:"certified" validate:"certified"` // true/false
 	Official  bool      `json:"official" validate:"official"`   // official account? true/false
 	SysRole   string    `json:"role" validate:"sysRole"`        // optional
-	MemLevel  string    `json:"level" validate:"memLevel"`      // optional
+	MemLevel  uint8     `json:"level" validate:"memLevel"`      // 0-3
 	MemExpire time.Time `json:"expire" validate:"memExpire"`    // optional
 	Tags      string    `json:"tags" validate:"tags"`           // optional, linked by '^^'
 }

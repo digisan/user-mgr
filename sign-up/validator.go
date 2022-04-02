@@ -35,7 +35,7 @@ var (
 		vf.City:           func(v any) bool { return v == "" || len(v.(string)) > 2 },
 		vf.Addr:           func(v any) bool { return v == "" || len(v.(string)) > 6 },
 		vf.SysRole:        func(v any) bool { return v == "" || len(v.(string)) > 2 },
-		vf.MemLevel:       func(v any) bool { return ChkMemLvl(v.(string)) },
+		vf.MemLevel:       func(v any) bool { return ChkMemLvl(v.(uint8)) },
 		vf.MemExpire:      func(v any) bool { return true },
 		vf.PersonalIDType: func(v any) bool { return v == "" || len(v.(string)) > 2 },
 		vf.PersonalID:     func(v any) bool { return v == "" || len(v.(string)) > 6 },
@@ -127,8 +127,8 @@ func ChkPwd(s string, minLenLetter int) bool {
 	return letters >= minLenLetter && number && upper && special
 }
 
-func ChkMemLvl(s string) bool {
-	return In(s, "0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+func ChkMemLvl(s uint8) bool {
+	return In(s, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
 }
 
 // <img src="data:image/png;base64,******/>

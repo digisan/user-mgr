@@ -48,7 +48,7 @@ func main() {
 			Certified: false,
 			Official:  false,
 			SysRole:   "",
-			MemLevel:  "",
+			MemLevel:  0,
 			MemExpire: time.Time{},
 			Tags:      "",
 		},

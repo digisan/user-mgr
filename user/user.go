@@ -177,6 +177,8 @@ func (u *User) Marshal() (forKey, forValue []byte) {
 				// lk.Debug(" --------------- encoding len: %d", len(encoding))
 				lk.FailOnErr("%v", err)
 				sb.Write(encoding)
+			case *uint8:
+				sb.Write([]byte{*v})
 			default:
 				panic("Marshal Error Type")
 			}
@@ -241,6 +243,8 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 					t := &time.Time{}
 					lk.FailOnErr("%v @ %v", t.UnmarshalBinary(seg), seg)
 					*v = *t
+				case *uint8:
+					*v = seg[0]
 				default:
 					panic("Unmarshal Error Type")
 				}

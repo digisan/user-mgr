@@ -47,7 +47,7 @@ func main() {
 			Certified: false,
 			Official:  false,
 			SysRole:   "admin",
-			MemLevel:  "1",
+			MemLevel:  1,
 			MemExpire: time.Time{},
 			Tags:      "",
 		},

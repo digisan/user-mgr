@@ -2,7 +2,6 @@ package udb
 
 import (
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -270,9 +269,6 @@ func (db *UDB) ListUser(filter func(*usr.User) bool) (users []*usr.User, err err
 			u := &usr.User{}
 			u.Unmarshal(it.Item().Key(), nil)
 			if filter(u) {
-				{
-					u.Password = strings.Repeat("*", len(u.Password)) // hide real password
-				}
 				users = append(users, u)
 			}
 		}

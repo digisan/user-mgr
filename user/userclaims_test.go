@@ -35,7 +35,7 @@ func TestClaims(t *testing.T) {
 		Admin{
 			Active:    true,
 			SysRole:   "",
-			MemLevel:  "",
+			MemLevel:  0,
 			MemExpire: time.Time{},
 			Regtime:   time.Now(),
 			Official:  false,
@@ -76,7 +76,7 @@ func TestClaims(t *testing.T) {
 		Admin{
 			Active:    true,
 			SysRole:   "",
-			MemLevel:  "",
+			MemLevel:  0,
 			MemExpire: time.Time{},
 			Regtime:   time.Now(),
 			Official:  false,
