@@ -17,6 +17,7 @@ func CheckUserExists(login *usr.User) error {
 	return fmt.Errorf("[%v] is not existing", login.UName)
 }
 
+// if successful, then update login user
 func PwdOK(login *usr.User) bool {
 
 	mPropVal := map[string]string{
@@ -28,6 +29,7 @@ func PwdOK(login *usr.User) bool {
 	for prop, val := range mPropVal {
 		user, ok, err := udb.UserDB.LoadUserByUniProp(prop, val, true)
 		if err == nil && ok && user.Password == login.Password {
+			login = user
 			return true
 		}
 	}
