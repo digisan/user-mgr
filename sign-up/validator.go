@@ -23,7 +23,7 @@ var (
 	mFieldValidator = map[string]func(any) bool{
 		vf.Active:         func(v any) bool { return true },
 		vf.UName:          func(v any) bool { return !udb.UserDB.UserExists(v.(string), "", false) },
-		vf.Email:          func(v any) bool { return !udb.UserDB.UserExists("", v.(string), false) },
+		vf.EmailDB:        func(v any) bool { return !udb.UserDB.UserExists("", v.(string), false) },
 		vf.Name:           func(v any) bool { return len(v.(string)) > 0 },
 		vf.Password:       func(v any) bool { return ChkPwd(v.(string), PwdLen) },
 		vf.AvatarType:     func(v any) bool { return ChkAvatarType(v.(string)) },
@@ -52,7 +52,8 @@ var (
 	mFieldValErr = map[string]func(t, v any) error{
 		vf.Active:         func(t, v any) error { return fEf("active status: true/false") },
 		vf.UName:          func(t, v any) error { return fEf("[%v] is already existing", v) },
-		vf.Email:          func(t, v any) error { return fEf("invalid email format OR [%v] is already registered") },
+		vf.Email:          func(t, v any) error { return fEf("[%v] is invalid email format", v) },
+		vf.EmailDB:        func(t, v any) error { return fEf("[%v] is already used by other user", v) },
 		vf.Name:           func(t, v any) error { return fEf("invalid user real name") },
 		vf.Password:       func(t, v any) error { return fEf("password rule: >=%d letter with UPPER,0-9,symbol", PwdLen) },
 		vf.Regtime:        func(t, v any) error { return fEf("register time is mandatory when signing up successfully") },

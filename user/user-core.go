@@ -10,9 +10,9 @@ import (
 )
 
 type Core struct {
-	UName    string `json:"uname" validate:"required,uname"`  // unique, registered name
-	Email    string `json:"email" validate:"required,email"`  // unique
-	Password string `json:"password" validate:"required,pwd"` // <-- a custom validation rule, plaintext!
+	UName    string `json:"uname" validate:"required,uname"`          // unique, registered name
+	Email    string `json:"email" validate:"required,email,email-db"` // unique
+	Password string `json:"password" validate:"required,pwd"`         // <-- a custom validation rule, plaintext!
 	key      [16]byte
 }
 

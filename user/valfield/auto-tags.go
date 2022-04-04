@@ -3,6 +3,7 @@ package valfield
 const (
 	UName          = "uname"
 	Email          = "email"
+	EmailDB        = "email-db"
 	Password       = "pwd"
 	Name           = "name"
 	Phone          = "phone"

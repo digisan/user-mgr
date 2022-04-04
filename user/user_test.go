@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
 	gio "github.com/digisan/gotk/io"
+	"github.com/digisan/gotk/strs"
 	lk "github.com/digisan/logkit"
 )
 
@@ -141,14 +143,19 @@ func TestMakeUserFieldTag(t *testing.T) {
 		typ := reflect.TypeOf(obj)
 		for i := 0; i < typ.NumField(); i++ {
 			field := typ.Field(i)
-			tag := field.Tag.Get(TAG)
+			tags := field.Tag.Get(TAG)
 			// fmt.Printf("%d. %v (%v), tag: '%v'\n", i+1, field.Name, field.Type.Name(), tag)
-			tag = r.ReplaceAllString(tag, "")
-			if len(tag) > 0 {
-				line := fmt.Sprintf("\t%s = \"%s\"", field.Name, tag)
-				gio.MustAppendFile(file, []byte(line), true)
+			tags = r.ReplaceAllString(tags, "")
+			if len(tags) > 0 {
+				for _, tag := range strings.Split(tags, ",") {
+					suffix := ""
+					if strings.Contains(tag, "-") {
+						suffix = strings.ToTitle(strs.SplitPartFromLast(tag, "-", 1))
+					}
+					line := fmt.Sprintf("\t%s = \"%s\"", field.Name+suffix, tag)
+					gio.MustAppendFile(file, []byte(line), true)
+				}
 			}
 		}
 	}
-
 }
