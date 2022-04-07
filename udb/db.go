@@ -304,6 +304,15 @@ func (db *UDB) UserExists(uname, email string, activeOnly bool) bool {
 	}
 }
 
+// only for unique value
+func (db *UDB) UsedByOther(uname_self, propName, propVal string) bool {
+	u, ok, err := db.LoadAnyUserByUniProp(propName, propVal)
+	if err == nil && ok && u != nil {
+		return uname_self != u.UName
+	}
+	return false
+}
+
 func (db *UDB) ActivateUser(uname string, flag bool) (*usr.User, bool, error) {
 	return db.SetUserBoolField(uname, "active", flag)
 }

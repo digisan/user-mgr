@@ -11,22 +11,35 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
+type ValRst struct {
+	OK      bool
+	FailErr error
+}
+
+func NewValRst(ok bool, failMsg string) ValRst {
+	if ok {
+		return ValRst{ok, nil}
+	}
+	return ValRst{ok, fmt.Errorf("%v", failMsg)}
+}
+
 var (
 	vTags           = ListValidator(User{}.Core, User{}.Profile, User{}.Admin)
 	mFieldValidator = &sync.Map{}
 )
 
-func RegisterValidator(tag string, f func(fv any) bool) {
+func RegisterValidator(tag string, f func(o, v any) ValRst) {
 	mFieldValidator.Store(tag, f)
 }
 
-func fnValidator(tag string) func(fv any) bool {
+func fnValidator(tag string) func(o, v any) ValRst {
 	f, ok := mFieldValidator.Load(tag)
 	lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("missing [%s] validator", tag))
-	return f.(func(fv any) bool)
+	return f.(func(o, v any) ValRst)
 }
 
 func (user *User) Validate(exclTags ...string) error {
+	mIfFail := make(map[string]error)
 	v := validator.New()
 	for _, vTag := range vTags {
 		if In(vTag, exclTags...) {
@@ -34,15 +47,25 @@ func (user *User) Validate(exclTags ...string) error {
 			continue
 		}
 		fn := fnValidator(vTag) // [fn] must be valued here !
-		v.RegisterValidation(vTag, func(fl validator.FieldLevel) bool {
-			return fn(fl.Field().Interface())
+		tag := vTag             // [tag] must be out of callback
+		err := v.RegisterValidation(vTag, func(fl validator.FieldLevel) bool {
+			rst := fn(user, fl.Field().Interface())
+			mIfFail[tag] = rst.FailErr
+			return rst.OK
 		})
+		lk.FailOnErr("%v", err)
 	}
-	if err := v.Struct(user); err != nil {
+	err := v.Struct(user)
+	if err != nil {
+		_, tag := ErrField(err)
 		for _, e := range err.(validator.ValidationErrors) {
+			if mIfFail[tag] != nil {
+				return mIfFail[tag]
+			}
 			return fmt.Errorf("%v", e)
 		}
 	}
+	lk.FailOnErr("%v", err)
 	return nil
 }
 

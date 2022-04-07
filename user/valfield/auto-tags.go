@@ -7,6 +7,7 @@ const (
 	Password       = "pwd"
 	Name           = "name"
 	Phone          = "phone"
+	PhoneDB        = "phone-db"
 	Country        = "country"
 	City           = "city"
 	Addr           = "addr"

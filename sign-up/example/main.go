@@ -39,7 +39,7 @@ func main() {
 			DOB:            "",
 			Position:       "",
 			Title:          "",
-			Employer:       "",
+			Employer:       "ABCDEFG",
 			Bio:            "",
 			AvatarType:     "",
 			Avatar:         []byte("abcdefg**********"),
@@ -52,11 +52,16 @@ func main() {
 			SysRole:   "admin",
 			MemLevel:  1,
 			MemExpire: time.Time{},
-			Tags:      "",
+			Tags:      "tag",
 		},
 	}
 
-	su.SetValidator(nil)
+	su.SetValidator(map[string]func(o any, v any) usr.ValRst{
+		vf.Employer: func(o, v any) usr.ValRst {
+			ok := len(v.(string)) > 6
+			return usr.NewValRst(ok, "at least 6 length for employer")
+		},
+	})
 
 	if err := su.ChkInput(user, vf.Phone); err != nil { // vf.Phone
 		lk.WarnOnErr("%v", err)

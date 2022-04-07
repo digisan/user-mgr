@@ -8,7 +8,7 @@ import (
 
 type Profile struct {
 	Name           string `json:"name" validate:"required,name"`            // real name
-	Phone          string `json:"phone" validate:"phone"`                   // optional
+	Phone          string `json:"phone" validate:"phone,phone-db"`          // optional
 	Country        string `json:"country" validate:"country"`               // optional
 	City           string `json:"city" validate:"city"`                     // optional
 	Addr           string `json:"addr" validate:"addr"`                     // optional

@@ -29,10 +29,7 @@ func SetCodeEmail(email, password string) {
 
 // POST 1
 func ChkInput(user *usr.User, exclTags ...string) error {
-	if err := user.Validate(exclTags...); err != nil {
-		return TransInvalidErr(user, err)
-	}
-	return nil
+	return user.Validate(exclTags...)
 }
 
 func verifyEmail(user *usr.User) (string, error) {
