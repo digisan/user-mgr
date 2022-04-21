@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/digisan/gotk/strs"
 	lk "github.com/digisan/logkit"
 	gm "gopkg.in/mail.v2"
 )
@@ -65,7 +66,7 @@ func SetGMail(gmail, password string) error {
 
 func genCode(email string) string {
 	key := []byte(fmt.Sprintf("%d", time.Now().UnixNano())[3:19])
-	return Maxlen(fmt.Sprintf("%06x", Encrypt(email, key)), 6)
+	return strs.Maxlen(fmt.Sprintf("%06x", Encrypt(email, key)), 6)
 }
 
 func SendCode(ctx context.Context, to string, timeout time.Duration) (string, error) {

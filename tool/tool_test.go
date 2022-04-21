@@ -25,9 +25,3 @@ func TestEnDe(t *testing.T) {
 		fmt.Println("ERROR")
 	}
 }
-
-func TestMaxlen(t *testing.T) {
-	fmt.Println(Maxlen("abcdef", 6))
-	fmt.Println(Maxlen("abcdefg", 6))
-	fmt.Println(Maxlen("abcde", 6))
-}

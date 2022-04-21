@@ -10,6 +10,7 @@ import (
 	"time"
 
 	. "github.com/digisan/go-generics/v2"
+	gio "github.com/digisan/gotk/io"
 	lk "github.com/digisan/logkit"
 	"github.com/digisan/user-mgr/tool"
 )
@@ -288,7 +289,7 @@ func (u *User) RmTags(tags ...string) {
 
 func (u *User) SetAvatar(avatarType string, r io.Reader) {
 	u.AvatarType = avatarType
-	u.Avatar = tool.StreamToByte(r)
+	u.Avatar = gio.StreamToBytes(r)
 }
 
 // 'avatarType' --- e.g. image/png, 'fh' --- FormFile('param')

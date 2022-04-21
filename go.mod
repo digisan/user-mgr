@@ -4,9 +4,9 @@ go 1.18
 
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.2
-	github.com/digisan/go-generics v0.1.8
-	github.com/digisan/gotk v0.0.52
-	github.com/digisan/logkit v0.0.7
+	github.com/digisan/go-generics v0.1.10
+	github.com/digisan/gotk v0.1.4
+	github.com/digisan/logkit v0.0.8
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/labstack/echo/v4 v4.7.2
 	gopkg.in/go-playground/validator.v9 v9.31.0
@@ -38,11 +38,11 @@ require (
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
 	go.opencensus.io v0.23.0 // indirect
-	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29 // indirect
-	golang.org/x/net v0.0.0-20220403103023-749bd193bc2b // indirect
-	golang.org/x/sys v0.0.0-20220403205710-6acee93ad0eb // indirect
+	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
+	golang.org/x/net v0.0.0-20220420153159-1850ba15e1be // indirect
+	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/time v0.0.0-20220224211638-0e9765cccd65 // indirect
+	golang.org/x/time v0.0.0-20220411224347-583f2d630306 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 )

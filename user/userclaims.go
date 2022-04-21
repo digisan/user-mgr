@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
+	fd "github.com/digisan/gotk/filedir"
 	lk "github.com/digisan/logkit"
-	"github.com/digisan/user-mgr/tool"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -15,7 +15,7 @@ type UserClaims struct {
 }
 
 var (
-	key        = tool.SelfMD5()
+	key        = fd.SelfMD5()
 	mUserToken = &sync.Map{}
 )
 
