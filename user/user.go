@@ -10,9 +10,9 @@ import (
 	"time"
 
 	. "github.com/digisan/go-generics/v2"
+	"github.com/digisan/gotk/crypto"
 	gio "github.com/digisan/gotk/io"
 	lk "github.com/digisan/logkit"
-	"github.com/digisan/user-mgr/tool"
 )
 
 // if modified, change 1. MOK_***, 2. mFldAddr, 3. 'auto-tags.go', 4. 'validator.go' in sign-up.
@@ -161,7 +161,7 @@ func (u *User) Marshal() (forKey, forValue []byte) {
 				sb.WriteString(SEP)
 			}
 			if ip == 0 && In(i, secret...) {
-				sb.Write(tool.Encrypt((*param.fnFldAddr(i).(*string)), key[:]))
+				sb.Write(crypto.Encrypt((*param.fnFldAddr(i).(*string)), key[:]))
 				continue
 			}
 			switch v := param.fnFldAddr(i).(type) {
@@ -222,7 +222,7 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 				}
 				if ip == 0 && In(i, secret...) {
 					if u.key != [16]byte{} {
-						*param.fnFldAddr(i).(*string) = tool.Decrypt(seg, u.key[:])
+						*param.fnFldAddr(i).(*string) = crypto.Decrypt(seg, u.key[:])
 						continue
 					}
 				}
