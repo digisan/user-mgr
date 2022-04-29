@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	lk "github.com/digisan/logkit"
 	"github.com/digisan/user-mgr/udb"
 )
 
@@ -19,11 +18,10 @@ func TestInactiveMonitor(t *testing.T) {
 	defer cancel()
 
 	removed := make(chan string, 1024)
-	MonitorInactive(ctx, removed, 20*time.Second)
+	MonitorInactive(ctx, removed, 20*time.Second, func(uname string) error { return udb.UserDB.RmOnline(uname) })
 	go func() {
 		for rm := range removed {
 			fmt.Println("offline:", rm)
-			lk.WarnOnErr("%v", udb.UserDB.RmOnline(rm))
 		}
 	}()
 

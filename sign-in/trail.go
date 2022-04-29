@@ -13,10 +13,11 @@ const (
 )
 
 func Trail(uname string) error {
+	lk.Log("%v Hearbeats", uname)
 	return udb.UserDB.RefreshOnline(uname)
 }
 
-func MonitorInactive(ctx context.Context, inactive chan<- string, offlineTimeout time.Duration) {
+func MonitorInactive(ctx context.Context, inactive chan<- string, offlineTimeout time.Duration, fnOnGotInactive func(uname string) error) {
 
 	if offlineTimeout <= CheckInterval {
 		offlineTimeout = 2 * CheckInterval
@@ -33,7 +34,9 @@ func MonitorInactive(ctx context.Context, inactive chan<- string, offlineTimeout
 					lastTm, err := udb.UserDB.GetOnline(uname)
 					lk.WarnOnErr("%v", err)
 					if time.Since(lastTm) > offlineTimeout {
-						// lk.WarnOnErr("%v", udb.UserDB.RemoveOnlineUser(uname)) // *** let invoker to do more
+						if fnOnGotInactive != nil {
+							lk.WarnOnErr("%v", fnOnGotInactive(uname))
+						}
 						inactive <- uname
 					}
 				}
