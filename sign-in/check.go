@@ -27,6 +27,9 @@ func PwdOK(login *usr.User) bool {
 	}
 
 	for prop, val := range mPropVal {
+		if len(val) == 0 {
+			continue
+		}
 		user, ok, err := udb.UserDB.LoadUserByUniProp(prop, val, true)
 		if err == nil && ok && user.Password == login.Password {
 			*login = *user
