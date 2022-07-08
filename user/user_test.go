@@ -107,7 +107,7 @@ func TestUser(t *testing.T) {
 	// }
 	// user.Avatar = ava
 
-	info, key := user.Marshal()
+	info, key := user.Marshal(nil)
 	fmt.Println("user.key", user.key)
 
 	fmt.Println()

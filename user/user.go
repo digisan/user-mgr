@@ -9,13 +9,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dgraph-io/badger/v3"
+	bh "github.com/digisan/db-helper/badger-helper"
 	. "github.com/digisan/go-generics/v2"
 	"github.com/digisan/gotk/crypto"
 	gio "github.com/digisan/gotk/io"
 	lk "github.com/digisan/logkit"
 )
 
-// if modified, change 1. MOK_***, 2. mFldAddr, 3. 'auto-tags.go', 4. 'validator.go' in sign-up.
+// if modified, change 1. KO_***, 2. mFldAddr, 3. 'auto-tags.go', 4. 'validator.go' in sign-up.
 type User struct {
 	Core
 	Profile
@@ -33,164 +35,179 @@ func (u User) String() string {
 // db key order
 const (
 	// Admin
-	MOK_Active int = iota
+	KO_Active int = iota
 	// Core
-	MOK_UName
-	MOK_Email
-	MOK_Password
-	MOK_Key
+	KO_UName
+	KO_Email
+	KO_Password
+	KO_Key
 	// Profile
-	MOK_Name
-	MOK_Phone
-	MOK_Country
-	MOK_City
-	MOK_Addr
-	MOK_PersonalIDType
-	MOK_PersonalID
-	MOK_Gender
-	MOK_DOB
-	MOK_Position
-	MOK_Title
-	MOK_Employer
-	MOK_Bio
-	MOK_AvatarType
+	KO_Name
+	KO_Phone
+	KO_Country
+	KO_City
+	KO_Addr
+	KO_PersonalIDType
+	KO_PersonalID
+	KO_Gender
+	KO_DOB
+	KO_Position
+	KO_Title
+	KO_Employer
+	KO_Bio
+	KO_AvatarType
 	// Admin
-	MOK_Regtime
-	MOK_SysRole
-	MOK_MemLevel
-	MOK_MemExpire
-	MOK_Official
-	MOK_Tags
+	KO_Regtime
+	KO_SysRole
+	KO_MemLevel
+	KO_MemExpire
+	KO_Official
+	KO_Certified
+	KO_Tags
 	//
-	MOK_END
+	KO_END
 )
 
 // db value order
 const (
 	// Profile
-	MOV_Avatar int = iota
+	VO_Avatar int = iota
 	//
-	MOV_END
+	VO_END
 )
 
-func (u *User) KeyFieldAddr(mok int) any {
+func (u *User) KeyFieldAddr(ko int) any {
 	mFldAddr := map[int]any{
 		// Core
-		MOK_UName:    &u.UName,
-		MOK_Email:    &u.Email,
-		MOK_Password: &u.Password,
-		MOK_Key:      &u.key,
+		KO_UName:    &u.UName,
+		KO_Email:    &u.Email,
+		KO_Password: &u.Password,
+		KO_Key:      &u.key,
 		// Profile
-		MOK_Name:           &u.Name,
-		MOK_Phone:          &u.Phone,
-		MOK_Country:        &u.Country,
-		MOK_City:           &u.City,
-		MOK_Addr:           &u.Addr,
-		MOK_PersonalIDType: &u.PersonalIDType,
-		MOK_PersonalID:     &u.PersonalID,
-		MOK_Gender:         &u.Gender,
-		MOK_DOB:            &u.DOB,
-		MOK_Position:       &u.Position,
-		MOK_Title:          &u.Title,
-		MOK_Employer:       &u.Employer,
-		MOK_Bio:            &u.Bio,
-		MOK_AvatarType:     &u.AvatarType,
+		KO_Name:           &u.Name,
+		KO_Phone:          &u.Phone,
+		KO_Country:        &u.Country,
+		KO_City:           &u.City,
+		KO_Addr:           &u.Addr,
+		KO_PersonalIDType: &u.PersonalIDType,
+		KO_PersonalID:     &u.PersonalID,
+		KO_Gender:         &u.Gender,
+		KO_DOB:            &u.DOB,
+		KO_Position:       &u.Position,
+		KO_Title:          &u.Title,
+		KO_Employer:       &u.Employer,
+		KO_Bio:            &u.Bio,
+		KO_AvatarType:     &u.AvatarType,
 		// Admin
-		MOK_Active:    &u.Active,
-		MOK_Regtime:   &u.Regtime,
-		MOK_SysRole:   &u.SysRole,
-		MOK_MemLevel:  &u.MemLevel,
-		MOK_MemExpire: &u.MemExpire,
-		MOK_Official:  &u.Official,
-		MOK_Tags:      &u.Tags,
+		KO_Active:    &u.Active,
+		KO_Regtime:   &u.Regtime,
+		KO_SysRole:   &u.SysRole,
+		KO_MemLevel:  &u.MemLevel,
+		KO_MemExpire: &u.MemExpire,
+		KO_Official:  &u.Official,
+		KO_Certified: &u.Certified,
+		KO_Tags:      &u.Tags,
 	}
-	return mFldAddr[mok]
+	return mFldAddr[ko]
 }
 
-func (u *User) ValFieldAddr(mov int) any {
+func (u *User) ValFieldAddr(vo int) any {
 	mFldAddr := map[int]any{
 		// Profile
-		MOV_Avatar: &u.Avatar,
+		VO_Avatar: &u.Avatar,
 	}
-	return mFldAddr[mov]
+	return mFldAddr[vo]
+}
+
+var secret = []int{
+	KO_Email,
+	KO_Password,
+	KO_Name,
+	KO_Phone,
+	KO_Country,
+	KO_City,
+	KO_Addr,
+	KO_PersonalIDType,
+	KO_PersonalID,
+	KO_Gender,
+	KO_DOB,
+	KO_Position,
+	KO_Title,
+	KO_Employer,
 }
 
 ////////////////////////////////////////////////////
 
-var secret = []int{
-	MOK_Email,
-	MOK_Password,
-	MOK_Name,
-	MOK_Phone,
-	MOK_Country,
-	MOK_City,
-	MOK_Addr,
-	MOK_PersonalIDType,
-	MOK_PersonalID,
-	MOK_Gender,
-	MOK_DOB,
-	MOK_Position,
-	MOK_Title,
-	MOK_Employer,
+func (u *User) BadgerDB() *badger.DB {
+	return dbGrp.dbReg
 }
 
-func (u *User) Marshal() (forKey, forValue []byte) {
-
-	key := u.GenKey()
-
-	params := []struct {
-		end       int
-		fnFldAddr func(int) any
-		out       *[]byte
-	}{
-		{
-			end:       MOK_END,
-			fnFldAddr: u.KeyFieldAddr,
-			out:       &forKey,
-		},
-		{
-			end:       MOV_END,
-			fnFldAddr: u.ValFieldAddr,
-			out:       &forValue,
-		},
-	}
-	for ip, param := range params {
-		sb := &strings.Builder{}
-		for i := 0; i < param.end; i++ {
-			if i > 0 {
-				sb.WriteString(SEP)
-			}
-			if ip == 0 && In(i, secret...) {
-				sb.Write(crypto.Encrypt((*param.fnFldAddr(i).(*string)), key[:]))
-				continue
-			}
-			switch v := param.fnFldAddr(i).(type) {
-			case *string:
-				sb.WriteString(*v)
-			case *[]byte:
-				sb.Write(*v)
-			case *[16]byte:
-				sb.Write((*v)[:])
-			case *bool:
-				sb.WriteString(strings.ToUpper(fmt.Sprintf("%v", *v)[0:1]))
-			case *time.Time:
-				encoding, err := (*v).MarshalBinary()
-				// lk.Debug(" --------------- encoding len: %d", len(encoding))
-				lk.FailOnErr("%v", err)
-				sb.Write(encoding)
-			case *uint8:
-				sb.Write([]byte{*v})
-			default:
-				panic("Marshal Error Type")
-			}
+func (u *User) Key() []byte {
+	var (
+		key = u.GenKey()
+		sb  = &strings.Builder{}
+	)
+	for i := 0; i < KO_END; i++ {
+		if i > 0 {
+			sb.WriteString(SEP)
 		}
-		*param.out = []byte(sb.String())
+		if In(i, secret...) {
+			sb.Write(crypto.Encrypt((*u.KeyFieldAddr(i).(*string)), key[:]))
+			continue
+		}
+		switch v := u.KeyFieldAddr(i).(type) {
+		case *string:
+			sb.WriteString(*v)
+		case *[]byte:
+			sb.Write(*v)
+		case *[16]byte:
+			sb.Write((*v)[:])
+		case *bool:
+			sb.WriteString(strings.ToUpper(fmt.Sprintf("%v", *v)[0:1]))
+		case *time.Time:
+			encoding, err := (*v).MarshalBinary()
+			// lk.Debug(" --------------- encoding len: %d", len(encoding))
+			lk.FailOnErr("%v", err)
+			sb.Write(encoding)
+		case *uint8:
+			sb.Write([]byte{*v})
+		default:
+			panic("need more type for marshaling key")
+		}
 	}
-	return
+	return []byte(sb.String())
 }
 
-func (u *User) Unmarshal(dbKey, dbVal []byte) {
+func (u *User) Value() []byte {
+	var (
+		key = u.GenKey()
+		sb  = &strings.Builder{}
+	)
+	for i := 0; i < VO_END; i++ {
+		if i > 0 {
+			sb.WriteString(SEP)
+		}
+		if In(i, secret...) {
+			sb.Write(crypto.Encrypt((*u.ValFieldAddr(i).(*string)), key[:]))
+			continue
+		}
+		switch v := u.ValFieldAddr(i).(type) {
+		case *string:
+			sb.WriteString(*v)
+		case *[]byte:
+			sb.Write(*v)
+		default:
+			panic("need more type for marshaling value")
+		}
+	}
+	return []byte(sb.String())
+}
 
+func (u *User) Marshal(at any) (forKey, forValue []byte) {
+	return u.Key(), u.Value()
+}
+
+func (u *User) Unmarshal(dbKey, dbVal []byte) (any, error) {
 	params := []struct {
 		in        []byte
 		fnFldAddr func(int) any
@@ -211,13 +228,13 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 
 			if ip == 0 {
 				segs = bytes.Split(param.in, []byte(SEP))
-				u.key = *(*[16]byte)(segs[MOK_Key])
+				u.key = *(*[16]byte)(segs[KO_Key])
 			} else if ip == 1 {
 				segs = [][]byte{param.in} // dbVal is one whole block
 			}
 
 			for i, seg := range segs {
-				if (ip == 0 && i == MOK_END) || (ip == 1 && i == MOV_END) {
+				if (ip == 0 && i == KO_END) || (ip == 1 && i == VO_END) {
 					break
 				}
 				if ip == 0 && In(i, secret...) {
@@ -252,6 +269,7 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) {
 			}
 		}
 	}
+	return u, nil
 }
 
 ///////////////////////////////////////////////////
@@ -308,4 +326,199 @@ func (u *User) AvatarBase64(urlEnc bool) (avatarType, data string) {
 		return u.AvatarType, base64.URLEncoding.EncodeToString(u.Avatar)
 	}
 	return u.AvatarType, base64.StdEncoding.EncodeToString(u.Avatar)
+}
+
+///////////////////////////////////////////////////
+
+func RemoveUser(uname string, lock bool) error {
+	if lock {
+		dbGrp.Lock()
+		defer dbGrp.Unlock()
+	}
+	prefixes := [][]byte{
+		[]byte("T" + SEP + uname + SEP),
+		[]byte("F" + SEP + uname + SEP),
+	}
+	for _, prefix := range prefixes {
+		n, err := bh.DeleteFirstObjectDB[User](prefix)
+		if err != nil {
+			return err
+		}
+		if n == 1 {
+			break
+		}
+	}
+	return nil
+}
+
+func UpdateUser(u *User) error {
+	dbGrp.Lock()
+	defer dbGrp.Unlock()
+
+	if err := RemoveUser(u.UName, false); err != nil {
+		return err
+	}
+	return bh.UpsertOneObjectDB(u)
+}
+
+func LoadUser(uname string, active bool) (*User, bool, error) {
+	dbGrp.Lock()
+	defer dbGrp.Unlock()
+
+	prefix := []byte("T" + SEP + uname + SEP)
+	if !active {
+		prefix = []byte("F" + SEP + uname + SEP)
+	}
+	u, err := bh.GetFirstObjectDB[User](prefix, nil)
+	return u, err == nil && u != nil && u.Email != "", err
+}
+
+func LoadActiveUser(uname string) (*User, bool, error) {
+	return LoadUser(uname, true)
+}
+
+func LoadAnyUser(uname string) (*User, bool, error) {
+	uA, okA, errA := LoadUser(uname, true)
+	uD, okD, errD := LoadUser(uname, false)
+	var u *User
+	if okA {
+		u = uA
+	} else if okD {
+		u = uD
+	}
+	var err error
+	if errA != nil {
+		err = errA
+	} else if errD != nil {
+		err = errD
+	}
+	return u, err == nil && (okA || okD), err
+}
+
+func LoadUserByUniProp(propName, propVal string, active bool) (*User, bool, error) {
+	var (
+		err error
+	)
+	users, err := ListUser(func(u *User) bool {
+		flag := u.IsActive()
+		if !active {
+			flag = !u.IsActive()
+		}
+		switch propName {
+		case "uname", "Uname":
+			return flag && u.UName == propVal
+		case "email", "Email":
+			return flag && u.Email == propVal
+		case "phone", "Phone":
+			return flag && u.Phone == propVal
+		default:
+			return false
+		}
+	})
+	if len(users) > 0 {
+		u := users[0]
+		return u, err == nil && u != nil && u.Email != "", err
+	}
+	return nil, false, err
+}
+
+func LoadActiveUserByUniProp(propName, propVal string) (*User, bool, error) {
+	return LoadUserByUniProp(propName, propVal, true)
+}
+
+func LoadAnyUserByUniProp(propName, propVal string) (*User, bool, error) {
+	uA, okA, errA := LoadUserByUniProp(propName, propVal, true)
+	uD, okD, errD := LoadUserByUniProp(propName, propVal, false)
+	var u *User
+	if okA {
+		u = uA
+	} else if okD {
+		u = uD
+	}
+	var err error
+	if errA != nil {
+		err = errA
+	} else if errD != nil {
+		err = errD
+	}
+	return u, err == nil && (okA || okD), err
+}
+
+func ListUser(filter func(*User) bool) ([]*User, error) {
+	dbGrp.Lock()
+	defer dbGrp.Unlock()
+
+	return bh.GetObjectsDB([]byte(""), filter)
+}
+
+func UserExists(uname, email string, activeOnly bool) bool {
+	if activeOnly {
+		// check uname
+		_, ok, err := LoadUser(uname, true)
+		lk.WarnOnErr("%v", err)
+		if ok {
+			return ok
+		}
+		// check email
+		_, ok, err = LoadActiveUserByUniProp("email", email)
+		lk.WarnOnErr("%v", err)
+		return ok
+
+	} else {
+		// check uname
+		_, ok, err := LoadAnyUser(uname)
+		lk.WarnOnErr("%v", err)
+		if ok {
+			return ok
+		}
+		// check email
+		_, ok, err = LoadAnyUserByUniProp("email", email)
+		lk.WarnOnErr("%v", err)
+		return ok
+	}
+}
+
+// only for unique value
+func UsedByOther(uname_self, propName, propVal string) bool {
+	u, ok, err := LoadAnyUserByUniProp(propName, propVal)
+	if err == nil && ok && u != nil {
+		return uname_self != u.UName
+	}
+	return false
+}
+
+func SetUserBoolField(uname, field string, flag bool) (u *User, ok bool, err error) {
+	if u, ok, err = LoadAnyUser(uname); err == nil {
+		if ok {
+			switch field {
+			case "Active", "active", "ACTIVE":
+				u.Active = flag
+			case "Official", "official", "OFFICIAL":
+				u.Official = flag
+			case "Certified", "certified", "CERTIFIED":
+				u.Certified = flag
+			default:
+				lk.FailOnErr("%v", fmt.Errorf("[%s] is unsupported setting BoolField", field))
+			}
+			if err = UpdateUser(u); err != nil {
+				return nil, false, err
+			}
+			u, ok, err = LoadAnyUser(uname)
+			return u, err == nil && ok, err
+		}
+		return nil, false, fmt.Errorf("couldn't find [%s] for setting [%s]", uname, field)
+	}
+	return nil, false, err
+}
+
+func ActivateUser(uname string, flag bool) (*User, bool, error) {
+	return SetUserBoolField(uname, "active", flag)
+}
+
+func OfficializeUser(uname string, flag bool) (*User, bool, error) {
+	return SetUserBoolField(uname, "official", flag)
+}
+
+func CertifyUser(uname string, flag bool) (*User, bool, error) {
+	return SetUserBoolField(uname, "certified", flag)
 }

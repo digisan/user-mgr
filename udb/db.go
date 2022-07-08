@@ -121,7 +121,7 @@ func (db *UDB) UpdateUser(user *usr.User) (err error) {
 		return err
 	}
 	err = db.dbReg.Update(func(txn *badger.Txn) error {
-		if forKey, forValue := user.Marshal(); len(forKey) > 0 || len(forValue) > 0 {
+		if forKey, forValue := user.Marshal(nil); len(forKey) > 0 || len(forValue) > 0 {
 			return txn.Set(forKey, forValue)
 		}
 		return nil
