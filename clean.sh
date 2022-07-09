@@ -8,7 +8,6 @@ rm -rf ./sign-*/example/udb
 rm -rf ./reset-pwd/example/example
 rm -rf ./reset-pwd/example/data
 rm -rf ./reset-pwd/example/udb
-rm -rf ./udb/data
 rm -rf ./data
 rm -rf ./relation/data
 

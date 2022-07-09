@@ -139,7 +139,7 @@ var secret = []int{
 ////////////////////////////////////////////////////
 
 func (u *User) BadgerDB() *badger.DB {
-	return dbGrp.dbReg
+	return DbGrp.Reg
 }
 
 func (u *User) Key() []byte {
@@ -326,8 +326,8 @@ func (u *User) AvatarBase64(urlEnc bool) (avatarType, data string) {
 
 func RemoveUser(uname string, lock bool) error {
 	if lock {
-		dbGrp.Lock()
-		defer dbGrp.Unlock()
+		DbGrp.Lock()
+		defer DbGrp.Unlock()
 	}
 	prefixes := [][]byte{
 		[]byte("T" + SEP + uname + SEP),
@@ -346,8 +346,8 @@ func RemoveUser(uname string, lock bool) error {
 }
 
 func UpdateUser(u *User) error {
-	dbGrp.Lock()
-	defer dbGrp.Unlock()
+	DbGrp.Lock()
+	defer DbGrp.Unlock()
 
 	if err := RemoveUser(u.UName, false); err != nil {
 		return err
@@ -356,8 +356,8 @@ func UpdateUser(u *User) error {
 }
 
 func LoadUser(uname string, active bool) (*User, bool, error) {
-	dbGrp.Lock()
-	defer dbGrp.Unlock()
+	DbGrp.Lock()
+	defer DbGrp.Unlock()
 
 	prefix := []byte("T" + SEP + uname + SEP)
 	if !active {
@@ -439,8 +439,8 @@ func LoadAnyUserByUniProp(propName, propVal string) (*User, bool, error) {
 }
 
 func ListUser(filter func(*User) bool) ([]*User, error) {
-	dbGrp.Lock()
-	defer dbGrp.Unlock()
+	DbGrp.Lock()
+	defer DbGrp.Unlock()
 
 	return bh.GetObjectsDB([]byte(""), filter)
 }

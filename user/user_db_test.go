@@ -161,3 +161,33 @@ func TestRmOnline(t *testing.T) {
 
 	fmt.Println(RmOnline("uname1"))
 }
+
+func TestUpdateOnlineUser(t *testing.T) {
+
+	InitDB(dbPath)
+	defer CloseDB()
+
+	RefreshOnline("a")
+	time.Sleep(1 * time.Second)
+	RefreshOnline("b")
+	time.Sleep(1 * time.Second)
+	RefreshOnline("c")
+	time.Sleep(1 * time.Second)
+
+	users, err := OnlineUsers()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(users)
+
+	u, _ := GetOnline("a")
+	fmt.Println(*u)
+
+	time.Sleep(3 * time.Second)
+
+	if time.Since(u.Tm) > 2*time.Second {
+		fmt.Println("more than 2 seconds")
+	} else {
+		fmt.Println("less than 2 seconds")
+	}
+}

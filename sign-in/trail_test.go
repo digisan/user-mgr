@@ -6,19 +6,22 @@ import (
 	"testing"
 	"time"
 
-	"github.com/digisan/user-mgr/udb"
+	u "github.com/digisan/user-mgr/user"
 )
 
 func TestInactiveMonitor(t *testing.T) {
 
-	udb.OpenUserStorage("../data/user")
-	defer udb.CloseUserStorage()
+	u.InitDB("../data/user")
+	defer u.CloseDB()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	removed := make(chan string, 1024)
-	MonitorInactive(ctx, removed, 20*time.Second, func(uname string) error { return udb.UserDB.RmOnline(uname) })
+	MonitorInactive(ctx, removed, 20*time.Second, func(uname string) error {
+		_, err := u.RmOnline(uname)
+		return err
+	})
 	go func() {
 		for rm := range removed {
 			fmt.Println("offline:", rm)

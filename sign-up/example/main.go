@@ -6,8 +6,7 @@ import (
 
 	lk "github.com/digisan/logkit"
 	su "github.com/digisan/user-mgr/sign-up"
-	"github.com/digisan/user-mgr/udb"
-	usr "github.com/digisan/user-mgr/user"
+	u "github.com/digisan/user-mgr/user"
 	vf "github.com/digisan/user-mgr/user/valfield"
 )
 
@@ -15,19 +14,19 @@ func main() {
 
 	lk.WarnDetail(false)
 
-	udb.OpenUserStorage("../../data/user")
-	defer udb.CloseUserStorage()
+	u.InitDB("../../data/user")
+	defer u.CloseDB()
 
 	// get [user] from POST
 
 	// Will be POST header
-	user := &usr.User{
-		usr.Core{
+	user := &u.User{
+		u.Core{
 			UName:    "Qing Miao",
 			Email:    "4987346@qq.com",
 			Password: "*pa55a@aD20TTTTT",
 		},
-		usr.Profile{
+		u.Profile{
 			Name:           "A boy has no name",
 			Phone:          "111111111",
 			Country:        "",
@@ -44,7 +43,7 @@ func main() {
 			AvatarType:     "",
 			Avatar:         []byte("abcdefg**********"),
 		},
-		usr.Admin{
+		u.Admin{
 			Regtime:   time.Now().Truncate(time.Second),
 			Active:    true,
 			Certified: false,
@@ -56,10 +55,10 @@ func main() {
 		},
 	}
 
-	su.SetValidator(map[string]func(o any, v any) usr.ValRst{
-		vf.Employer: func(o, v any) usr.ValRst {
+	su.SetValidator(map[string]func(o any, v any) u.ValRst{
+		vf.Employer: func(o, v any) u.ValRst {
 			ok := len(v.(string)) > 6
-			return usr.NewValRst(ok, "at least 6 length for employer")
+			return u.NewValRst(ok, "at least 6 length for employer")
 		},
 	})
 

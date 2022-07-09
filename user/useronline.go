@@ -13,19 +13,16 @@ import (
 
 // if modified, change 1. KO_OL_***, 2. mFldAddr, 3. 'auto-tags.go', 4. 'validator.go' in sign-up.
 type UserOnline struct {
-	uname string
-	tm    time.Time
+	Uname string
+	Tm    time.Time
 }
 
 func NewUserOnline(uname string) *UserOnline {
-	return &UserOnline{
-		uname: uname,
-		tm:    time.Now().UTC(),
-	}
+	return &UserOnline{uname, time.Now().UTC()}
 }
 
 func (u UserOnline) String() string {
-	return fmt.Sprintf("%s @ %v\n", u.uname, u.tm)
+	return fmt.Sprintf("%s @ %v\n", u.Uname, u.Tm)
 }
 
 // db key order
@@ -42,14 +39,14 @@ const (
 
 func (u *UserOnline) KeyFieldAddr(ko int) any {
 	mFldAddr := map[int]any{
-		KO_OL_UName: &u.uname,
+		KO_OL_UName: &u.Uname,
 	}
 	return mFldAddr[ko]
 }
 
 func (u *UserOnline) ValFieldAddr(vo int) any {
 	mFldAddr := map[int]any{
-		VO_OL_Tm: &u.tm,
+		VO_OL_Tm: &u.Tm,
 	}
 	return mFldAddr[vo]
 }
@@ -57,7 +54,7 @@ func (u *UserOnline) ValFieldAddr(vo int) any {
 ////////////////////////////////////////////////////
 
 func (u *UserOnline) BadgerDB() *badger.DB {
-	return dbGrp.dbOnline
+	return DbGrp.Online
 }
 
 func (u *UserOnline) Key() []byte {
@@ -138,30 +135,30 @@ func (u *UserOnline) Unmarshal(dbKey, dbVal []byte) (any, error) {
 ///////////////////////////////////////////////////
 
 func GetOnline(uname string) (*UserOnline, error) {
-	dbGrp.Lock()
-	defer dbGrp.Unlock()
+	DbGrp.Lock()
+	defer DbGrp.Unlock()
 
 	return bh.GetOneObjectDB[UserOnline]([]byte(uname))
 }
 
 func RefreshOnline(uname string) (*UserOnline, error) {
-	dbGrp.Lock()
-	defer dbGrp.Unlock()
+	DbGrp.Lock()
+	defer DbGrp.Unlock()
 
 	u := NewUserOnline(uname)
 	return u, bh.UpsertOneObjectDB(u)
 }
 
 func RmOnline(uname string) (int, error) {
-	dbGrp.Lock()
-	defer dbGrp.Unlock()
+	DbGrp.Lock()
+	defer DbGrp.Unlock()
 
 	return bh.DeleteOneObjectDB[UserOnline]([]byte(uname))
 }
 
 func OnlineUsers() ([]*UserOnline, error) {
-	dbGrp.Lock()
-	defer dbGrp.Unlock()
+	DbGrp.Lock()
+	defer DbGrp.Unlock()
 
 	return bh.GetObjectsDB[UserOnline]([]byte(""), nil)
 }

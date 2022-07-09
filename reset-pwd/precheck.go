@@ -3,21 +3,20 @@ package resetpwd
 import (
 	"fmt"
 
-	"github.com/digisan/user-mgr/udb"
-	usr "github.com/digisan/user-mgr/user"
+	u "github.com/digisan/user-mgr/user"
 )
 
-func CheckUserExists(login *usr.User) error {
-	if udb.UserDB.UserExists(login.UName, login.Email, true) {
+func CheckUserExists(login *u.User) error {
+	if u.UserExists(login.UName, login.Email, true) {
 		return nil
 	}
-	if udb.UserDB.UserExists(login.UName, login.Email, false) {
+	if u.UserExists(login.UName, login.Email, false) {
 		return fmt.Errorf("[%v] is dormant", login.UName)
 	}
 	return fmt.Errorf("[%v] is not existing", login.UName)
 }
 
-func EmailOK(login *usr.User) bool {
-	user, ok, err := udb.UserDB.LoadUser(login.UName, true)
+func EmailOK(login *u.User) bool {
+	user, ok, err := u.LoadUser(login.UName, true)
 	return err == nil && ok && login.Email == user.Email
 }

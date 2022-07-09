@@ -1,7 +1,8 @@
 package signout
 
-import "github.com/digisan/user-mgr/udb"
+import u "github.com/digisan/user-mgr/user"
 
 func Logout(uname string) error {
-	return udb.UserDB.RmOnline(uname)
+	_, err := u.RmOnline(uname)
+	return err
 }

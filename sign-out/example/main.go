@@ -7,12 +7,13 @@ import (
 
 	si "github.com/digisan/user-mgr/sign-in"
 	so "github.com/digisan/user-mgr/sign-out"
-	"github.com/digisan/user-mgr/udb"
+	u "github.com/digisan/user-mgr/user"
 )
 
 func main() {
-	udb.OpenUserStorage("../../data/user")
-	defer udb.CloseUserStorage()
+
+	u.InitDB("../../data/user")
+	defer u.CloseDB()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

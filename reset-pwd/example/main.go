@@ -7,25 +7,24 @@ import (
 	lk "github.com/digisan/logkit"
 	rp "github.com/digisan/user-mgr/reset-pwd"
 	su "github.com/digisan/user-mgr/sign-up"
-	"github.com/digisan/user-mgr/udb"
-	usr "github.com/digisan/user-mgr/user"
+	u "github.com/digisan/user-mgr/user"
 )
 
 func main() {
 
-	udb.OpenUserStorage("../../data/user")
-	defer udb.CloseUserStorage()
+	u.InitDB("../../data/user")
+	defer u.CloseDB()
 
 	// get [user] from GET
 
 	// Will be GET header
-	user := &usr.User{
-		usr.Core{
+	usr := u.User{
+		u.Core{
 			UName:    "QMiao",
 			Email:    "cdutwhu@outlook.com",
 			Password: "",
 		},
-		usr.Profile{
+		u.Profile{
 			Name:           "",
 			Phone:          "",
 			Country:        "",
@@ -42,7 +41,7 @@ func main() {
 			AvatarType:     "",
 			Avatar:         []byte{},
 		},
-		usr.Admin{
+		u.Admin{
 			Regtime:   time.Now().Truncate(time.Second),
 			Active:    true,
 			Certified: false,
@@ -54,32 +53,32 @@ func main() {
 		},
 	}
 
-	if err := rp.CheckUserExists(user); err != nil {
+	if err := rp.CheckUserExists(&usr); err != nil {
 		lk.Log("%v", err)
 		return
 	}
-	if !rp.EmailOK(user) {
-		lk.Log("%s's email [%s] is different from your sign-up one", user.UName, user.Email)
+	if !rp.EmailOK(&usr) {
+		lk.Log("%s's email [%s] is different from your sign-up one", usr.UName, usr.Email)
 		return
 	}
 
-	if err := su.ChkEmail(user); err != nil {
+	if err := su.ChkEmail(&usr); err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	fmt.Println("Input verification code in you email:", user.Email)
+	fmt.Println("Input verification code in you email:", usr.Email)
 	incode := ""
 	fmt.Scanf("%s", &incode)
 	// get [incode] from POST
 
-	user, err := su.VerifyCode(user.UName, incode)
+	user, err := su.VerifyCode(usr.UName, incode)
 	if err != nil {
 		fmt.Println("Email verification failed:", err)
 		return
 	}
 
-	// user, _, err = udb.UserDB.LoadActiveUser(user.UName)
+	// user, _, err = u.LoadActiveUser(user.UName)
 	// lk.FailOnErr("%v", err)
 	/////
 
@@ -97,7 +96,7 @@ AGAIN:
 	}
 
 	// store into db
-	if err := su.Store(user); err != nil {
+	if err := su.Store(&usr); err != nil {
 		fmt.Println(err)
 	}
 

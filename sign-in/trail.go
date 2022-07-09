@@ -5,7 +5,7 @@ import (
 	"time"
 
 	lk "github.com/digisan/logkit"
-	"github.com/digisan/user-mgr/udb"
+	u "github.com/digisan/user-mgr/user"
 )
 
 const (
@@ -14,7 +14,8 @@ const (
 
 func Trail(uname string) error {
 	lk.Log("%v Hearbeats", uname)
-	return udb.UserDB.RefreshOnline(uname)
+	_, err := u.RefreshOnline(uname)
+	return err
 }
 
 func MonitorInactive(ctx context.Context, inactive chan<- string, offlineTimeout time.Duration, fnOnGotInactive func(uname string) error) {
@@ -28,16 +29,16 @@ func MonitorInactive(ctx context.Context, inactive chan<- string, offlineTimeout
 		for {
 			select {
 			case <-ticker.C:
-				unames, err := udb.UserDB.OnlineUsers()
+				users, err := u.OnlineUsers()
 				lk.WarnOnErr("%v", err)
-				for _, uname := range unames {
-					lastTm, err := udb.UserDB.GetOnline(uname)
+				for _, usr := range users {
+					usr, err := u.GetOnline(usr.Uname)
 					lk.WarnOnErr("%v", err)
-					if time.Since(lastTm) > offlineTimeout {
+					if time.Since(usr.Tm) > offlineTimeout {
 						if fnOnGotInactive != nil {
-							lk.WarnOnErr("%v", fnOnGotInactive(uname))
+							lk.WarnOnErr("%v", fnOnGotInactive(usr.Uname))
 						}
-						inactive <- uname
+						inactive <- usr.Uname
 					}
 				}
 			case <-ctx.Done():

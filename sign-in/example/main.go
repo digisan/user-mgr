@@ -6,25 +6,24 @@ import (
 
 	lk "github.com/digisan/logkit"
 	si "github.com/digisan/user-mgr/sign-in"
-	"github.com/digisan/user-mgr/udb"
-	usr "github.com/digisan/user-mgr/user"
+	u "github.com/digisan/user-mgr/user"
 )
 
 func main() {
 
-	udb.OpenUserStorage("../../data/user")
-	defer udb.CloseUserStorage()
+	u.InitDB("../../data/user")
+	defer u.CloseDB()
 
 	// get [user] from GET
 
 	// Will be GET header
-	user := &usr.User{
-		usr.Core{
+	user := &u.User{
+		u.Core{
 			UName:    "Qing Miao",
 			Email:    "4987346@qq.com",
 			Password: "*pa55a@aD20TTTTT",
 		},
-		usr.Profile{
+		u.Profile{
 			Name:           "A boy has no name",
 			Phone:          "11",
 			Country:        "",
@@ -41,7 +40,7 @@ func main() {
 			AvatarType:     "",
 			Avatar:         []byte("abcdefg**********"),
 		},
-		usr.Admin{
+		u.Admin{
 			Regtime:   time.Now().Truncate(time.Second),
 			Active:    true,
 			Certified: false,
