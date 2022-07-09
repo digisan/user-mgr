@@ -59,8 +59,8 @@ func (user *User) Validate(exclTags ...string) error {
 	if err != nil {
 		_, tag := ErrField(err)
 		for _, e := range err.(validator.ValidationErrors) {
-			if mIfFail[tag] != nil {
-				return mIfFail[tag]
+			if err, ok := mIfFail[tag]; ok && err != nil {
+				return err
 			}
 			return fmt.Errorf("%v", e)
 		}

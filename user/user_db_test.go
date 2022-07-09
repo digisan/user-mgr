@@ -122,3 +122,42 @@ func TestExisting(t *testing.T) {
 	fmt.Println("---", UserExists("unique-user-name", "", false))
 	fmt.Println("---", UserExists("", "hello@abc.com", false))
 }
+
+///////////////////////////////////////////////////////////////////
+
+func TestOnlines(t *testing.T) {
+
+	InitDB(dbPath)
+	defer CloseDB()
+
+	users, err := OnlineUsers()
+	lk.FailOnErr("%v", err)
+
+	for _, u := range users {
+		fmt.Println(u)
+	}
+}
+
+func TestRefreshOnline(t *testing.T) {
+
+	InitDB(dbPath)
+	defer CloseDB()
+
+	fmt.Println(RefreshOnline("uname1"))
+}
+
+func TestGetOnline(t *testing.T) {
+
+	InitDB(dbPath)
+	defer CloseDB()
+
+	fmt.Println(GetOnline("uname1"))
+}
+
+func TestRmOnline(t *testing.T) {
+
+	InitDB(dbPath)
+	defer CloseDB()
+
+	fmt.Println(RmOnline("uname1"))
+}

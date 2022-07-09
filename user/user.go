@@ -212,14 +212,8 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) (any, error) {
 		in        []byte
 		fnFldAddr func(int) any
 	}{
-		{
-			in:        dbKey,
-			fnFldAddr: u.KeyFieldAddr,
-		},
-		{
-			in:        dbVal,
-			fnFldAddr: u.ValFieldAddr,
-		},
+		{dbKey, u.KeyFieldAddr},
+		{dbVal, u.ValFieldAddr},
 	}
 	for ip, param := range params {
 		if len(param.in) > 0 {
