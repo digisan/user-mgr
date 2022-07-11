@@ -177,22 +177,30 @@ func LoadRel(uname string, flag int, lock bool) (*Rel, bool, error) {
 }
 
 // flag: [FOLLOWING FOLLOWER BLOCK MUTED]
-func ListRel(uname string, flag int, lock bool) []string {
-	if r, ok, err := LoadRel(uname, flag, lock); err == nil && ok {
-		return r.mWithOthers[flag]
+func ListRel(uname string, flag int, lock bool) ([]string, error) {
+	r, ok, err := LoadRel(uname, flag, lock)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	if ok {
+		return r.mWithOthers[flag], nil
+	}
+	return []string{}, nil
 }
 
-func RelMgr(uname string, flags ...int) *Rel {
+func RelMgr(uname string, flags ...int) (*Rel, error) {
 	r := &Rel{uname: uname, mWithOthers: make(map[int][]string)}
 	if len(flags) == 0 {
 		flags = []int{FOLLOWING, FOLLOWER, BLOCKED, MUTED}
 	}
 	for _, flag := range flags {
-		r.mWithOthers[flag] = ListRel(uname, flag, true)
+		names, err := ListRel(uname, flag, true)
+		if err != nil {
+			return nil, err
+		}
+		r.mWithOthers[flag] = names
 	}
-	return r
+	return r, nil
 }
 
 func relAction(me string, flag int, whom string, lock bool) error {
@@ -215,8 +223,14 @@ func relAction(me string, flag int, whom string, lock bool) error {
 
 		switch flag {
 		case FOLLOW, UNFOLLOW:
-			meFollowing := ListRel(me, FOLLOWING, false)
-			whomFollower := ListRel(whom, FOLLOWER, false)
+			meFollowing, err := ListRel(me, FOLLOWING, false)
+			if err != nil {
+				return err
+			}
+			whomFollower, err := ListRel(whom, FOLLOWER, false)
+			if err != nil {
+				return err
+			}
 			did := false
 
 			if flag == FOLLOW && NotIn(whom, meFollowing...) {
@@ -242,7 +256,10 @@ func relAction(me string, flag int, whom string, lock bool) error {
 			}
 
 		case BLOCK, UNBLOCK:
-			blocked := ListRel(me, BLOCKED, lock)
+			blocked, err := ListRel(me, BLOCKED, lock)
+			if err != nil {
+				return err
+			}
 			did := false
 
 			if flag == BLOCK && NotIn(whom, blocked...) {
@@ -265,7 +282,10 @@ func relAction(me string, flag int, whom string, lock bool) error {
 			}
 
 		case MUTE, UNMUTE:
-			muted := ListRel(me, MUTED, lock)
+			muted, err := ListRel(me, MUTED, lock)
+			if err != nil {
+				return err
+			}
 			did := false
 
 			if flag == MUTE && NotIn(whom, muted...) {
@@ -310,7 +330,11 @@ func RelAction(me string, flag int, whom string) error {
 		if !ok {
 			return errors.New("invalid flag when 'whom == ALL', only accept [UNFOLLOW UNBLOCK UNMUTE]")
 		}
-		for _, name := range ListRel(me, status, true) {
+		names, err := ListRel(me, status, true)
+		if err != nil {
+			return err
+		}
+		for _, name := range names {
 			if err := relAction(me, flag, name, true); err != nil {
 				return err
 			}

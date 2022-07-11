@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	lk "github.com/digisan/logkit"
 	u "github.com/digisan/user-mgr/user"
 )
 
@@ -64,7 +65,9 @@ func TestListRel(t *testing.T) {
 
 	uname := "qing"
 
-	fmt.Println("followers:", ListRel(uname, FOLLOWER, true))
+	names, err := ListRel(uname, FOLLOWER, true)
+	lk.FailOnErr("%v", err)
+	fmt.Println("followers:", names)
 	fmt.Println("---------------------------------")
 	fmt.Println(RelMgr(uname))
 }
@@ -98,7 +101,8 @@ func TestRelAction(t *testing.T) {
 	// content := RelContent("qing", FOLLOWING)
 	// fmt.Println(content)
 
-	r := RelMgr("qing")
+	r, err := RelMgr("qing")
+	lk.FailOnErr("%v", err)
 	fmt.Println(RelMgr("qing"))
 	fmt.Println("qing following musk:", r.HasFollowing("musk"))
 	fmt.Println("qing following trump:", r.HasFollowing("trump"))
