@@ -12,41 +12,43 @@ func TestUserInit(t *testing.T) {
 	u.InitDB("./data")
 	defer u.CloseDB()
 
-	usr := u.User{
-		Core: u.Core{
-			UName:    "qing",
-			Email:    "",
-			Password: "",
-		},
-		Profile: u.Profile{
-			Name:           "",
-			Phone:          "",
-			Country:        "",
-			City:           "",
-			Addr:           "",
-			PersonalIDType: "",
-			PersonalID:     "",
-			Gender:         "",
-			DOB:            "",
-			Position:       "",
-			Title:          "",
-			Employer:       "",
-			Bio:            "",
-			AvatarType:     "",
-			Avatar:         []byte{},
-		},
-		Admin: u.Admin{
-			Regtime:   time.Time{},
-			Active:    false,
-			Certified: false,
-			Official:  false,
-			SysRole:   "",
-			MemLevel:  0,
-			MemExpire: time.Time{},
-			Tags:      "",
-		},
+	for _, uname := range []string{"qing", "musk", "trump"} {
+		usr := u.User{
+			Core: u.Core{
+				UName:    uname,
+				Email:    "abc@email.com",
+				Password: "",
+			},
+			Profile: u.Profile{
+				Name:           "",
+				Phone:          "",
+				Country:        "",
+				City:           "",
+				Addr:           "",
+				PersonalIDType: "",
+				PersonalID:     "",
+				Gender:         "",
+				DOB:            "",
+				Position:       "",
+				Title:          "",
+				Employer:       "",
+				Bio:            "",
+				AvatarType:     "",
+				Avatar:         []byte{},
+			},
+			Admin: u.Admin{
+				Regtime:   time.Time{},
+				Active:    true,
+				Certified: false,
+				Official:  false,
+				SysRole:   "",
+				MemLevel:  0,
+				MemExpire: time.Time{},
+				Tags:      "",
+			},
+		}
+		u.UpdateUser(&usr)
 	}
-	u.UpdateUser(&usr)
 }
 
 func TestUserCheck(t *testing.T) {
@@ -60,7 +62,22 @@ func TestListRel(t *testing.T) {
 	InitDB("./data")
 	defer CloseDB()
 
-	fmt.Println("followers:", ListRel("qing", FOLLOWER))
+	uname := "qing"
+
+	fmt.Println("followers:", ListRel(uname, FOLLOWER, true))
+	fmt.Println("---------------------------------")
+	fmt.Println(RelMgr(uname))
+}
+
+func TestClearRel(t *testing.T) {
+
+	u.InitDB("./data")
+	defer u.CloseDB()
+
+	InitDB("./data")
+	defer CloseDB()
+
+	fmt.Println(RelAction("qing", UNFOLLOW, "ALL"))
 }
 
 func TestRelAction(t *testing.T) {
@@ -71,43 +88,41 @@ func TestRelAction(t *testing.T) {
 	InitDB("./data")
 	defer CloseDB()
 
-	fmt.Println(RelAction("qing", DO_FOLLOW, "musk"))
+	// fmt.Println(RelAction("qing", FOLLOW, "trump"))
+	// fmt.Println(RelAction("musk", FOLLOW, "qing"))
 
-	// RelAction("qing", DO_FOLLOW, "trump")
-	// RelAction("qing", DO_UNFOLLOW, "musk")
-	// RelAction("qing", DO_FOLLOW, "musk")
+	// fmt.Println(RelAction("qing", FOLLOW, "trump"))
+	fmt.Println(RelAction("qing", UNFOLLOW, "musk"))
+	fmt.Println(RelAction("qing", FOLLOW, "musk"))
 
 	// content := RelContent("qing", FOLLOWING)
 	// fmt.Println(content)
 
-	// rel := RelMgr("qing")
-	// fmt.Println(rel.HasFollowing("musk"))
+	r := RelMgr("qing")
+	fmt.Println(RelMgr("qing"))
+	fmt.Println("qing following musk:", r.HasFollowing("musk"))
+	fmt.Println("qing following trump:", r.HasFollowing("trump"))
 
-	// fmt.Println("-----------------------")
+	fmt.Println("-----------------------")
+	fmt.Println(RelMgr("musk"))
 
-	// fmt.Println(RelMgr("musk"))
-
-	// fmt.Println("-----------------------")
-
-	// fmt.Println(RelMgr("trump"))
+	fmt.Println("-----------------------")
+	fmt.Println(RelMgr("trump"))
 
 	// fmt.Println(" unfollow -----------------------")
 
-	// RelAction("qing", DO_UNFOLLOW, "musk")
-	// // RelAction(DO_UNFOLLOW, "qing", "trump")
+	// RelAction("qing", UNFOLLOW, "musk")
 
 	// fmt.Println(RelMgr("qing"))
 	// fmt.Println(RelMgr("musk"))
 
-	// RelAction("musk", DO_FOLLOW, "trump")
-
-	// // fmt.Println(RelContent("trump", FOLLOWER))
+	// RelAction("musk", FOLLOW, "trump")
 
 	// fmt.Println(RelMgr("trump"))
 
-	// RelAction("qing", DO_FOLLOW, "biden")
+	// RelAction("qing", FOLLOW, "biden")
 	// fmt.Println(RelMgr("qing"))
 
-	// RelAction("qing", DO_BLOCK, "biden")
+	// RelAction("qing", BLOCK, "biden")
 	// fmt.Println(RelMgr("qing"))
 }

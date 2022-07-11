@@ -155,7 +155,7 @@ func SetValidator(extraValidator map[string]func(o, v any) u.ValRst) {
 ////////////////////////////////////////////////////////////////////////////////////////
 
 func ChkPwd(s string) u.ValRst {
-	pwdLen := 6
+	pwdLen := 4
 	letters, number, upper, special := 0, false, false, false
 	for _, c := range s {
 		switch {
@@ -172,8 +172,8 @@ func ChkPwd(s string) u.ValRst {
 			//return false, false, false, false
 		}
 	}
-	ok := letters >= pwdLen && number && upper && special
-	return u.NewValRst(ok, fSf("password rule: >=%d letter with UPPER,0-9,symbol", pwdLen))
+	ok := letters >= pwdLen && (number || upper || special)
+	return u.NewValRst(ok, fSf("password rule: >=%d letter with at least one UPPER, number or symbol", pwdLen))
 }
 
 // <img src="data:image/png;base64,******/>

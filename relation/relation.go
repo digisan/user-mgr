@@ -1,6 +1,7 @@
 package relation
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -23,12 +24,12 @@ const (
 )
 
 const (
-	DO_FOLLOW int = iota
-	DO_UNFOLLOW
-	DO_BLOCK
-	DO_UNBLOCK
-	DO_MUTE
-	DO_UNMUTE
+	FOLLOW int = iota
+	UNFOLLOW
+	BLOCK
+	UNBLOCK
+	MUTE
+	UNMUTE
 )
 
 type Rel struct {
@@ -77,8 +78,12 @@ func (r *Rel) Marshal(at any) (forKey, forValue []byte) {
 func (r *Rel) Unmarshal(dbKey, dbVal []byte) (any, error) {
 	unames := strings.Split(string(dbKey), SEP)
 	others := strings.Split(string(dbVal), SEP)
+	if len(dbVal) == 0 {
+		others = []string{}
+	}
 	if len(unames) > 1 {
 		r.uname = unames[1]
+		r.mWithOthers = make(map[int][]string)
 		switch unames[0] {
 		case "FI":
 			r.mWithOthers[FOLLOWING] = others
@@ -138,9 +143,11 @@ func RemoveRel(uname string, flag int, lock bool) error {
 }
 
 // flag: [FOLLOWING FOLLOWER BLOCK MUTED]
-func UpdateRel(r *Rel, flag int) error {
-	DbGrp.Lock()
-	defer DbGrp.Unlock()
+func UpdateRel(r *Rel, flag int, lock bool) error {
+	if lock {
+		DbGrp.Lock()
+		defer DbGrp.Unlock()
+	}
 
 	if err := RemoveRel(r.uname, flag, false); err != nil {
 		return err
@@ -149,9 +156,11 @@ func UpdateRel(r *Rel, flag int) error {
 }
 
 // flag: [FOLLOWING FOLLOWER BLOCK MUTED]
-func LoadRel(uname string, flag int) (*Rel, bool, error) {
-	DbGrp.Lock()
-	defer DbGrp.Unlock()
+func LoadRel(uname string, flag int, lock bool) (*Rel, bool, error) {
+	if lock {
+		DbGrp.Lock()
+		defer DbGrp.Unlock()
+	}
 
 	mKey := map[int][]byte{
 		FOLLOWING: []byte("FI" + SEP + uname),
@@ -168,114 +177,118 @@ func LoadRel(uname string, flag int) (*Rel, bool, error) {
 }
 
 // flag: [FOLLOWING FOLLOWER BLOCK MUTED]
-func ListRel(uname string, flag int) []string {
-	if r, ok, err := LoadRel(uname, flag); err == nil && ok {
+func ListRel(uname string, flag int, lock bool) []string {
+	if r, ok, err := LoadRel(uname, flag, lock); err == nil && ok {
 		return r.mWithOthers[flag]
 	}
 	return nil
 }
 
 func RelMgr(uname string, flags ...int) *Rel {
-	r := &Rel{uname: uname}
+	r := &Rel{uname: uname, mWithOthers: make(map[int][]string)}
+	if len(flags) == 0 {
+		flags = []int{FOLLOWING, FOLLOWER, BLOCKED, MUTED}
+	}
 	for _, flag := range flags {
-		r.mWithOthers[flag] = ListRel(uname, flag)
+		r.mWithOthers[flag] = ListRel(uname, flag, true)
 	}
 	return r
 }
 
-func relAction(me string, doFlag int, whom string, lock bool) error {
+func relAction(me string, flag int, whom string, lock bool) error {
 	if lock {
 		DbGrp.Lock()
 		defer DbGrp.Unlock()
 	}
 
+	if len(whom) == 0 {
+		return nil
+	}
+
 	if DbGrp.Rel != nil && u.DbGrp != nil && u.DbGrp.Reg != nil {
+		if !u.UserExists(me, "", false) {
+			return fmt.Errorf("'%s' is not registered", me)
+		}
+		if !u.UserExists(whom, "", false) {
+			return fmt.Errorf("'%s' is not registered", whom)
+		}
 
-		if u.UserExists(whom, "", false) {
+		switch flag {
+		case FOLLOW, UNFOLLOW:
+			meFollowing := ListRel(me, FOLLOWING, false)
+			whomFollower := ListRel(whom, FOLLOWER, false)
+			did := false
 
-			switch doFlag {
-			case DO_FOLLOW, DO_UNFOLLOW:
-
-				meFollowing := ListRel(me, FOLLOWING)
-				whomFollower := ListRel(whom, FOLLOWER)
-				did := false
-
-				if doFlag == DO_FOLLOW && NotIn(whom, meFollowing...) {
-					meFollowing = append(meFollowing, whom)
-					whomFollower = append(whomFollower, me)
-					did = true
-				} else if doFlag == DO_UNFOLLOW && In(whom, meFollowing...) {
-					DelOneEle(&meFollowing, whom)
-					DelOneEle(&whomFollower, me)
-					did = true
+			if flag == FOLLOW && NotIn(whom, meFollowing...) {
+				meFollowing = append(meFollowing, whom)
+				whomFollower = append(whomFollower, me)
+				did = true
+			} else if flag == UNFOLLOW && In(whom, meFollowing...) {
+				DelOneEle(&meFollowing, whom)
+				DelOneEle(&whomFollower, me)
+				did = true
+			}
+			if did {
+				m := map[int][]string{
+					FOLLOWING: meFollowing,
+					FOLLOWER:  whomFollower,
 				}
-				if did {
-					m := map[int][]string{
-						FOLLOWING: meFollowing,
-						FOLLOWER:  whomFollower,
-					}
-					if err := UpdateRel(&Rel{me, m}, FOLLOWING); err != nil {
-						return err
-					}
-					if err := UpdateRel(&Rel{whom, m}, FOLLOWER); err != nil {
-						return err
-					}
+				if err := UpdateRel(&Rel{me, m}, FOLLOWING, false); err != nil {
+					return err
 				}
-
-			case DO_BLOCK, DO_UNBLOCK:
-
-				blocked := ListRel(me, BLOCKED)
-				did := false
-
-				if doFlag == DO_BLOCK && NotIn(whom, blocked...) {
-					blocked = append(blocked, whom)
-					// other actions
-					{
-						relAction(me, DO_UNFOLLOW, whom, false)
-					}
-					//
-					did = true
-				} else if doFlag == DO_UNBLOCK && In(whom, blocked...) {
-					DelOneEle(&blocked, whom)
-					did = true
+				if err := UpdateRel(&Rel{whom, m}, FOLLOWER, false); err != nil {
+					return err
 				}
-				if did {
-					m := map[int][]string{
-						BLOCKED: blocked,
-					}
-					return UpdateRel(&Rel{me, m}, BLOCKED)
-				}
-
-			case DO_MUTE, DO_UNMUTE:
-
-				muted := ListRel(me, MUTED)
-				did := false
-
-				if doFlag == DO_MUTE && NotIn(whom, muted...) {
-					muted = append(muted, whom)
-					// other actions
-					{
-
-					}
-					//
-					did = true
-				} else if doFlag == DO_UNMUTE && In(whom, muted...) {
-					DelOneEle(&muted, whom)
-					did = true
-				}
-				if did {
-					m := map[int][]string{
-						MUTED: muted,
-					}
-					return UpdateRel(&Rel{me, m}, MUTED)
-				}
-
-			default:
-				panic("invalid doFlag, only accept [DO_FOLLOW DO_UNFOLLOW DO_BLOCK DO_UNBLOCK DO_MUTE DO_UNMUTE]")
 			}
 
-		} else {
-			return fmt.Errorf("%s is not registered", whom)
+		case BLOCK, UNBLOCK:
+			blocked := ListRel(me, BLOCKED, lock)
+			did := false
+
+			if flag == BLOCK && NotIn(whom, blocked...) {
+				blocked = append(blocked, whom)
+				// other actions
+				{
+					relAction(me, UNFOLLOW, whom, false)
+				}
+				//
+				did = true
+			} else if flag == UNBLOCK && In(whom, blocked...) {
+				DelOneEle(&blocked, whom)
+				did = true
+			}
+			if did {
+				m := map[int][]string{
+					BLOCKED: blocked,
+				}
+				return UpdateRel(&Rel{me, m}, BLOCKED, false)
+			}
+
+		case MUTE, UNMUTE:
+			muted := ListRel(me, MUTED, lock)
+			did := false
+
+			if flag == MUTE && NotIn(whom, muted...) {
+				muted = append(muted, whom)
+				// other actions
+				{
+
+				}
+				//
+				did = true
+			} else if flag == UNMUTE && In(whom, muted...) {
+				DelOneEle(&muted, whom)
+				did = true
+			}
+			if did {
+				m := map[int][]string{
+					MUTED: muted,
+				}
+				return UpdateRel(&Rel{me, m}, MUTED, false)
+			}
+
+		default:
+			panic("invalid flag, only accept [FOLLOW UNFOLLOW BLOCK UNBLOCK MUTE UNMUTE]")
 		}
 
 	} else {
@@ -284,7 +297,25 @@ func relAction(me string, doFlag int, whom string, lock bool) error {
 	return nil
 }
 
-// doFlag: [DO_FOLLOW, DO_UNFOLLOW, DO_BLOCK, DO_UNBLOCK, DO_MUTE, DO_UNMUTE]
-func RelAction(me string, doFlag int, whom string) error {
-	return relAction(me, doFlag, whom, true)
+// flag: [FOLLOW, UNFOLLOW, BLOCK, UNBLOCK, MUTE, UNMUTE]
+// whom: if "ALL", clear all add flag [UNFOLLOW UNBLOCK UNMUTE]
+func RelAction(me string, flag int, whom string) error {
+	if whom == "ALL" {
+		m := map[int]int{
+			UNFOLLOW: FOLLOWING,
+			UNBLOCK:  BLOCKED,
+			UNMUTE:   MUTED,
+		}
+		status, ok := m[flag]
+		if !ok {
+			return errors.New("invalid flag when 'whom == ALL', only accept [UNFOLLOW UNBLOCK UNMUTE]")
+		}
+		for _, name := range ListRel(me, status, true) {
+			if err := relAction(me, flag, name, true); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	return relAction(me, flag, whom, true)
 }
