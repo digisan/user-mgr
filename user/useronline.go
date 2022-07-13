@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/dgraph-io/badger/v3"
-	bh "github.com/digisan/db-helper/badger-helper"
+	bh "github.com/digisan/db-helper/badger"
 	lk "github.com/digisan/logkit"
 )
 
