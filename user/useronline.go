@@ -13,8 +13,10 @@ import (
 
 // if modified, change 1. KO_OL_***, 2. mFldAddr, 3. 'auto-tags.go', 4. 'validator.go' in sign-up.
 type UserOnline struct {
+	// key
 	Uname string
-	Tm    time.Time
+	// value
+	Tm time.Time
 }
 
 func NewUserOnline(uname string) *UserOnline {

@@ -219,11 +219,11 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) (any, error) {
 		if len(param.in) > 0 {
 
 			var segs [][]byte
-
-			if ip == 0 {
+			switch ip {
+			case 0:
 				segs = bytes.Split(param.in, []byte(SEP))
 				u.key = *(*[16]byte)(segs[KO_Key])
-			} else if ip == 1 {
+			case 1:
 				segs = [][]byte{param.in} // dbVal is one whole block
 			}
 
