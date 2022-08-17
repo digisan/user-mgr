@@ -21,8 +21,7 @@ var (
 		},
 
 		vf.UName: func(o, v any) u.ValRst {
-			ok := !u.UserExists(v.(string), "", false)
-			return u.NewValRst(ok, fSf("[%v] is already existing", v))
+			return ChkUName(v.(string))
 		},
 
 		vf.EmailDB: func(o, v any) u.ValRst {
@@ -153,6 +152,18 @@ func SetValidator(extraValidator map[string]func(o, v any) u.ValRst) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
+
+func ChkUName(s string) u.ValRst {
+	for _, c := range s {
+		if unicode.IsPunct(c) || unicode.IsSymbol(c) || unicode.IsSpace(c) {
+			if NotIn(c, '.', '-', '_') { // only allow '.' '-' '_' in user name
+				return u.NewValRst(false, fSf("user name: [%v] has invalid character [%v]", s, string(c)))
+			}
+		}
+	}
+	ok := !u.UserExists(s, "", false)
+	return u.NewValRst(ok, fSf("[%v] is already existing", s))
+}
 
 func ChkPwd(s string) u.ValRst {
 	pwdLen := 4

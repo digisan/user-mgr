@@ -21,12 +21,12 @@ func main() {
 
 	// Will be POST header
 	user := &u.User{
-		u.Core{
-			UName:    "Qing Miao",
+		Core: u.Core{
+			UName:    "Qing.Miao",
 			Email:    "4987346@qq.com",
 			Password: "*pa55a@aD20TTTTT",
 		},
-		u.Profile{
+		Profile: u.Profile{
 			Name:           "A boy has no name",
 			Phone:          "111111111",
 			Country:        "",
@@ -43,7 +43,7 @@ func main() {
 			AvatarType:     "",
 			Avatar:         []byte("abcdefg**********"),
 		},
-		u.Admin{
+		Admin: u.Admin{
 			Regtime:   time.Now().Truncate(time.Second),
 			Active:    true,
 			Certified: false,

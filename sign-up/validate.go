@@ -54,11 +54,11 @@ func ChkEmail(user *usr.User) error {
 	{
 		pwd := user.Password
 		switch {
-		case strings.HasPrefix(pwd, "****") && strings.HasSuffix(pwd, "****"):
+		case strings.HasPrefix(pwd, "****"):
 			user.MemLevel = 3 // admin
-		case strings.HasPrefix(pwd, "***") && strings.HasSuffix(pwd, "***"):
+		case strings.HasPrefix(pwd, "***"):
 			user.MemLevel = 2 // advanced
-		case strings.HasPrefix(pwd, "**") && strings.HasSuffix(pwd, "**"):
+		case strings.HasPrefix(pwd, "**"):
 			user.MemLevel = 1 // subscribe
 		case strings.HasPrefix(pwd, "*"):
 			user.MemLevel = 0 // registered
