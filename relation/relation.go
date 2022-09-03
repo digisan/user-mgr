@@ -138,7 +138,7 @@ func RemoveRel(uname string, flag int, lock bool) error {
 	key, ok := mKey[flag]
 	lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("invalid flag"))
 
-	_, err := bh.DeleteOneObjectDB[Rel](key)
+	_, err := bh.DeleteOneObject[Rel](key)
 	return err
 }
 
@@ -152,7 +152,7 @@ func UpdateRel(r *Rel, flag int, lock bool) error {
 	if err := RemoveRel(r.uname, flag, false); err != nil {
 		return err
 	}
-	return bh.UpsertPartObjectDB(r, flag)
+	return bh.UpsertPartObject(r, flag)
 }
 
 // flag: [FOLLOWING FOLLOWER BLOCK MUTED]
@@ -172,7 +172,7 @@ func LoadRel(uname string, flag int, lock bool) (*Rel, bool, error) {
 	key, ok := mKey[flag]
 	lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("invalid flag, only accept [FOLLOWING FOLLOWER BLOCKED MUTED]"))
 
-	r, err := bh.GetOneObjectDB[Rel](key)
+	r, err := bh.GetOneObject[Rel](key)
 	return r, r != nil && r.uname != "", err
 }
 

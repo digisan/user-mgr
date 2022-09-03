@@ -334,7 +334,7 @@ func RemoveUser(uname string, lock bool) error {
 		[]byte("F" + SEP + uname + SEP),
 	}
 	for _, prefix := range prefixes {
-		n, err := bh.DeleteFirstObjectDB[User](prefix)
+		n, err := bh.DeleteFirstObject[User](prefix)
 		if err != nil {
 			return err
 		}
@@ -352,7 +352,7 @@ func UpdateUser(u *User) error {
 	if err := RemoveUser(u.UName, false); err != nil {
 		return err
 	}
-	return bh.UpsertOneObjectDB(u)
+	return bh.UpsertOneObject(u)
 }
 
 func LoadUser(uname string, active bool) (*User, bool, error) {
@@ -363,7 +363,7 @@ func LoadUser(uname string, active bool) (*User, bool, error) {
 	if !active {
 		prefix = []byte("F" + SEP + uname + SEP)
 	}
-	u, err := bh.GetFirstObjectDB[User](prefix, nil)
+	u, err := bh.GetFirstObject[User](prefix, nil)
 	return u, err == nil && u != nil && u.Email != "", err
 }
 
@@ -442,7 +442,7 @@ func ListUser(filter func(*User) bool) ([]*User, error) {
 	DbGrp.Lock()
 	defer DbGrp.Unlock()
 
-	return bh.GetObjectsDB([]byte(""), filter)
+	return bh.GetObjects([]byte(""), filter)
 }
 
 func UserExists(uname, email string, activeOnly bool) bool {

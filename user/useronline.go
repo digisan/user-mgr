@@ -140,7 +140,7 @@ func GetOnline(uname string) (*UserOnline, error) {
 	DbGrp.Lock()
 	defer DbGrp.Unlock()
 
-	return bh.GetOneObjectDB[UserOnline]([]byte(uname))
+	return bh.GetOneObject[UserOnline]([]byte(uname))
 }
 
 func RefreshOnline(uname string) (*UserOnline, error) {
@@ -148,19 +148,19 @@ func RefreshOnline(uname string) (*UserOnline, error) {
 	defer DbGrp.Unlock()
 
 	u := NewUserOnline(uname)
-	return u, bh.UpsertOneObjectDB(u)
+	return u, bh.UpsertOneObject(u)
 }
 
 func RmOnline(uname string) (int, error) {
 	DbGrp.Lock()
 	defer DbGrp.Unlock()
 
-	return bh.DeleteOneObjectDB[UserOnline]([]byte(uname))
+	return bh.DeleteOneObject[UserOnline]([]byte(uname))
 }
 
 func OnlineUsers() ([]*UserOnline, error) {
 	DbGrp.Lock()
 	defer DbGrp.Unlock()
 
-	return bh.GetObjectsDB[UserOnline]([]byte(""), nil)
+	return bh.GetObjects[UserOnline]([]byte(""), nil)
 }
