@@ -30,7 +30,7 @@ var (
 		},
 
 		vf.Name: func(o, v any) u.ValRst {
-			ok := len(v.(string)) > 0
+			ok := v == "" || len(v.(string)) > 2
 			return u.NewValRst(ok, "invalid user real name")
 		},
 
