@@ -7,21 +7,21 @@ import (
 )
 
 type Profile struct {
-	Name           string `json:"name" validate:"required,name"`            // real name
-	Phone          string `json:"phone" validate:"phone,phone-db"`          // optional
-	Country        string `json:"country" validate:"country"`               // optional
-	City           string `json:"city" validate:"city"`                     // optional
-	Addr           string `json:"addr" validate:"addr"`                     // optional
-	PersonalIDType string `json:"personalidtype" validate:"personalidtype"` // optional
-	PersonalID     string `json:"personalid" validate:"personalid"`         // optional
-	Gender         string `json:"gender" validate:"gender"`                 // optional
-	DOB            string `json:"dob" validate:"dob"`                       // optional
-	Position       string `json:"position" validate:"position"`             // optional
-	Title          string `json:"title" validate:"title"`                   // optional
-	Employer       string `json:"employer" validate:"employer"`             // optional
-	Bio            string `json:"bio" validate:"bio"`                       // optional
-	AvatarType     string `json:"avatartype" validate:"avatartype"`         // optional
-	Avatar         []byte `json:"avatar" validate:"avatar"`                 // optional
+	Name           string `json:"name" validate:"name"`                     // real name
+	Phone          string `json:"phone" validate:"phone,phone-db"`          //
+	Country        string `json:"country" validate:"country"`               //
+	City           string `json:"city" validate:"city"`                     //
+	Addr           string `json:"addr" validate:"addr"`                     //
+	PersonalIDType string `json:"personalidtype" validate:"personalidtype"` //
+	PersonalID     string `json:"personalid" validate:"personalid"`         //
+	Gender         string `json:"gender" validate:"gender"`                 //
+	DOB            string `json:"dob" validate:"dob"`                       //
+	Position       string `json:"position" validate:"position"`             //
+	Title          string `json:"title" validate:"title"`                   //
+	Employer       string `json:"employer" validate:"employer"`             //
+	Bio            string `json:"bio" validate:"bio"`                       //
+	AvatarType     string `json:"avatartype" validate:"avatartype"`         //
+	Avatar         []byte `json:"avatar" validate:"avatar"`                 //
 }
 
 func (p Profile) String() string {
