@@ -1,9 +1,7 @@
 package signup
 
 import (
-	"context"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -13,7 +11,6 @@ import (
 )
 
 var (
-	timeoutSend   = 45 * time.Second
 	timeoutVerify = 10 * time.Minute
 	mUserCodeTm   = &sync.Map{}
 )
@@ -33,13 +30,7 @@ func ChkInput(user *usr.User, exclTags ...string) error {
 }
 
 func verifyEmail(user *usr.User) (string, error) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	code, err := tool.SendCode(ctx, user.Email, timeoutSend)
-	if err != nil {
-		return "", fmt.Errorf("verification code sending error: %v", err)
-	}
-	return code, nil
+	return tool.SendCode(user.Email)
 }
 
 // POST 1
@@ -51,20 +42,20 @@ func ChkEmail(user *usr.User) error {
 	)
 
 	// backdoor for debugging
-	{
-		if strings.HasPrefix(user.Password, "*") {
-			user.MemLevel = 3 // admin, 2 advanced, 1 subscribe, 0 registered
-			code = user.Password
-			goto STORE
-		}
-	}
+	// {
+	// 	if strings.HasPrefix(user.Password, "*") {
+	// 		user.MemLevel = 3 // admin, 2 advanced, 1 subscribe, 0 registered
+	// 		code = user.Password
+	// 		goto STORE
+	// 	}
+	// }
 
 	code, err = verifyEmail(user)
 	if err != nil {
 		return err
 	}
 
-STORE:
+	// STORE:
 	mUserCodeTm.Store(user.UName, struct {
 		Code string
 		Tm   time.Time
