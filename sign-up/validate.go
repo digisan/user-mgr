@@ -5,7 +5,6 @@ import (
 	"sync"
 	"time"
 
-	lk "github.com/digisan/logkit"
 	"github.com/digisan/user-mgr/tool"
 	usr "github.com/digisan/user-mgr/user"
 )
@@ -17,11 +16,6 @@ var (
 
 func SetVerifyEmailTimeout(t time.Duration) {
 	timeoutVerify = t
-}
-
-// only support gmail now
-func SetCodeEmail(email, password string) {
-	lk.FailOnErr("%v", tool.SetGMail(email, password))
 }
 
 // POST 1
