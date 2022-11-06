@@ -48,7 +48,7 @@ func SendCode(recipient string) (string, error) {
 	// fmt.Println(code)
 	body := fmt.Sprintf("verification code: %s\n", code)
 
-	if ok, _, _, errs := gm.SendMG(subject, body, recipient); ok {
+	if ok, _, _, errs := gm.SendMail(subject, body, recipient); ok {
 		return code, nil
 	} else {
 		if len(errs) > 0 {
