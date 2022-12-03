@@ -8,7 +8,7 @@ require (
 	github.com/digisan/go-generics v0.2.6
 	github.com/digisan/go-mail v0.0.6
 	github.com/digisan/gotk v0.2.6
-	github.com/digisan/logkit v0.1.3
+	github.com/digisan/logkit v0.1.4
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/labstack/echo/v4 v4.9.1
 	gopkg.in/go-playground/validator.v9 v9.31.0
@@ -19,7 +19,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/clbanning/mxj v1.8.4 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
-	github.com/digisan/go-config v0.0.8 // indirect
+	github.com/digisan/go-config v0.0.9 // indirect
 	github.com/digisan/json-tool v0.1.8 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
