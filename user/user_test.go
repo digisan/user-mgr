@@ -10,8 +10,8 @@ import (
 
 	gio "github.com/digisan/gotk/io"
 	"github.com/digisan/gotk/strs"
-	st "github.com/digisan/gotk/struct-tool"
 	lk "github.com/digisan/logkit"
+	. "github.com/digisan/go-generics/v2"
 )
 
 func TestIterTags(t *testing.T) {
@@ -54,9 +54,9 @@ func TestFieldValue(t *testing.T) {
 		},
 	}
 
-	fmt.Println(st.FieldValue(user, "UName"))
+	fmt.Println(FieldValue(user, "UName"))
 	// fmt.Println(user.FieldValue("key")) // panic
-	fmt.Println(st.FieldValue(user, "Avatar"))
+	fmt.Println(FieldValue(user, "Avatar"))
 
 	user.AddTags("abc", "def")
 	fmt.Println("tags:", user.GetTags())

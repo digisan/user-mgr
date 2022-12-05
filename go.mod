@@ -5,9 +5,9 @@ go 1.19
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.4
 	github.com/digisan/db-helper v0.0.18
-	github.com/digisan/go-generics v0.2.6
+	github.com/digisan/go-generics v0.2.7
 	github.com/digisan/go-mail v0.0.6
-	github.com/digisan/gotk v0.2.6
+	github.com/digisan/gotk v0.2.7
 	github.com/digisan/logkit v0.1.4
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/labstack/echo/v4 v4.9.1
@@ -16,7 +16,7 @@ require (
 
 require (
 	github.com/cespare/xxhash v1.1.0 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/clbanning/mxj v1.8.4 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/digisan/go-config v0.0.9 // indirect
@@ -54,9 +54,9 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/crypto v0.3.0 // indirect
 	golang.org/x/net v0.2.0 // indirect
-	golang.org/x/sys v0.2.0 // indirect
-	golang.org/x/text v0.4.0 // indirect
-	golang.org/x/time v0.2.0 // indirect
+	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/text v0.5.0 // indirect
+	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/mail.v2 v2.3.1 // indirect
