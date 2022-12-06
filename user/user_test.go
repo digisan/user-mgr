@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
+	. "github.com/digisan/go-generics/v2"
 	gio "github.com/digisan/gotk/io"
 	"github.com/digisan/gotk/strs"
 	lk "github.com/digisan/logkit"
-	. "github.com/digisan/go-generics/v2"
 )
 
 func TestIterTags(t *testing.T) {
@@ -57,6 +57,12 @@ func TestFieldValue(t *testing.T) {
 	fmt.Println(FieldValue(user, "UName"))
 	// fmt.Println(user.FieldValue("key")) // panic
 	fmt.Println(FieldValue(user, "Avatar"))
+
+	if err := SetFieldValue(user, "Name", "MODIFIED-NAME"); err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Printf("%+v\n", *user)
 
 	user.AddTags("abc", "def")
 	fmt.Println("tags:", user.GetTags())

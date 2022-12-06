@@ -5,9 +5,9 @@ go 1.19
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.4
 	github.com/digisan/db-helper v0.0.18
-	github.com/digisan/go-generics v0.2.7
+	github.com/digisan/go-generics v0.2.11
 	github.com/digisan/go-mail v0.0.6
-	github.com/digisan/gotk v0.2.7
+	github.com/digisan/gotk v0.2.8
 	github.com/digisan/logkit v0.1.4
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/labstack/echo/v4 v4.9.1
@@ -53,7 +53,7 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/crypto v0.3.0 // indirect
-	golang.org/x/net v0.2.0 // indirect
+	golang.org/x/net v0.3.0 // indirect
 	golang.org/x/sys v0.3.0 // indirect
 	golang.org/x/text v0.5.0 // indirect
 	golang.org/x/time v0.3.0 // indirect

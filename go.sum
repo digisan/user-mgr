@@ -27,12 +27,12 @@ github.com/digisan/db-helper v0.0.18 h1:J+dE45+PUwc8u8t/PGmYeiTA8ezmXwOvHXmqSEjm
 github.com/digisan/db-helper v0.0.18/go.mod h1:cU5mKqJV8a94mfXN+2gJ46voA6bfi4zQbRFbf7CU0e4=
 github.com/digisan/go-config v0.0.9 h1:3PYVkkE8LkBq/L2kSjx5yC/oSZWiLMKCBUc+MBHo0DU=
 github.com/digisan/go-config v0.0.9/go.mod h1:ihofbWjY/t6W15bjEwI9S2aCLwLyV0WBhb7TEKzFHxc=
-github.com/digisan/go-generics v0.2.7 h1:Ycev55iJKHTBIjyMd2ulUpa3gH0wnuSCkp0UUMYb3wY=
-github.com/digisan/go-generics v0.2.7/go.mod h1:HoHbkpjEgiw3YQ3QaADIfeFt/kpdODb0qerSbs0PSBA=
+github.com/digisan/go-generics v0.2.11 h1:l37gzGv+qwuL/VsZn+VGrDyEKYZhQavhA0p4ihijPH4=
+github.com/digisan/go-generics v0.2.11/go.mod h1:HoHbkpjEgiw3YQ3QaADIfeFt/kpdODb0qerSbs0PSBA=
 github.com/digisan/go-mail v0.0.6 h1:+fa6Lan0w1RKRpasadJKqk8di0lTj5rInc5ODoqf/tc=
 github.com/digisan/go-mail v0.0.6/go.mod h1:bX7B1xF8V0ab1QxPECP+AM3lFp5uCLLva/k0B3c2Ipo=
-github.com/digisan/gotk v0.2.7 h1:Q/fdYxo/xO/BDS77FOyPshCFJwasuf+kAjuQRXLxWnA=
-github.com/digisan/gotk v0.2.7/go.mod h1:twLn+hzFwGHW1Ruab95Bxh9RjY3tSyHljqyzVfdp/t0=
+github.com/digisan/gotk v0.2.8 h1:ic7/N7eJOpVx1WR+3JebLzIQypDPNq5sCy78n0hpxg4=
+github.com/digisan/gotk v0.2.8/go.mod h1:O77oA2uyBKM43C9DMUuSM9Uoq3eeySnTQQErQkRRYAE=
 github.com/digisan/json-tool v0.1.8 h1:Sp+P3k8mL4Q/K8cS1KmWFZOwPJJLNB/selS4RO3eyh4=
 github.com/digisan/json-tool v0.1.8/go.mod h1:chsEN51aWOQhL7JHXkPgZ3Z25f9GzFVDgLMlPEVmb8o=
 github.com/digisan/logkit v0.1.4 h1:kbs7nl7AqMou5IFm/RG68/HrxRsbu5G2Zfrvmev+CqQ=
@@ -208,8 +208,8 @@ golang.org/x/net v0.0.0-20190620200207-3b0461eec859/go.mod h1:z5CRVTTTmAJ677TzLL
 golang.org/x/net v0.0.0-20200226121028-0de0cce0169b/go.mod h1:z5CRVTTTmAJ677TzLLGU+0bjPO0LkuOLi4/5GtJWs/s=
 golang.org/x/net v0.0.0-20201021035429-f5854403a974/go.mod h1:sp8m0HH+o8qH0wwXwYZr8TS3Oi6o0r6Gce1SSxlDquU=
 golang.org/x/net v0.0.0-20201110031124-69a78807bb2b/go.mod h1:sp8m0HH+o8qH0wwXwYZr8TS3Oi6o0r6Gce1SSxlDquU=
-golang.org/x/net v0.2.0 h1:sZfSu1wtKLGlWI4ZZayP0ck9Y73K1ynO6gqzTdBVdPU=
-golang.org/x/net v0.2.0/go.mod h1:KqCZLdyyvdV855qA2rE3GC2aiw5xGR5TEjj8smXukLY=
+golang.org/x/net v0.3.0 h1:VWL6FNY2bEEmsGVKabSlHu5Irp34xmMRoqb/9lF9lxk=
+golang.org/x/net v0.3.0/go.mod h1:MBQ8lrhLObU/6UmLb4fmbmk5OcyYmqtbGd/9yIeKjEE=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20181108010431-42b317875d0f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
