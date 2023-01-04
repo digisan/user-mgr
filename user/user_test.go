@@ -157,7 +157,7 @@ func TestMakeUserFieldTag(t *testing.T) {
 				for _, tag := range strings.Split(tags, ",") {
 					suffix := ""
 					if strings.Contains(tag, "-") {
-						suffix = strings.ToTitle(strs.SplitPartFromLast(tag, "-", 1))
+						suffix = strings.ToTitle(strs.SplitPartFromLastTo[string](tag, "-", 1))
 					}
 					line := fmt.Sprintf("\t%s = \"%s\"", field.Name+suffix, tag)
 					gio.MustAppendFile(file, []byte(line), true)
