@@ -6,7 +6,8 @@ import (
 	u "github.com/digisan/user-mgr/user"
 )
 
-func IsUserExisting(login *u.User) error {
+// if return nil, which means user exists normally
+func UserStatusIssue(login *u.User) error {
 	if u.UserExists(login.UName, login.Email, true) {
 		return nil
 	}

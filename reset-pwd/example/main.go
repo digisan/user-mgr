@@ -53,7 +53,7 @@ func main() {
 		},
 	}
 
-	if err := rp.IsUserExisting(&usr); err != nil {
+	if err := rp.UserStatusIssue(&usr); err != nil {
 		lk.Log("%v", err)
 		return
 	}
