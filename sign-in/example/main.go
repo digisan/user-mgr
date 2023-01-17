@@ -52,7 +52,7 @@ func main() {
 		},
 	}
 
-	lk.FailOnErr("%v", si.CheckUserExisting(user))
+	lk.FailOnErr("%v", si.IsUserExisting(user))
 	lk.FailOnErrWhen(!si.PwdOK(user), "%v", fmt.Errorf("incorrect password"))
 	lk.FailOnErr("%v", si.Trail(user.UName))
 
