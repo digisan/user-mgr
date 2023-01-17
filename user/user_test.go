@@ -58,7 +58,7 @@ func TestFieldValue(t *testing.T) {
 	// fmt.Println(user.FieldValue("key")) // panic
 	fmt.Println(FieldValue(user, "Avatar"))
 
-	if err := SetFieldValue(user, "Name", "MODIFIED-NAME"); err != nil {
+	if err := SetField(user, "Name", "MODIFIED-NAME"); err != nil {
 		fmt.Println(err)
 		return
 	}
