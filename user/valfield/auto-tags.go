@@ -21,7 +21,7 @@ const (
 	Bio            = "bio"
 	AvatarType     = "avatartype"
 	Avatar         = "avatar"
-	Regtime        = "regtime"
+	RegTime        = "regtime"
 	Active         = "active"
 	Certified      = "certified"
 	Official       = "official"

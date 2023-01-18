@@ -44,7 +44,7 @@ func main() {
 			Avatar:         []byte("abcdefg**********"),
 		},
 		Admin: u.Admin{
-			Regtime:   time.Now().Truncate(time.Second),
+			RegTime:   time.Now().Truncate(time.Second),
 			Active:    true,
 			Certified: false,
 			Official:  false,

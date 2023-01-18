@@ -54,7 +54,7 @@ func TestSaveUser(t *testing.T) {
 			Avatar:         []byte("******"),
 		},
 		Admin{
-			Regtime:   time.Now().Truncate(time.Second),
+			RegTime:   time.Now().Truncate(time.Second),
 			Active:    false,
 			Certified: false,
 			Official:  false,

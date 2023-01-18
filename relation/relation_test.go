@@ -38,7 +38,7 @@ func TestUserInit(t *testing.T) {
 				Avatar:         []byte{},
 			},
 			Admin: u.Admin{
-				Regtime:   time.Time{},
+				RegTime:   time.Time{},
 				Active:    true,
 				Certified: false,
 				Official:  false,

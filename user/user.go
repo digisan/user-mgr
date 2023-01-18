@@ -57,7 +57,7 @@ const (
 	KO_Bio
 	KO_AvatarType
 	// Admin
-	KO_Regtime
+	KO_RegTime
 	KO_SysRole
 	KO_MemLevel
 	KO_MemExpire
@@ -100,7 +100,7 @@ func (u *User) KeyFieldAddr(ko int) any {
 		KO_AvatarType:     &u.AvatarType,
 		// Admin
 		KO_Active:    &u.Active,
-		KO_Regtime:   &u.Regtime,
+		KO_RegTime:   &u.RegTime,
 		KO_SysRole:   &u.SysRole,
 		KO_MemLevel:  &u.MemLevel,
 		KO_MemExpire: &u.MemExpire,
@@ -273,12 +273,12 @@ func (u *User) IsActive() bool {
 }
 
 func (u *User) StampRegTime() {
-	u.Regtime = time.Now()
+	u.RegTime = time.Now()
 }
 
 func (u *User) SinceJoined() time.Duration {
 	t := &time.Time{}
-	t.UnmarshalText([]byte(u.Regtime.Format(time.RFC3339)))
+	t.UnmarshalText([]byte(u.RegTime.Format(time.RFC3339)))
 	return time.Since(*t)
 }
 

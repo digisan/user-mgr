@@ -48,7 +48,7 @@ func TestFieldValue(t *testing.T) {
 			SysRole:   "",
 			MemLevel:  0,
 			MemExpire: time.Time{},
-			Regtime:   time.Now(),
+			RegTime:   time.Now(),
 			Official:  false,
 			Tags:      "",
 		},
@@ -101,7 +101,7 @@ func TestUser(t *testing.T) {
 			SysRole:   "",
 			MemLevel:  3,
 			MemExpire: time.Time{},
-			Regtime:   time.Now().Truncate(time.Second), // must Truncate, otherwise Unmarshal error
+			RegTime:   time.Now().Truncate(time.Second), // must Truncate, otherwise Unmarshal error
 			Official:  false,
 			Tags:      "",
 		},

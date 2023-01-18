@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"time"
 
+	lk "github.com/digisan/logkit"
 	usr "github.com/digisan/user-mgr/user"
-	"github.com/golang-jwt/jwt"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -19,13 +20,15 @@ import (
 func login(c echo.Context) error {
 	// [POST] Form to fill user info
 
+	lk.Log("login")
+
 	user := &usr.User{
-		usr.Core{
+		Core: usr.Core{
 			UName:    c.FormValue("name"),
 			Email:    c.FormValue("name"),
 			Password: "*pa55a@aD20TTTTT",
 		},
-		usr.Profile{
+		Profile: usr.Profile{
 			Name:           "",
 			Phone:          "",
 			Country:        "",
@@ -42,8 +45,8 @@ func login(c echo.Context) error {
 			AvatarType:     "",
 			Avatar:         []byte{},
 		},
-		usr.Admin{
-			Regtime:   time.Now().Truncate(time.Second),
+		Admin: usr.Admin{
+			RegTime:   time.Now().Truncate(time.Second),
 			Active:    true,
 			Certified: false,
 			Official:  false,
@@ -61,36 +64,54 @@ func login(c echo.Context) error {
 		})
 	}
 
-	claims := usr.MakeUserClaims(user)
-	token := claims.GenToken()
+	claims := usr.MakeClaims(user)
+	token := usr.GenerateToken(claims)
 	fmt.Println(token)
+
 	return c.JSON(http.StatusOK, echo.Map{
 		"token": token,
 	})
 }
 
 func accessible(c echo.Context) error {
+
+	lk.Log("accessible")
+
 	return c.String(http.StatusOK, "Accessible")
 }
 
 func restricted(c echo.Context) error {
-	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(*usr.UserClaims)
-	return c.String(http.StatusOK, "Welcome "+claims.UName+"!")
+
+	lk.Log("restricted")
+
+	invoker, err := usr.Invoker(c)
+	if err != nil {
+		return err
+	}
+	return c.String(http.StatusOK, "Welcome "+invoker.UName+"!")
 }
 
 func logout(c echo.Context) error {
-	userTkn := c.Get("user").(*jwt.Token)
-	claims := userTkn.Claims.(*usr.UserClaims)
-	claims.DeleteToken()
-	return c.String(http.StatusOK, "See you "+claims.UName+"!")
+
+	lk.Log("logout")
+
+	invoker, err := usr.Invoker(c)
+	if err != nil {
+		return err
+	}
+
+	invoker.DeleteToken()
+	return c.String(http.StatusOK, "See you "+invoker.UName+"!")
 }
 
 func ValidateToken(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userTkn := c.Get("user").(*jwt.Token)
-		claims := userTkn.Claims.(*usr.UserClaims)
-		if claims.ValidateToken(userTkn.Raw) {
+		token, claims, err := usr.TokenClaimsInHandler(c)
+		if err != nil {
+			return err
+		}
+		invoker := usr.ClaimsToUser(claims)
+		if invoker.ValidateToken(token.Raw) {
 			return next(c)
 		}
 		return c.JSON(http.StatusUnauthorized, map[string]any{
@@ -116,10 +137,7 @@ func main() {
 	r := e.Group("/restricted")
 
 	// Configure middleware with the custom claims type
-	r.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		Claims:     &usr.UserClaims{},
-		SigningKey: []byte(usr.TokenKey()),
-	}))
+	r.Use(echojwt.JWT([]byte(usr.TokenKey())))
 	r.Use(ValidateToken)
 
 	r.GET("", restricted)

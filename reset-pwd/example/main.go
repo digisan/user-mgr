@@ -19,12 +19,12 @@ func main() {
 
 	// Will be GET header
 	usr := u.User{
-		u.Core{
+		Core: u.Core{
 			UName:    "QMiao",
 			Email:    "cdutwhu@outlook.com",
 			Password: "",
 		},
-		u.Profile{
+		Profile: u.Profile{
 			Name:           "",
 			Phone:          "",
 			Country:        "",
@@ -41,8 +41,8 @@ func main() {
 			AvatarType:     "",
 			Avatar:         []byte{},
 		},
-		u.Admin{
-			Regtime:   time.Now().Truncate(time.Second),
+		Admin: u.Admin{
+			RegTime:   time.Now().Truncate(time.Second),
 			Active:    true,
 			Certified: false,
 			Official:  false,

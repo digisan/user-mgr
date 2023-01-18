@@ -46,7 +46,7 @@ var (
 			return u.NewValRst(true, "")
 		},
 
-		vf.Regtime: func(o, v any) u.ValRst {
+		vf.RegTime: func(o, v any) u.ValRst {
 			ok := v != nil && v != time.Time{}
 			return u.NewValRst(ok, "register time is mandatory when signing up successfully")
 		},

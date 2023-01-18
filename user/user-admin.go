@@ -8,7 +8,7 @@ import (
 )
 
 type Admin struct {
-	Regtime   time.Time `json:"regtime" validate:"regtime"`     // register time
+	RegTime   time.Time `json:"regtime" validate:"regtime"`     // register time
 	Active    bool      `json:"active" validate:"active"`       // true/false
 	Certified bool      `json:"certified" validate:"certified"` // true/false
 	Official  bool      `json:"official" validate:"official"`   // official account? true/false
