@@ -268,6 +268,9 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) (any, error) {
 
 ///////////////////////////////////////////////////
 
+// DO NOT  apply below functions directly to user from claims !!!
+// Apply them to user from db or cache !!!
+
 func (u *User) IsActive() bool {
 	return u.Active
 }

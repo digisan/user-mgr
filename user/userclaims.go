@@ -42,7 +42,7 @@ func MakeClaims(user *User) *UserClaims {
 	}
 }
 
-// invoke in 'login'
+// invoke in 'login', store token in cache here
 func GenerateToken(uc *UserClaims) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, uc)
 	ts, err := token.SignedString([]byte(key))
