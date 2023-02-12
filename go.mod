@@ -4,11 +4,11 @@ go 1.20
 
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.5
-	github.com/digisan/db-helper v0.0.22
-	github.com/digisan/go-generics v0.3.0
-	github.com/digisan/go-mail v0.2.0
-	github.com/digisan/gotk v0.3.0
-	github.com/digisan/logkit v0.2.0
+	github.com/digisan/db-helper v0.0.24
+	github.com/digisan/go-generics v0.3.2
+	github.com/digisan/go-mail v0.2.2
+	github.com/digisan/gotk v0.3.2
+	github.com/digisan/logkit v0.2.2
 	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/labstack/echo-jwt/v4 v4.1.0
 	github.com/labstack/echo/v4 v4.10.0
@@ -20,8 +20,8 @@ require (
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
-	github.com/digisan/fileflatter v0.0.7 // indirect
-	github.com/digisan/go-config v0.2.0 // indirect
+	github.com/digisan/fileflatter v0.0.10 // indirect
+	github.com/digisan/go-config v0.2.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
@@ -39,7 +39,7 @@ require (
 	github.com/klauspost/compress v1.15.15 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
-	github.com/mailgun/mailgun-go/v4 v4.8.1 // indirect
+	github.com/mailgun/mailgun-go/v4 v4.8.2 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -55,10 +55,10 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.5.0 // indirect
-	golang.org/x/net v0.5.0 // indirect
-	golang.org/x/sys v0.4.0 // indirect
-	golang.org/x/text v0.6.0 // indirect
+	golang.org/x/crypto v0.6.0 // indirect
+	golang.org/x/net v0.6.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
