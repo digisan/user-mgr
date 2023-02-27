@@ -166,25 +166,33 @@ func ChkUName(s string) u.ValRst {
 }
 
 func ChkPwd(s string) u.ValRst {
-	pwdLen := 4
-	letters, number, upper, special := 0, false, false, false
+	const MinLen = 8
+	number, lower, upper, special := false, false, false, false
 	for _, c := range s {
 		switch {
 		case unicode.IsNumber(c):
 			number = true
 		case unicode.IsUpper(c):
 			upper = true
-			letters++
+		case unicode.IsLower(c):
+			lower = true
 		case unicode.IsPunct(c) || unicode.IsSymbol(c):
 			special = true
-		case unicode.IsLetter(c) || c == ' ':
-			letters++
+		case c == '	' || c == '\t':
+			return u.NewValRst(false, "[space] and [table] are not allowed in password")
+
+		// case unicode.IsLetter(c) || c == ' ':
+
 		default:
 			//return false, false, false, false
 		}
 	}
-	ok := letters >= pwdLen && (number || upper || special)
-	return u.NewValRst(ok, fSf("password rule: >=%d letter with at least one UPPER, number or symbol", pwdLen))
+	ok := len(s) >= MinLen && (number && lower && upper && special)
+	return u.NewValRst(ok, PwdRule(MinLen))
+}
+
+func PwdRule(MinLen int) string {
+	return fSf("Password Rule: No less than %d Characters with 1+ UPPER, 1+ Number and 1+ Symbol", MinLen)
 }
 
 // <img src="data:image/png;base64,******/>
