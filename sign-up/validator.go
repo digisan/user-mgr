@@ -11,6 +11,10 @@ import (
 	vf "github.com/digisan/user-mgr/user/valfield"
 )
 
+const (
+	minPwdLen = 8
+)
+
 var (
 	fSf = fmt.Sprintf
 
@@ -166,7 +170,6 @@ func ChkUName(s string) u.ValRst {
 }
 
 func ChkPwd(s string) u.ValRst {
-	const MinLen = 8
 	number, lower, upper, special := false, false, false, false
 	for _, c := range s {
 		switch {
@@ -187,12 +190,12 @@ func ChkPwd(s string) u.ValRst {
 			//return false, false, false, false
 		}
 	}
-	ok := len(s) >= MinLen && (number && lower && upper && special)
-	return u.NewValRst(ok, PwdRule(MinLen))
+	ok := len(s) >= minPwdLen && (number && lower && upper && special)
+	return u.NewValRst(ok, PwdRule())
 }
 
-func PwdRule(MinLen int) string {
-	return fSf("Password Rule: No less than %d Characters with 1+ UPPER, 1+ Number and 1+ Symbol", MinLen)
+func PwdRule() string {
+	return fSf("No less than %d Characters including at least one UPPER, Number and Symbol", minPwdLen)
 }
 
 // <img src="data:image/png;base64,******/>
