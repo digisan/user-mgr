@@ -191,7 +191,7 @@ func ChkPwd(s string) u.ValRst {
 		}
 	}
 	ok := len(s) >= minPwdLen && (number && lower && upper && special)
-	return u.NewValRst(ok, PwdRule())
+	return u.NewValRst(ok, "Password Rule: " + PwdRule())
 }
 
 func PwdRule() string {
