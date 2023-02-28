@@ -9,16 +9,17 @@ import (
 	u "github.com/digisan/user-mgr/user"
 )
 
-func TestInactiveMonitor(t *testing.T) {
+func TestOfflineMonitor(t *testing.T) {
 
-	u.InitDB("../data/user")
+	u.InitDB("../server-example/data/user")
 	defer u.CloseDB()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	removed := make(chan string, 1024)
-	MonitorInactive(ctx, removed, 20*time.Second, func(uname string) error {
+	SetOfflineTimeout(20 * time.Second)
+	MonitorOffline(ctx, removed, func(uname string) error {
 		_, err := u.RmOnline(uname)
 		return err
 	})

@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
 	lk "github.com/digisan/logkit"
+	si "github.com/digisan/user-mgr/sign-in"
+	so "github.com/digisan/user-mgr/sign-out"
 	usr "github.com/digisan/user-mgr/user"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -70,6 +74,12 @@ func login(c echo.Context) error {
 	claims := usr.MakeClaims(user)
 	token := usr.GenerateToken(claims)
 	fmt.Println(token)
+
+	lk.FailOnErr("%v", si.UserStatusIssue(user))                              // check user existing status
+	lk.FailOnErrWhen(!si.PwdOK(user), "%v", fmt.Errorf("incorrect password")) // check password
+	lk.FailOnErr("%v", si.Trail(user.UName))                                  // this is a user online record notification
+
+	fmt.Println("Login OK")
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"token": token,
@@ -137,6 +147,37 @@ func ValidateToken(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func main() {
+
+	usr.InitDB("./data/user")
+	defer usr.CloseDB()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	///////////////////////////////////////////////////////
+
+	offline := make(chan string, 2048)
+	si.SetOfflineTimeout(10 * time.Second)
+	si.MonitorOffline(ctx, offline, func(uname string) error { return so.Logout(uname) })
+	go func() {
+		for rm := range offline {
+			fmt.Println("offline:", rm)
+			if e := so.Logout(rm); e != nil {
+				log.Fatalf("offline error @%s on %v", rm, e)
+			}
+		}
+	}()
+
+	///////////////////////////////////////////////////////
+
+	usr.SetTokenValidPeriod(20 * time.Second)
+	usr.MonitorTokenExpired(ctx, func(uname string) error {
+		fmt.Printf("[%s]'s session is expired\n", uname)
+		return nil
+	})
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	e := echo.New()
 
 	// Middleware
@@ -149,7 +190,7 @@ func main() {
 	// Unauthenticated route
 	e.GET("/", accessible)
 
-	// Restricted group
+	// Auth group
 	r := e.Group("/auth")
 
 	// Configure middleware with the custom claims type

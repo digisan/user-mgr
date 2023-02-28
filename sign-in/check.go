@@ -19,13 +19,11 @@ func UserStatusIssue(login *u.User) error {
 
 // if successful, then update login user
 func PwdOK(login *u.User) bool {
-
 	mPropVal := map[string]string{
 		"uname": login.UName,
 		"email": login.Email,
 		"phone": login.Phone,
 	}
-
 	for prop, val := range mPropVal {
 		if len(val) == 0 {
 			continue
@@ -36,6 +34,5 @@ func PwdOK(login *u.User) bool {
 			return true
 		}
 	}
-
 	return false
 }

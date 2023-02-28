@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"errors"
 	"sync"
 	"time"
@@ -16,13 +17,53 @@ type UserClaims struct {
 	jwt.RegisteredClaims
 }
 
+type TokenInfo struct {
+	value string
+	start time.Time
+}
+
 var (
-	key     = fd.SelfMD5()
-	smToken = &sync.Map{}
+	key         = fd.SelfMD5()
+	smToken     = &sync.Map{}    // uname: *TokenInfo
+	validPeriod = time.Hour * 24 // default token valid period
 )
 
 func TokenKey() string {
 	return key
+}
+
+func MonitorTokenExpired(ctx context.Context, fnOnGotTokenExp func(uname string) error) {
+	const interval = 15 * time.Second
+	go func(ctx context.Context) {
+		ticker := time.NewTicker(interval)
+		for {
+			select {
+			case <-ticker.C:
+				expUsers := []string{}
+				smToken.Range(func(key, value any) bool {
+					uname := key.(string)
+					tkInfo := value.(*TokenInfo)
+					if time.Since(tkInfo.start) > validPeriod {
+						expUsers = append(expUsers, uname)
+						if fnOnGotTokenExp != nil {
+							lk.WarnOnErr("%v", fnOnGotTokenExp(uname))
+						}
+					}
+					return true
+				})
+				for _, user := range expUsers {
+					smToken.Delete(user)
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}(ctx)
+}
+
+// must invoke this before 'MakeClaims'
+func SetTokenValidPeriod(period time.Duration) {
+	validPeriod = period
 }
 
 // invoke in 'login'
@@ -34,7 +75,7 @@ func MakeClaims(user *User) *UserClaims {
 			Issuer:    "",
 			Subject:   "",
 			Audience:  []string{},
-			ExpiresAt: jwt.NewNumericDate(now.Add(time.Hour * 72)),
+			ExpiresAt: jwt.NewNumericDate(now.Add(validPeriod)),
 			NotBefore: &jwt.NumericDate{},
 			IssuedAt:  jwt.NewNumericDate(now),
 			ID:        "",
@@ -47,7 +88,10 @@ func GenerateToken(uc *UserClaims) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, uc)
 	ts, err := token.SignedString([]byte(key))
 	lk.FailOnErr("%v", err)
-	smToken.Store(uc.UName, ts)
+	smToken.Store(uc.UName, &TokenInfo{
+		value: ts,
+		start: time.Now(),
+	})
 	return ts
 }
 
@@ -58,8 +102,8 @@ func (u *User) DeleteToken() {
 
 // validate token
 func (u *User) ValidateToken(token string) bool {
-	tkn, ok := smToken.Load(u.UName)
-	return ok && tkn == token
+	tkInfo, ok := smToken.Load(u.UName)
+	return ok && tkInfo.(*TokenInfo).value == token
 }
 
 // to fetch field from "claims", map key must be json key.

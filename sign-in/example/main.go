@@ -11,7 +11,7 @@ import (
 
 func main() {
 
-	u.InitDB("../../data/user")
+	u.InitDB("../../server-example/data/user")
 	defer u.CloseDB()
 
 	// get [user] from GET

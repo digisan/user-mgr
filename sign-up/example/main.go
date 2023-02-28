@@ -14,7 +14,7 @@ func main() {
 
 	lk.WarnDetail(false)
 
-	u.InitDB("../../data/user")
+	u.InitDB("../../server-example/data/user")
 	defer u.CloseDB()
 
 	// get [user] from POST
@@ -91,5 +91,5 @@ func main() {
 	// store into db
 	lk.FailOnErr("%v", su.Store(user))
 
-	lk.Log("Sign-up OK")
+	lk.Log("Sign-Up OK")
 }

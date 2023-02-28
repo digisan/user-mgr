@@ -10,7 +10,7 @@ import (
 )
 
 func TestUserInit(t *testing.T) {
-	u.InitDB("./data")
+	u.InitDB("../server-example/data")
 	defer u.CloseDB()
 
 	for _, uname := range []string{"qing", "musk", "trump"} {
@@ -53,7 +53,7 @@ func TestUserInit(t *testing.T) {
 }
 
 func TestUserCheck(t *testing.T) {
-	u.InitDB("./data")
+	u.InitDB("../server-example/data")
 	defer u.CloseDB()
 
 	fmt.Println(u.ListUser(nil))
@@ -74,7 +74,7 @@ func TestListRel(t *testing.T) {
 
 func TestClearRel(t *testing.T) {
 
-	u.InitDB("./data")
+	u.InitDB("../server-example/data")
 	defer u.CloseDB()
 
 	InitDB("./data")
@@ -85,7 +85,7 @@ func TestClearRel(t *testing.T) {
 
 func TestRelAction(t *testing.T) {
 
-	u.InitDB("./data")
+	u.InitDB("../server-example/data")
 	defer u.CloseDB()
 
 	InitDB("./data")

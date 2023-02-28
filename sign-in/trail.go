@@ -8,24 +8,28 @@ import (
 	u "github.com/digisan/user-mgr/user"
 )
 
-const (
-	CheckInterval = 10 * time.Second
+var (
+	offlineTimeout time.Duration = 20 * time.Second
 )
 
+// frequently invoke it at Front-End. Interval should be less than 1 minute
 func Trail(uname string) error {
-	lk.Log("%v Hearbeats", uname)
+	lk.Log("%v Heartbeats:", uname)
 	_, err := u.RefreshOnline(uname)
 	return err
 }
 
-func MonitorInactive(ctx context.Context, inactive chan<- string, offlineTimeout time.Duration, fnOnGotInactive func(uname string) error) {
+func SetOfflineTimeout(period time.Duration) {
+	offlineTimeout = period
+}
 
-	if offlineTimeout <= CheckInterval {
-		offlineTimeout = 2 * CheckInterval
+func MonitorOffline(ctx context.Context, offline chan<- string, fnOnGotOffline func(uname string) error) {
+	const interval = 10 * time.Second
+	if offlineTimeout <= interval {
+		offlineTimeout = 3 * interval
 	}
-
 	go func(ctx context.Context) {
-		ticker := time.NewTicker(CheckInterval)
+		ticker := time.NewTicker(interval)
 		for {
 			select {
 			case <-ticker.C:
@@ -35,10 +39,10 @@ func MonitorInactive(ctx context.Context, inactive chan<- string, offlineTimeout
 					usr, err := u.GetOnline(usr.Uname)
 					lk.WarnOnErr("%v", err)
 					if time.Since(usr.Tm) > offlineTimeout {
-						if fnOnGotInactive != nil {
-							lk.WarnOnErr("%v", fnOnGotInactive(usr.Uname))
+						if fnOnGotOffline != nil {
+							lk.WarnOnErr("%v", fnOnGotOffline(usr.Uname))
 						}
-						inactive <- usr.Uname
+						offline <- usr.Uname
 					}
 				}
 			case <-ctx.Done():
