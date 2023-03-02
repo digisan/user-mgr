@@ -15,6 +15,7 @@ var (
 		return time.Now().Unix() / n
 	}
 	smFrequently = &sync.Map{}
+	smWaiting    = &sync.Map{}
 )
 
 func recordAccess(uname string, span int) (string, int) {
@@ -44,23 +45,32 @@ func delAccessRecord(uname string) int {
 	return len(keys)
 }
 
-func CheckFrequentlyAccess(uname string, spanSeconds, lockThreshold int) {
-	if _, n := recordAccess(uname, spanSeconds); n >= lockThreshold {
+func CheckFrequentlyAccess(uname string, spanSeconds, accessThreshold int) {
+	if _, n := recordAccess(uname, spanSeconds); n >= accessThreshold {
 		smFrequently.Store(uname, struct{}{})
 		return
 	}
 }
 
-func IsFrequentlyAccess(uname string, delay time.Duration) bool {
+func IsFrequentlyAccess(uname string) bool {
 	_, ok := smFrequently.Load(uname)
-	if ok {
-		smFrequently.Delete(uname)
-		delAccessRecord(uname)
-	}
 	return ok
 }
 
-//////////////////////////////////////////////////
+func RemoveFrequentlyAccessRecord(uname string, delay time.Duration) {
+	go func() {
+		if _, ok := smWaiting.Load(uname); ok {
+			return
+		}
+		smWaiting.Store(uname, struct{}{})
+		time.Sleep(delay)
+		smFrequently.Delete(uname)
+		delAccessRecord(uname)
+		smWaiting.Delete(uname)
+	}()
+}
+
+//////////////////////////////////////////////////////////////////////
 
 // if return nil, which means user exists normally
 func UserStatusIssue(login *u.User) error {

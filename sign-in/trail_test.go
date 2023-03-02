@@ -79,16 +79,18 @@ func TestLockCheck(t *testing.T) {
 
 		fmt.Printf("%s trying... %02d\n", uname, i)
 
-		if IsFrequentlyAccess(uname, 5*time.Second) {
-			fmt.Printf("locked, wait %v\n", 5*time.Second)
-			time.Sleep(5 * time.Second)
+		if IsFrequentlyAccess(uname) {
+			delay := 5 * time.Second
+			fmt.Printf("locked, wait %v\n", delay)
+			RemoveFrequentlyAccessRecord(uname, delay)
+			time.Sleep(delay)
 		}
 
-		CheckFrequentlyAccess(uname, 3, 6)
+		CheckFrequentlyAccess(uname, 3, 2)
 
 		// different user is not blocked.
 		// uname = fmt.Sprintf("%s:%d", USER, i)
 
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 	}
 }
