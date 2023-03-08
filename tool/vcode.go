@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	gm "github.com/digisan/go-mail"
 	"github.com/digisan/gotk/crypto"
 	"github.com/digisan/gotk/strs"
-	gm "github.com/digisan/go-mail"
 )
 
 func genCode(email string) string {

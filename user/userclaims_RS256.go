@@ -3,10 +3,10 @@ package user
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
-	fd "github.com/digisan/gotk/filedir"
 	lk "github.com/digisan/logkit"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -23,14 +23,9 @@ type TokenInfo struct {
 }
 
 var (
-	key         = fd.SelfMD5()
 	smToken     = &sync.Map{}    // uname: *TokenInfo
 	validPeriod = time.Hour * 24 // default token valid period
 )
-
-func TokenKey() string {
-	return key
-}
 
 func MonitorTokenExpired(ctx context.Context, fnOnGotTokenExp func(uname string) error) {
 	const interval = 15 * time.Second
@@ -67,7 +62,7 @@ func SetTokenValidPeriod(period time.Duration) {
 }
 
 // invoke in 'login'
-func MakeClaims(user *User) *UserClaims {
+func MakeUserClaims(user *User) *UserClaims {
 	now := time.Now()
 	return &UserClaims{
 		user.Core,
@@ -83,16 +78,32 @@ func MakeClaims(user *User) *UserClaims {
 	}
 }
 
-// invoke in 'login', store token in cache here
-func GenerateToken(uc *UserClaims) string {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, uc)
-	ts, err := token.SignedString([]byte(key))
-	lk.FailOnErr("%v", err)
+// store a copy of token here for further validation
+func (uc *UserClaims) GenerateToken(prvKey []byte) (string, error) {
+
+	key, err := jwt.ParseRSAPrivateKeyFromPEM(prvKey)
+	if err != nil {
+		return "", fmt.Errorf("create: parse key: %w", err)
+	}
+
+	// now := time.Now().UTC()
+	// claims := make(jwt.MapClaims)
+	// claims["dat"] = content             // Our custom data.
+	// claims["exp"] = now.Add(ttl).Unix() // The expiration time after which the token must be disregarded.
+	// claims["iat"] = now.Unix()          // The time at which the token was issued.
+	// claims["nbf"] = now.Unix()          // The time before which the token must be disregarded.
+
+	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, uc).SignedString(key)
+	if err != nil {
+		return "", fmt.Errorf("create: sign token: %w", err)
+	}
+
 	smToken.Store(uc.UName, &TokenInfo{
-		value: ts,
+		value: token,
 		start: time.Now(),
 	})
-	return ts
+
+	return token, nil
 }
 
 // invoke in 'logout'
@@ -101,17 +112,47 @@ func (u *User) DeleteToken() {
 }
 
 // validate token
-func (u *User) ValidateToken(token string) bool {
+func (u *User) ValidateToken(ts string, pubKey []byte) (bool, error) {
+
+	key, err := jwt.ParseRSAPublicKeyFromPEM(pubKey)
+	if err != nil {
+		return false, fmt.Errorf("validate: parse key: %w", err)
+	}
+
+	token, err := jwt.Parse(ts, func(jwtToken *jwt.Token) (interface{}, error) {
+		if _, ok := jwtToken.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("unexpected method: %s", jwtToken.Header["alg"])
+		}
+		return key, nil
+	})
+	if err != nil {
+		return false, fmt.Errorf("validate: %w", err)
+	}
+
+	_, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return false, fmt.Errorf("validate: token to MapClaims")
+	}
+
 	tkInfo, ok := smToken.Load(u.UName)
-	return ok && tkInfo.(*TokenInfo).value == token
+	if !ok || tkInfo.(*TokenInfo).value != ts {
+		return false, fmt.Errorf("validate: token doesn't exist in record")
+	}
+
+	return true, nil
 }
+
+//////////////////////////////////////////////////////////////////
 
 // to fetch field from "claims", map key must be json key.
 // may not struct field name.
 func TokenClaimsInHandler(c echo.Context) (*jwt.Token, jwt.MapClaims, error) {
+	if c.Get("user") == nil {
+		return nil, nil, errors.New("JWT token missing")
+	}
 	token, ok := c.Get("user").(*jwt.Token) // by default token is stored under `user` key
 	if !ok {
-		return nil, nil, errors.New("JWT token missing or invalid")
+		return nil, nil, errors.New("JWT token invalid")
 	}
 	claims, ok := token.Claims.(jwt.MapClaims) // by default claims is of type `jwt.MapClaims`
 	if !ok {

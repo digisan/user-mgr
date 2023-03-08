@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
+	"github.com/digisan/gotk/crypto"
 	lk "github.com/digisan/logkit"
 	si "github.com/digisan/user-mgr/sign-in"
 	so "github.com/digisan/user-mgr/sign-out"
 	usr "github.com/digisan/user-mgr/user"
+	"github.com/golang-jwt/jwt/v4"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -18,8 +21,20 @@ import (
 
 // curl test ref: https://davidwalsh.name/curl-post-file
 
-// curl -X "POST" -F name='Foo Bar' 127.0.0.1:1323/login
-// curl localhost:1323/restricted -H "Authorization: Bearer ******"
+// *** Sign Up first if there is no user existing ***.
+
+// curl -X "POST" -F name='Qing.Miao' 127.0.0.1:1323/login
+// curl localhost:1323/auth -H "Authorization: Bearer ******"
+
+var (
+	prvKey []byte
+	pubKey []byte
+)
+
+func init() {
+	prvKey, _ = os.ReadFile("../server-example/cert/id_rsa")
+	pubKey, _ = os.ReadFile("../server-example/cert/id_rsa.pub")
+}
 
 var user = &usr.User{
 	Core: usr.Core{
@@ -71,13 +86,25 @@ func login(c echo.Context) error {
 		})
 	}
 
-	claims := usr.MakeClaims(user)
-	token := usr.GenerateToken(claims)
+	claims := usr.MakeUserClaims(user)
+	token, err := claims.GenerateToken(prvKey)
+	if err != nil {
+		return err
+	}
+
 	fmt.Println(token)
 
-	lk.FailOnErr("%v", si.UserStatusIssue(user))                              // check user existing status
-	lk.FailOnErrWhen(!si.PwdOK(user), "%v", fmt.Errorf("incorrect password")) // check password
-	lk.FailOnErr("%v", si.Trail(user.UName))                                  // this is a user online record notification
+	// check user existing status
+	if e := si.UserStatusIssue(user); e != nil {
+		return c.String(http.StatusBadRequest, e.Error()+"\n")
+	}
+
+	// check password
+	if !si.PwdOK(user) {
+		return c.String(http.StatusBadRequest, "incorrect password\n")
+	}
+
+	lk.FailOnErr("%v", si.Trail(user.UName)) // this is a user online record notification
 
 	fmt.Println("Login OK")
 
@@ -95,18 +122,18 @@ func accessible(c echo.Context) error {
 
 func auth(c echo.Context) error {
 
-	lk.Log("auth")
+	lk.Warn("---> auth")
 
 	invoker, err := usr.Invoker(c)
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
-	return c.String(http.StatusOK, "Welcome "+invoker.UName+"!")
+	return c.String(http.StatusOK, "Welcome "+invoker.UName+"!\n")
 }
 
 func logout(c echo.Context) error {
 
-	lk.Log("logout")
+	lk.Log("---> logout")
 
 	invoker, err := usr.Invoker(c)
 	if err != nil {
@@ -119,7 +146,7 @@ func logout(c echo.Context) error {
 
 func activate(c echo.Context) error {
 
-	lk.Log("activate")
+	lk.Log("---> activate")
 
 	invoker, err := usr.Invoker(c)
 	if err != nil {
@@ -137,11 +164,11 @@ func ValidateToken(next echo.HandlerFunc) echo.HandlerFunc {
 			return err
 		}
 		invoker := usr.ClaimsToUser(claims)
-		if invoker.ValidateToken(token.Raw) {
+		if ok, err := invoker.ValidateToken(token.Raw, pubKey); ok && err == nil {
 			return next(c)
 		}
 		return c.JSON(http.StatusUnauthorized, map[string]any{
-			"message": "invalid or expired jwt",
+			"message": "invalid or expired JWT",
 		})
 	}
 }
@@ -157,7 +184,7 @@ func main() {
 	///////////////////////////////////////////////////////
 
 	offline := make(chan string, 2048)
-	si.SetOfflineTimeout(10 * time.Second)
+	si.SetOfflineTimeout(300 * time.Second)
 	si.MonitorOffline(ctx, offline, func(uname string) error { return so.Logout(uname) })
 	go func() {
 		for rm := range offline {
@@ -170,7 +197,7 @@ func main() {
 
 	///////////////////////////////////////////////////////
 
-	usr.SetTokenValidPeriod(20 * time.Second)
+	usr.SetTokenValidPeriod(400 * time.Second)
 	usr.MonitorTokenExpired(ctx, func(uname string) error {
 		fmt.Printf("[%s]'s session is expired\n", uname)
 		return nil
@@ -179,27 +206,42 @@ func main() {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	e := echo.New()
+	{
+		// Middleware
+		e.Use(middleware.Logger())
+		e.Use(middleware.Recover())
 
-	// Middleware
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+		// Login route
+		e.POST("/login", login)
 
-	// Login route
-	e.POST("/login", login)
-
-	// Unauthenticated route
-	e.GET("/", accessible)
+		// Unauthenticated route
+		e.GET("/", accessible)
+	}
 
 	// Auth group
 	r := e.Group("/auth")
+	{
+		// Configure middleware with the custom claims type
 
-	// Configure middleware with the custom claims type
-	r.Use(echojwt.JWT([]byte(usr.TokenKey())))
-	r.Use(ValidateToken)
+		// HS256
+		// r.Use(echojwt.JWT(pubKey))
 
-	r.GET("", auth)
-	r.GET("/bye", logout)
-	r.POST("/activate", activate)
+		// RSA
+		r.Use(echojwt.WithConfig(echojwt.Config{
+			KeyFunc: getKey,
+		}))
+
+		r.Use(ValidateToken)
+
+		r.GET("", auth)
+		r.GET("/bye", logout)
+		r.POST("/activate", activate)
+	}
 
 	e.Logger.Fatal(e.Start(":1323"))
+}
+
+func getKey(token *jwt.Token) (interface{}, error) {
+	// lk.Warn("%s\n", token.Raw)
+	return crypto.ParseRsaPublicKeyFromPemStr(string(pubKey))
 }

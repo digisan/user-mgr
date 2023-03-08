@@ -2,8 +2,11 @@ package user
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
+
+	lk "github.com/digisan/logkit"
 )
 
 func TestClaims(t *testing.T) {
@@ -44,12 +47,29 @@ func TestClaims(t *testing.T) {
 	}
 	fmt.Println(user)
 
-	claims := MakeClaims(user)
-	fmt.Println(GenerateToken(claims))
+	prvKey, err := os.ReadFile("../server-example/cert/id_rsa")
+	lk.FailOnErr("%v", err)
+
+	pubKey, err := os.ReadFile("../server-example/cert/id_rsa.pub")
+	lk.FailOnErr("%v", err)
+
+	claims := MakeUserClaims(user)
+	ts, err := claims.GenerateToken(prvKey)
+	lk.FailOnErr("%v", err)
+
+	fmt.Println(ts)
 
 	smToken.Range(func(key, value any) bool {
-		fmt.Println("key ---", key)
-		fmt.Println("val ---", value)
+		fmt.Println("\nkey ---", key)
+		fmt.Println("\nval ---", value.(*TokenInfo).value)
 		return true
 	})
+
+	fmt.Println("---------------------------------------")
+
+	userValidate, err := user.ValidateToken(ts, pubKey)
+	lk.FailOnErr("%v", err)
+
+	fmt.Printf("%+v", userValidate)
+
 }
