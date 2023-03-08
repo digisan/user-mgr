@@ -9,7 +9,7 @@ import (
 	"time"
 
 	. "github.com/digisan/go-generics/v2"
-	gio "github.com/digisan/gotk/io"
+	fd "github.com/digisan/gotk/file-dir"
 	"github.com/digisan/gotk/strs"
 	lk "github.com/digisan/logkit"
 )
@@ -138,9 +138,9 @@ func TestUser(t *testing.T) {
 func TestMakeUserFieldTag(t *testing.T) {
 	const pkg = "valfield"
 	const file = pkg + "/auto-tags.go"
-	gio.MustAppendFile(file, []byte("package "+pkg+"\n"), true)
-	gio.MustAppendFile(file, []byte("const ("), true)
-	defer gio.MustAppendFile(file, []byte("\n)"), false)
+	fd.MustAppendFile(file, []byte("package "+pkg+"\n"), true)
+	fd.MustAppendFile(file, []byte("const ("), true)
+	defer fd.MustAppendFile(file, []byte("\n)"), false)
 
 	const TAG = "validate"
 	// r := regexp.MustCompile(`((required),?)|((email),?)`) // exclude default validator tags
@@ -160,7 +160,7 @@ func TestMakeUserFieldTag(t *testing.T) {
 						suffix = strings.ToTitle(strs.SplitPartFromLastTo[string](tag, "-", 1))
 					}
 					line := fmt.Sprintf("\t%s = \"%s\"", field.Name+suffix, tag)
-					gio.MustAppendFile(file, []byte(line), true)
+					fd.MustAppendFile(file, []byte(line), true)
 				}
 			}
 		}

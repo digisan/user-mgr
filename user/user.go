@@ -13,7 +13,6 @@ import (
 	bh "github.com/digisan/db-helper/badger"
 	. "github.com/digisan/go-generics/v2"
 	"github.com/digisan/gotk/crypto"
-	gio "github.com/digisan/gotk/io"
 	lk "github.com/digisan/logkit"
 )
 
@@ -304,7 +303,7 @@ func (u *User) RmTags(tags ...string) {
 
 func (u *User) SetAvatar(avatarType string, r io.Reader) {
 	u.AvatarType = avatarType
-	u.Avatar = gio.StreamToBytes(r)
+	u.Avatar = StreamToBytes(r)
 }
 
 // 'avatarType' --- e.g. image/png, 'fh' --- FormFile('param')
