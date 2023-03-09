@@ -86,14 +86,6 @@ func login(c echo.Context) error {
 		})
 	}
 
-	claims := usr.MakeUserClaims(user)
-	token, err := claims.GenerateToken(prvKey)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(token)
-
 	// check user existing status
 	if e := si.UserStatusIssue(user); e != nil {
 		return c.String(http.StatusBadRequest, e.Error()+"\n")
@@ -106,7 +98,14 @@ func login(c echo.Context) error {
 
 	lk.FailOnErr("%v", si.Trail(user.UName)) // this is a user online record notification
 
-	fmt.Println("Login OK")
+	fmt.Println("Login OK, Generating Token:")
+
+	claims := usr.MakeUserClaims(user)
+	token, err := claims.GenerateToken(prvKey)
+	if err != nil {
+		return err
+	}
+	fmt.Println(token)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"token": token,
