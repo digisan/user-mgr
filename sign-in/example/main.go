@@ -54,7 +54,7 @@ func main() {
 
 	lk.FailOnErr("%v", si.UserStatusIssue(user))
 	lk.FailOnErrWhen(!si.PwdOK(user), "%v", fmt.Errorf("incorrect password"))
-	lk.FailOnErr("%v", si.Trail(user.UName))
+	lk.FailOnErr("%v", si.Hail(user.UName))
 
 	fmt.Println("Login OK")
 }

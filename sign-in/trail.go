@@ -13,7 +13,7 @@ var (
 )
 
 // frequently invoke it at Front-End. Interval should be less than 1 minute
-func Trail(uname string) error {
+func Hail(uname string) error {
 	lk.Log("%v Heartbeats:", uname)
 	_, err := u.RefreshOnline(uname)
 	return err
@@ -23,7 +23,7 @@ func SetOfflineTimeout(period time.Duration) {
 	offlineTimeout = period
 }
 
-func MonitorOffline(ctx context.Context, offline chan<- string, fnOnGotOffline func(uname string) error) {
+func MonitorOffline(ctx context.Context, cOffline chan<- string, fnOnGotOffline func(uname string) error) {
 	const interval = 10 * time.Second
 	if offlineTimeout <= interval {
 		offlineTimeout = 3 * interval
@@ -42,7 +42,7 @@ func MonitorOffline(ctx context.Context, offline chan<- string, fnOnGotOffline f
 						if fnOnGotOffline != nil {
 							lk.WarnOnErr("%v", fnOnGotOffline(usr.Uname))
 						}
-						offline <- usr.Uname
+						cOffline <- usr.Uname
 					}
 				}
 			case <-ctx.Done():

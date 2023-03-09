@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -96,7 +95,7 @@ func login(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "incorrect password\n")
 	}
 
-	lk.FailOnErr("%v", si.Trail(user.UName)) // this is a user online record notification
+	lk.FailOnErr("%v", si.Hail(user.UName)) // this is a user online record notification
 
 	fmt.Println("Login OK, Generating Token:")
 
@@ -182,25 +181,25 @@ func main() {
 
 	///////////////////////////////////////////////////////
 
-	offline := make(chan string, 2048)
+	cOffline := make(chan string, 2048)
 	si.SetOfflineTimeout(300 * time.Second)
-	si.MonitorOffline(ctx, offline, func(uname string) error { return so.Logout(uname) })
+	si.MonitorOffline(ctx, cOffline, func(uname string) error { return so.Logout(uname) })
 	go func() {
-		for rm := range offline {
-			fmt.Println("offline:", rm)
-			if e := so.Logout(rm); e != nil {
-				log.Fatalf("offline error @%s on %v", rm, e)
-			}
+		for offline := range cOffline {
+			fmt.Println("offline:", offline)
 		}
 	}()
 
 	///////////////////////////////////////////////////////
 
+	cExpired := make(chan string, 2048)
 	usr.SetTokenValidPeriod(400 * time.Second)
-	usr.MonitorTokenExpired(ctx, func(uname string) error {
-		fmt.Printf("[%s]'s session is expired\n", uname)
-		return nil
-	})
+	usr.MonitorTokenExpired(ctx, cExpired, func(uname string) error { return nil })
+	go func() {
+		for exp := range cExpired {
+			fmt.Printf("[%s]'s session is expired\n", exp)
+		}
+	}()
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -27,7 +27,7 @@ var (
 	validPeriod = time.Hour * 24 // default token valid period
 )
 
-func MonitorTokenExpired(ctx context.Context, fnOnGotTokenExp func(uname string) error) {
+func MonitorTokenExpired(ctx context.Context, cExpired chan<- string, fnOnGotTokenExp func(uname string) error) {
 	const interval = 15 * time.Second
 	go func(ctx context.Context) {
 		ticker := time.NewTicker(interval)
@@ -43,6 +43,7 @@ func MonitorTokenExpired(ctx context.Context, fnOnGotTokenExp func(uname string)
 						if fnOnGotTokenExp != nil {
 							lk.WarnOnErr("%v", fnOnGotTokenExp(uname))
 						}
+						cExpired <- uname
 					}
 					return true
 				})

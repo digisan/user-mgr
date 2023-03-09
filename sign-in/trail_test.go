@@ -30,24 +30,24 @@ func TestOfflineMonitor(t *testing.T) {
 	}()
 
 	go func() {
-		Trail("a")
+		Hail("a")
 		time.Sleep(1 * time.Second)
-		Trail("a")
+		Hail("a")
 		time.Sleep(1 * time.Second)
-		Trail("a")
+		Hail("a")
 		time.Sleep(1 * time.Second)
 	}()
 
 	go func() {
-		Trail("b")
+		Hail("b")
 		time.Sleep(1 * time.Second)
-		Trail("c")
+		Hail("c")
 		time.Sleep(1 * time.Second)
 	}()
 
 	go func() {
 		time.Sleep(30 * time.Second)
-		Trail("a")
+		Hail("a")
 	}()
 
 	time.Sleep(1 * time.Minute)
