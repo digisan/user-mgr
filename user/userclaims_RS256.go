@@ -181,3 +181,35 @@ func Invoker(c echo.Context) (*User, error) {
 	}
 	return ClaimsToUser(claims), nil
 }
+
+func ToFullUser(c echo.Context) (*User, error) {
+	_, claims, err := TokenClaimsInHandler(c)
+	if err != nil {
+		return nil, err
+	}
+	userSlim := ClaimsToUser(claims)
+	user, ok, err := LoadAnyUser(userSlim.UName)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, fmt.Errorf("cannot find [%s] for its full fields", userSlim.UName)
+	}
+	return user, nil
+}
+
+func ToActiveFullUser(c echo.Context) (*User, error) {
+	_, claims, err := TokenClaimsInHandler(c)
+	if err != nil {
+		return nil, err
+	}
+	userSlim := ClaimsToUser(claims)
+	user, ok, err := LoadActiveUser(userSlim.UName)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, fmt.Errorf("cannot find active [%s] for its full fields", userSlim.UName)
+	}
+	return user, nil
+}
