@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -301,27 +303,53 @@ func (u *User) RmTags(tags ...string) {
 	u.Tags = strings.TrimSuffix(strings.Join(tags, SEP_TAG), SEP_TAG)
 }
 
-func (u *User) SetAvatar(avatarType string, r io.Reader) {
+func (u *User) SetAvatar(r io.Reader, avatarType string) {
 	u.AvatarType = avatarType
 	u.Avatar = StreamToBytes(r)
 }
 
 // 'avatarType' --- e.g. image/png, 'fh' --- FormFile('param')
 // for example '<img src="data:image/png;base64,******/>'
-func (u *User) SetAvatarByFormFile(avatarType string, fh *multipart.FileHeader) error {
+func (u *User) SetAvatarByFormFile(fh *multipart.FileHeader, x, y, w, h int) error {
 	file, err := fh.Open()
 	if err != nil {
 		return err
 	}
-	u.SetAvatar(avatarType, file)
-	return file.Close()
+	defer file.Close()
+
+	// prepare a temp file for writing, then delete temp file
+	tempAvatar := fmt.Sprintf(`/tmp/temp-avatar-%v`, u.UName)
+	writer, err := os.Create(tempAvatar)
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tempAvatar)
+	defer writer.Close()
+	// write avatar to temp file from file header
+	if _, err = io.Copy(writer, file); err != nil {
+		return err
+	}
+
+	// crop temp image and set it as avatar, then delete cropped file
+	if op, err := cropImage(tempAvatar, fmt.Sprintf(`crop:%d,%d,%d,%d`, x, y, w, h), "png"); err == nil && len(op) != 0 {
+		cropped, err := os.Open(op)
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(op)
+		defer cropped.Close()
+
+		avatarType := "image/" + strings.TrimPrefix(filepath.Ext(fh.Filename), ".")
+		u.SetAvatar(cropped, avatarType)
+	}
+	return nil
 }
 
-func (u *User) AvatarBase64(urlEnc bool) (avatarType, data string) {
+func (u *User) AvatarBase64(urlEnc bool) (data, avatarType string) {
 	if urlEnc {
-		return u.AvatarType, base64.URLEncoding.EncodeToString(u.Avatar)
+		return base64.URLEncoding.EncodeToString(u.Avatar), u.AvatarType
 	}
-	return u.AvatarType, base64.StdEncoding.EncodeToString(u.Avatar)
+	return base64.StdEncoding.EncodeToString(u.Avatar), u.AvatarType
 }
 
 ///////////////////////////////////////////////////
