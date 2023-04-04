@@ -21,7 +21,7 @@ type Profile struct {
 	Employer       string `json:"employer" validate:"employer"`             //
 	Bio            string `json:"bio" validate:"bio"`                       //
 	AvatarType     string `json:"avatartype" validate:"avatartype"`         //
-	Avatar         []byte `json:"avatar" validate:"avatar"`                 //
+	Avatar         []byte `json:"-" validate:"avatar"`                      // DO NOT fill this field value in JSON
 }
 
 func (p Profile) String() string {
