@@ -8,7 +8,7 @@ package user
 
 // 	fd "github.com/digisan/gotk/filedir"
 // 	lk "github.com/digisan/logkit"
-// 	"github.com/golang-jwt/jwt/v4"
+// 	"github.com/golang-jwt/jwt/v5"
 // 	"github.com/labstack/echo/v4"
 // )
 
