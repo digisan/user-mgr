@@ -4,26 +4,36 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/dgraph-io/badger/v3"
+	"github.com/dgraph-io/badger/v4"
+	fd "github.com/digisan/gotk/file-dir"
 	lk "github.com/digisan/logkit"
 )
 
-type DBGrp struct {
+type DatabaseGroup struct {
 	sync.Mutex
-	Reg    *badger.DB
-	Online *badger.DB
+	Registered *badger.DB
+	Online     *badger.DB
+	Signing    *badger.DB
 }
 
 var (
-	onceDB sync.Once // do once
-	DbGrp  *DBGrp    // global, for keeping single instance
+	once  sync.Once      // do once
+	DbGrp *DatabaseGroup // global, for keeping single instance
 )
 
 func open(dir string) *badger.DB {
-	opt := badger.DefaultOptions("").WithInMemory(true)
-	if dir != "" {
+	var opt badger.Options
+	if len(dir) != 0 {
+		if fd.DirExists(dir) {
+			lk.Log("opening dir for BadgerDB: '%s'", dir)
+		} else {
+			lk.Log("creating dir for BadgerDB: '%s'", dir)
+		}
 		opt = badger.DefaultOptions(dir)
 		opt.Logger = nil
+	} else {
+		opt = badger.DefaultOptions("").WithInMemory(true)
+		lk.Log("badger is in-memory mode")
 	}
 	db, err := badger.Open(opt)
 	lk.FailOnErr("%v", err)
@@ -31,12 +41,13 @@ func open(dir string) *badger.DB {
 }
 
 // init global 'dbGrp'
-func InitDB(dir string) *DBGrp {
+func InitDB(dir string) *DatabaseGroup {
 	if DbGrp == nil {
-		onceDB.Do(func() {
-			DbGrp = &DBGrp{
-				Reg:    open(filepath.Join(dir, "registration")),
-				Online: open(filepath.Join(dir, "online")),
+		once.Do(func() {
+			DbGrp = &DatabaseGroup{
+				Registered: open(filepath.Join(dir, "registered")),
+				Online:     open(filepath.Join(dir, "online")),
+				Signing:    open(filepath.Join(dir, "signing")),
 			}
 		})
 	}
@@ -47,12 +58,16 @@ func CloseDB() {
 	DbGrp.Lock()
 	defer DbGrp.Unlock()
 
-	if DbGrp.Reg != nil {
-		lk.FailOnErr("%v", DbGrp.Reg.Close())
-		DbGrp.Reg = nil
+	if DbGrp.Registered != nil {
+		lk.FailOnErr("%v", DbGrp.Registered.Close())
+		DbGrp.Registered = nil
 	}
 	if DbGrp.Online != nil {
 		lk.FailOnErr("%v", DbGrp.Online.Close())
 		DbGrp.Online = nil
+	}
+	if DbGrp.Signing != nil {
+		lk.FailOnErr("%v", DbGrp.Signing.Close())
+		DbGrp.Signing = nil
 	}
 }

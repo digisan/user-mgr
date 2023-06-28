@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dgraph-io/badger/v3"
+	"github.com/dgraph-io/badger/v4"
 	bh "github.com/digisan/db-helper/badger"
 	. "github.com/digisan/go-generics/v2"
 	lk "github.com/digisan/logkit"
@@ -213,7 +213,7 @@ func relAction(me string, flag int, whom string, lock bool) error {
 		return nil
 	}
 
-	if DbGrp.Rel != nil && u.DbGrp != nil && u.DbGrp.Reg != nil {
+	if DbGrp.Rel != nil && u.DbGrp != nil && u.DbGrp.Registered != nil {
 		if !u.UserExists(me, "", false) {
 			return fmt.Errorf("'%s' is not registered", me)
 		}
