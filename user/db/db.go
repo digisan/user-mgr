@@ -1,4 +1,4 @@
-package user
+package db
 
 import (
 	"path/filepath"

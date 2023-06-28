@@ -6,14 +6,16 @@ import (
 	"time"
 
 	lk "github.com/digisan/logkit"
+	"github.com/digisan/user-mgr/user/db"
+	. "github.com/digisan/user-mgr/user/registered"
 )
 
 const dbPath = "../data/db/user"
 
 func TestListUser(t *testing.T) {
 
-	InitDB(dbPath)
-	defer CloseDB()
+	db.InitDB(dbPath)
+	defer db.CloseDB()
 
 	users, err := ListUser(func(u *User) bool {
 		return u.IsActive() || !u.IsActive()
@@ -22,21 +24,22 @@ func TestListUser(t *testing.T) {
 
 	for _, user := range users {
 		fmt.Println(user)
-		fmt.Printf("regstered for %v\n\n", user.SinceJoined())
+		fmt.Printf("%v since registered \n", user.SinceJoined())
 	}
 }
 
 func TestSaveUser(t *testing.T) {
-	InitDB(dbPath)
-	defer CloseDB()
+
+	db.InitDB(dbPath)
+	defer db.CloseDB()
 
 	u := &User{
-		Core{
+		Core: Core{
 			UName:    "unique-user-name",
 			Email:    "hello@abc.com",
 			Password: "123456789a",
 		},
-		Profile{
+		Profile: Profile{
 			Name:           "test-name",
 			Phone:          "111111111",
 			Country:        "",
@@ -53,7 +56,7 @@ func TestSaveUser(t *testing.T) {
 			AvatarType:     "image/png",
 			Avatar:         []byte("******"),
 		},
-		Admin{
+		Admin: Admin{
 			RegTime:   time.Now().Truncate(time.Second),
 			Active:    false,
 			Certified: false,
@@ -70,8 +73,8 @@ func TestSaveUser(t *testing.T) {
 
 func TestOpen(t *testing.T) {
 
-	InitDB(dbPath)
-	defer CloseDB()
+	db.InitDB(dbPath)
+	defer db.CloseDB()
 
 	fmt.Println("---------------------------")
 
@@ -100,8 +103,8 @@ func TestOpen(t *testing.T) {
 
 func TestRemove(t *testing.T) {
 
-	InitDB(dbPath)
-	defer CloseDB()
+	db.InitDB(dbPath)
+	defer db.CloseDB()
 
 	lk.FailOnErr("%v", RemoveUser("unique-user-name", true))
 
@@ -116,8 +119,8 @@ func TestRemove(t *testing.T) {
 
 func TestExisting(t *testing.T) {
 
-	InitDB(dbPath)
-	defer CloseDB()
+	db.InitDB(dbPath)
+	defer db.CloseDB()
 
 	fmt.Println("---", UserExists("unique-user-name", "", false))
 	fmt.Println("---", UserExists("", "hello@abc.com", false))
@@ -127,8 +130,8 @@ func TestExisting(t *testing.T) {
 
 func TestOnlines(t *testing.T) {
 
-	InitDB(dbPath)
-	defer CloseDB()
+	db.InitDB(dbPath)
+	defer db.CloseDB()
 
 	users, err := OnlineUsers()
 	lk.FailOnErr("%v", err)
@@ -140,32 +143,32 @@ func TestOnlines(t *testing.T) {
 
 func TestRefreshOnline(t *testing.T) {
 
-	InitDB(dbPath)
-	defer CloseDB()
+	db.InitDB(dbPath)
+	defer db.CloseDB()
 
 	fmt.Println(RefreshOnline("uname1"))
 }
 
 func TestGetOnline(t *testing.T) {
 
-	InitDB(dbPath)
-	defer CloseDB()
+	db.InitDB(dbPath)
+	defer db.CloseDB()
 
 	fmt.Println(GetOnline("uname1"))
 }
 
 func TestRmOnline(t *testing.T) {
 
-	InitDB(dbPath)
-	defer CloseDB()
+	db.InitDB(dbPath)
+	defer db.CloseDB()
 
 	fmt.Println(RmOnline("uname1"))
 }
 
 func TestUpdateOnlineUser(t *testing.T) {
 
-	InitDB(dbPath)
-	defer CloseDB()
+	db.InitDB(dbPath)
+	defer db.CloseDB()
 
 	RefreshOnline("a")
 	time.Sleep(1 * time.Second)

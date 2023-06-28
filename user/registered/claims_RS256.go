@@ -1,15 +1,13 @@
-package user
+package registered
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"sync"
 	"time"
 
 	lk "github.com/digisan/logkit"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/labstack/echo/v4"
 )
 
 type UserClaims struct {
@@ -141,75 +139,4 @@ func (u *User) ValidateToken(ts string, pubKey []byte) (bool, error) {
 	}
 
 	return true, nil
-}
-
-//////////////////////////////////////////////////////////////////
-
-// to fetch field from "claims", map key must be json key.
-// may not struct field name.
-func TokenClaimsInHandler(c echo.Context) (*jwt.Token, jwt.MapClaims, error) {
-	if c.Get("user") == nil {
-		return nil, nil, errors.New("JWT token missing")
-	}
-	token, ok := c.Get("user").(*jwt.Token) // by default token is stored under `user` key
-	if !ok {
-		return nil, nil, errors.New("JWT token invalid")
-	}
-	claims, ok := token.Claims.(jwt.MapClaims) // by default claims is of type `jwt.MapClaims`
-	if !ok {
-		return nil, nil, errors.New("failed to cast claims as jwt.MapClaims")
-	}
-	return token, claims, nil
-}
-
-func ClaimsToUser(claims jwt.MapClaims) *User {
-	return &User{
-		Core: Core{
-			UName:    claims["uname"].(string),
-			Email:    claims["email"].(string),
-			Password: claims["password"].(string),
-		},
-		Profile: Profile{},
-		Admin:   Admin{},
-	}
-}
-
-func Invoker(c echo.Context) (*User, error) {
-	_, claims, err := TokenClaimsInHandler(c)
-	if err != nil {
-		return nil, err
-	}
-	return ClaimsToUser(claims), nil
-}
-
-func ToFullUser(c echo.Context) (*User, error) {
-	_, claims, err := TokenClaimsInHandler(c)
-	if err != nil {
-		return nil, err
-	}
-	userSlim := ClaimsToUser(claims)
-	user, ok, err := LoadAnyUser(userSlim.UName)
-	if err != nil {
-		return nil, err
-	}
-	if !ok {
-		return nil, fmt.Errorf("cannot find [%s] for its full fields", userSlim.UName)
-	}
-	return user, nil
-}
-
-func ToActiveFullUser(c echo.Context) (*User, error) {
-	_, claims, err := TokenClaimsInHandler(c)
-	if err != nil {
-		return nil, err
-	}
-	userSlim := ClaimsToUser(claims)
-	user, ok, err := LoadActiveUser(userSlim.UName)
-	if err != nil {
-		return nil, err
-	}
-	if !ok {
-		return nil, fmt.Errorf("cannot find active [%s] for its full fields", userSlim.UName)
-	}
-	return user, nil
 }

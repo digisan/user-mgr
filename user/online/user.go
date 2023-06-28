@@ -1,4 +1,4 @@
-package user
+package online
 
 import (
 	"bytes"
@@ -7,23 +7,28 @@ import (
 	"time"
 
 	"github.com/dgraph-io/badger/v4"
-	bh "github.com/digisan/db-helper/badger"
 	lk "github.com/digisan/logkit"
+	"github.com/digisan/user-mgr/user/db"
+)
+
+const (
+	SEP     = "^^"
+	SEP_TAG = "^"
 )
 
 // if modified, change 1. KO_OL_***, 2. mFldAddr, 3. 'auto-tags.go', 4. 'validator.go' in sign-up.
-type UserOnline struct {
+type User struct {
 	// key
 	Uname string
 	// value
 	Tm time.Time
 }
 
-func NewUserOnline(uname string) *UserOnline {
-	return &UserOnline{uname, time.Now().UTC()}
+func NewUser(uname string) *User {
+	return &User{uname, time.Now().UTC()}
 }
 
-func (u UserOnline) String() string {
+func (u User) String() string {
 	return fmt.Sprintf("%s @ %v\n", u.Uname, u.Tm)
 }
 
@@ -39,14 +44,14 @@ const (
 	VO_OL_END
 )
 
-func (u *UserOnline) KeyFieldAddr(ko int) any {
+func (u *User) KeyFieldAddr(ko int) any {
 	mFldAddr := map[int]any{
 		KO_OL_UName: &u.Uname,
 	}
 	return mFldAddr[ko]
 }
 
-func (u *UserOnline) ValFieldAddr(vo int) any {
+func (u *User) ValFieldAddr(vo int) any {
 	mFldAddr := map[int]any{
 		VO_OL_Tm: &u.Tm,
 	}
@@ -55,11 +60,11 @@ func (u *UserOnline) ValFieldAddr(vo int) any {
 
 ////////////////////////////////////////////////////
 
-func (u *UserOnline) BadgerDB() *badger.DB {
-	return DbGrp.Online
+func (u *User) BadgerDB() *badger.DB {
+	return db.DbGrp.Online
 }
 
-func (u *UserOnline) Key() []byte {
+func (u *User) Key() []byte {
 	var (
 		sb = &strings.Builder{}
 	)
@@ -77,7 +82,7 @@ func (u *UserOnline) Key() []byte {
 	return []byte(sb.String())
 }
 
-func (u *UserOnline) Value() []byte {
+func (u *User) Value() []byte {
 	var (
 		sb = &strings.Builder{}
 	)
@@ -98,11 +103,11 @@ func (u *UserOnline) Value() []byte {
 	return []byte(sb.String())
 }
 
-func (u *UserOnline) Marshal(at any) (forKey, forValue []byte) {
+func (u *User) Marshal(at any) (forKey, forValue []byte) {
 	return u.Key(), u.Value()
 }
 
-func (u *UserOnline) Unmarshal(dbKey, dbVal []byte) (any, error) {
+func (u *User) Unmarshal(dbKey, dbVal []byte) (any, error) {
 	params := []struct {
 		in        []byte
 		fnFldAddr func(int) any
@@ -132,35 +137,4 @@ func (u *UserOnline) Unmarshal(dbKey, dbVal []byte) (any, error) {
 		}
 	}
 	return u, nil
-}
-
-///////////////////////////////////////////////////
-
-func GetOnline(uname string) (*UserOnline, error) {
-	DbGrp.Lock()
-	defer DbGrp.Unlock()
-
-	return bh.GetOneObject[UserOnline]([]byte(uname))
-}
-
-func RefreshOnline(uname string) (*UserOnline, error) {
-	DbGrp.Lock()
-	defer DbGrp.Unlock()
-
-	u := NewUserOnline(uname)
-	return u, bh.UpsertOneObject(u)
-}
-
-func RmOnline(uname string) (int, error) {
-	DbGrp.Lock()
-	defer DbGrp.Unlock()
-
-	return bh.DeleteOneObject[UserOnline]([]byte(uname))
-}
-
-func OnlineUsers() ([]*UserOnline, error) {
-	DbGrp.Lock()
-	defer DbGrp.Unlock()
-
-	return bh.GetObjects[UserOnline]([]byte(""), nil)
 }

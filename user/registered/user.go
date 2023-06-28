@@ -1,4 +1,4 @@
-package user
+package registered
 
 import (
 	"bytes"
@@ -12,10 +12,16 @@ import (
 	"time"
 
 	"github.com/dgraph-io/badger/v4"
-	bh "github.com/digisan/db-helper/badger"
 	. "github.com/digisan/go-generics/v2"
 	"github.com/digisan/gotk/crypto"
 	lk "github.com/digisan/logkit"
+	"github.com/digisan/user-mgr/user/db"
+	. "github.com/digisan/user-mgr/user/tool"
+)
+
+const (
+	SEP     = "^^"
+	SEP_TAG = "^"
 )
 
 // if modified, change 1. KO_***, 2. mFldAddr, 3. 'auto-tags.go', 4. 'validator.go' in sign-up.
@@ -140,7 +146,7 @@ var secret = []int{
 ////////////////////////////////////////////////////
 
 func (u *User) BadgerDB() *badger.DB {
-	return DbGrp.Registered
+	return db.DbGrp.Registered
 }
 
 func (u *User) Key() []byte {
@@ -331,7 +337,7 @@ func (u *User) SetAvatarByFormFile(fh *multipart.FileHeader, x, y, w, h int) err
 	}
 
 	// crop temp image and set it as avatar, then delete cropped file
-	if op, err := cropImage(tempAvatar, fmt.Sprintf(`crop:%d,%d,%d,%d`, x, y, w, h), "png"); err == nil && len(op) != 0 {
+	if op, err := CropImage(tempAvatar, fmt.Sprintf(`crop:%d,%d,%d,%d`, x, y, w, h), "png"); err == nil && len(op) != 0 {
 		cropped, err := os.Open(op)
 		if err != nil {
 			return err
@@ -350,199 +356,4 @@ func (u *User) AvatarBase64(urlEnc bool) (data, avatarType string) {
 		return base64.URLEncoding.EncodeToString(u.Avatar), u.AvatarType
 	}
 	return base64.StdEncoding.EncodeToString(u.Avatar), u.AvatarType
-}
-
-///////////////////////////////////////////////////
-
-func RemoveUser(uname string, lock bool) error {
-	if lock {
-		DbGrp.Lock()
-		defer DbGrp.Unlock()
-	}
-	prefixes := [][]byte{
-		[]byte("T" + SEP + uname + SEP),
-		[]byte("F" + SEP + uname + SEP),
-	}
-	for _, prefix := range prefixes {
-		n, err := bh.DeleteFirstObject[User](prefix)
-		if err != nil {
-			return err
-		}
-		if n == 1 {
-			break
-		}
-	}
-	return nil
-}
-
-func UpdateUser(u *User) error {
-	DbGrp.Lock()
-	defer DbGrp.Unlock()
-
-	if err := RemoveUser(u.UName, false); err != nil {
-		return err
-	}
-	return bh.UpsertOneObject(u)
-}
-
-func LoadUser(uname string, active bool) (*User, bool, error) {
-	DbGrp.Lock()
-	defer DbGrp.Unlock()
-
-	prefix := []byte("T" + SEP + uname + SEP)
-	if !active {
-		prefix = []byte("F" + SEP + uname + SEP)
-	}
-	u, err := bh.GetFirstObject[User](prefix, nil)
-	return u, err == nil && u != nil && u.Email != "", err
-}
-
-func LoadActiveUser(uname string) (*User, bool, error) {
-	return LoadUser(uname, true)
-}
-
-func LoadAnyUser(uname string) (*User, bool, error) {
-	uA, okA, errA := LoadUser(uname, true)
-	uD, okD, errD := LoadUser(uname, false)
-	var u *User
-	if okA {
-		u = uA
-	} else if okD {
-		u = uD
-	}
-	var err error
-	if errA != nil {
-		err = errA
-	} else if errD != nil {
-		err = errD
-	}
-	return u, err == nil && (okA || okD), err
-}
-
-func LoadUserByUniProp(propName, propVal string, active bool) (*User, bool, error) {
-	var (
-		err error
-	)
-	users, err := ListUser(func(u *User) bool {
-		flag := u.IsActive()
-		if !active {
-			flag = !u.IsActive()
-		}
-		switch propName {
-		case "uname", "Uname":
-			return flag && u.UName == propVal
-		case "email", "Email":
-			return flag && u.Email == propVal
-		case "phone", "Phone":
-			return flag && u.Phone == propVal
-		default:
-			return false
-		}
-	})
-	if len(users) > 0 {
-		u := users[0]
-		return u, err == nil && u != nil && u.Email != "", err
-	}
-	return nil, false, err
-}
-
-func LoadActiveUserByUniProp(propName, propVal string) (*User, bool, error) {
-	return LoadUserByUniProp(propName, propVal, true)
-}
-
-func LoadAnyUserByUniProp(propName, propVal string) (*User, bool, error) {
-	uA, okA, errA := LoadUserByUniProp(propName, propVal, true)
-	uD, okD, errD := LoadUserByUniProp(propName, propVal, false)
-	var u *User
-	if okA {
-		u = uA
-	} else if okD {
-		u = uD
-	}
-	var err error
-	if errA != nil {
-		err = errA
-	} else if errD != nil {
-		err = errD
-	}
-	return u, err == nil && (okA || okD), err
-}
-
-func ListUser(filter func(*User) bool) ([]*User, error) {
-	DbGrp.Lock()
-	defer DbGrp.Unlock()
-
-	return bh.GetObjects([]byte(""), filter)
-}
-
-func UserExists(uname, email string, activeOnly bool) bool {
-	if activeOnly {
-		// check uname
-		_, ok, err := LoadUser(uname, true)
-		lk.WarnOnErr("%v", err)
-		if ok {
-			return ok
-		}
-		// check email
-		_, ok, err = LoadActiveUserByUniProp("email", email)
-		lk.WarnOnErr("%v", err)
-		return ok
-
-	} else {
-		// check uname
-		_, ok, err := LoadAnyUser(uname)
-		lk.WarnOnErr("%v", err)
-		if ok {
-			return ok
-		}
-		// check email
-		_, ok, err = LoadAnyUserByUniProp("email", email)
-		lk.WarnOnErr("%v", err)
-		return ok
-	}
-}
-
-// only for unique value
-func UsedByOther(uname_self, propName, propVal string) bool {
-	u, ok, err := LoadAnyUserByUniProp(propName, propVal)
-	if err == nil && ok && u != nil {
-		return uname_self != u.UName
-	}
-	return false
-}
-
-func SetUserBoolField(uname, field string, flag bool) (u *User, ok bool, err error) {
-	if u, ok, err = LoadAnyUser(uname); err == nil {
-		if ok {
-			switch field {
-			case "Active", "active", "ACTIVE":
-				u.Active = flag
-			case "Official", "official", "OFFICIAL":
-				u.Official = flag
-			case "Certified", "certified", "CERTIFIED":
-				u.Certified = flag
-			default:
-				lk.FailOnErr("%v", fmt.Errorf("[%s] is unsupported setting BoolField", field))
-			}
-			if err = UpdateUser(u); err != nil {
-				return nil, false, err
-			}
-			u, ok, err = LoadAnyUser(uname)
-			return u, err == nil && ok, err
-		}
-		return nil, false, fmt.Errorf("couldn't find [%s] for setting [%s]", uname, field)
-	}
-	return nil, false, err
-}
-
-func ActivateUser(uname string, flag bool) (*User, bool, error) {
-	return SetUserBoolField(uname, "active", flag)
-}
-
-func OfficializeUser(uname string, flag bool) (*User, bool, error) {
-	return SetUserBoolField(uname, "official", flag)
-}
-
-func CertifyUser(uname string, flag bool) (*User, bool, error) {
-	return SetUserBoolField(uname, "certified", flag)
 }

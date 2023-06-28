@@ -1,4 +1,4 @@
-package user
+package registered
 
 import (
 	"fmt"
@@ -12,6 +12,7 @@ import (
 	fd "github.com/digisan/gotk/file-dir"
 	"github.com/digisan/gotk/strs"
 	lk "github.com/digisan/logkit"
+	. "github.com/digisan/user-mgr/user/tool"
 )
 
 func TestIterTags(t *testing.T) {

@@ -1,8 +1,10 @@
-package user
+package registered
 
 import (
 	"fmt"
 	"testing"
+
+	. "github.com/digisan/user-mgr/user/tool"
 )
 
 func TestCoreFields(t *testing.T) {

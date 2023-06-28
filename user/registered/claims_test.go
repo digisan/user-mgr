@@ -1,4 +1,4 @@
-package user
+package registered
 
 import (
 	"fmt"
@@ -71,5 +71,4 @@ func TestClaims(t *testing.T) {
 	lk.FailOnErr("%v", err)
 
 	fmt.Printf("%+v", userValidate)
-
 }

@@ -1,4 +1,4 @@
-package user
+package registered
 
 import (
 	"fmt"
@@ -8,12 +8,13 @@ import (
 
 	. "github.com/digisan/go-generics/v2"
 	lk "github.com/digisan/logkit"
+	. "github.com/digisan/user-mgr/user/tool"
 	"gopkg.in/go-playground/validator.v9"
 )
 
 type ValRst struct {
-	OK      bool
-	FailErr error
+	OK  bool
+	Err error
 }
 
 func NewValRst(ok bool, failMsg string) ValRst {
@@ -50,7 +51,7 @@ func (user *User) Validate(exclTags ...string) error {
 		tag := vTag             // [tag] must be out of callback
 		err := v.RegisterValidation(vTag, func(fl validator.FieldLevel) bool {
 			rst := fn(user, fl.Field().Interface())
-			mIfFail[tag] = rst.FailErr
+			mIfFail[tag] = rst.Err
 			return rst.OK
 		})
 		lk.FailOnErr("%v", err)

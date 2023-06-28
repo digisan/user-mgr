@@ -1,4 +1,4 @@
-package user
+package tool
 
 import (
 	"errors"
@@ -29,7 +29,7 @@ func ListValidator(objects ...any) (tags []string) {
 	return Settify(tags...)
 }
 
-func loadImage(path string) (image.Image, error) {
+func LoadImage(path string) (image.Image, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -43,14 +43,14 @@ func loadImage(path string) (image.Image, error) {
 	return img, nil
 }
 
-func roi4rgba(img image.Image, left, top, right, bottom int) *image.RGBA {
+func Roi4Rgba(img image.Image, left, top, right, bottom int) *image.RGBA {
 	rect := image.Rect(0, 0, right-left, bottom-top)
 	rgba := image.NewRGBA(rect)
 	draw.Draw(rgba, rect, img, image.Point{left, top}, draw.Src)
 	return rgba
 }
 
-func saveJPG(img image.Image, path string) (image.Image, error) {
+func SaveJPG(img image.Image, path string) (image.Image, error) {
 	out, err := os.Create(path)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func saveJPG(img image.Image, path string) (image.Image, error) {
 	return img, nil
 }
 
-func savePNG(img image.Image, path string) (image.Image, error) {
+func SavePNG(img image.Image, path string) (image.Image, error) {
 	out, err := os.Create(path)
 	if err != nil {
 		return nil, err
@@ -79,32 +79,32 @@ func savePNG(img image.Image, path string) (image.Image, error) {
 }
 
 // note must be 'crop:x,y,w,h'
-func cropImage(fPath, note, outFmt string) (fCrop string, err error) {
+func CropImage(fPath, note, outFmt string) (fCrop string, err error) {
 	x, y, w, h := 0, 0, 0, 0
 	if n, err := fmt.Sscanf(note, "crop:%d,%d,%d,%d", &x, &y, &w, &h); err == nil && n == 4 {
-		img, err := loadImage(fPath)
+		img, err := LoadImage(fPath)
 		if err != nil {
 			return "", err
 		}
 
-		roi := roi4rgba(img, x, y, x+w, y+h)
+		roi := Roi4Rgba(img, x, y, x+w, y+h)
 		fCrop = fd.ChangeFileName(fPath, "", "-crop")
 		fCrop = strings.TrimSuffix(fCrop, filepath.Ext(fCrop))
 
 		switch outFmt {
 		case ".png", "png":
 			fCrop += ".png"
-			if _, err := savePNG(roi, fCrop); err != nil {
+			if _, err := SavePNG(roi, fCrop); err != nil {
 				return "", err
 			}
 		case ".jpg", "jpg":
 			fCrop += ".jpg"
-			if _, err := saveJPG(roi, fCrop); err != nil {
+			if _, err := SaveJPG(roi, fCrop); err != nil {
 				return "", err
 			}
 		default:
 			fCrop += ".png"
-			if _, err := savePNG(roi, fCrop); err != nil {
+			if _, err := SavePNG(roi, fCrop); err != nil {
 				return "", err
 			}
 		}
