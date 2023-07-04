@@ -6,15 +6,15 @@ import (
 	"log"
 	"time"
 
+	. "github.com/digisan/user-mgr/db"
 	si "github.com/digisan/user-mgr/sign-in"
 	so "github.com/digisan/user-mgr/sign-out"
-	u "github.com/digisan/user-mgr/user"
 )
 
 func main() {
 
-	u.InitDB("../../server-example/data/user")
-	defer u.CloseDB()
+	InitDB("../../server-example/data/user")
+	defer CloseDB()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

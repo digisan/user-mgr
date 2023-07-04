@@ -5,25 +5,26 @@ import (
 	"time"
 
 	lk "github.com/digisan/logkit"
+	. "github.com/digisan/user-mgr/db"
 	si "github.com/digisan/user-mgr/sign-in"
-	u "github.com/digisan/user-mgr/user"
+	ur "github.com/digisan/user-mgr/user/registered"
 )
 
 func main() {
 
-	u.InitDB("../../server-example/data/user")
-	defer u.CloseDB()
+	InitDB("../../server-example/data/user")
+	defer CloseDB()
 
 	// get [user] from GET
 
 	// Will be GET header
-	user := &u.User{
-		Core: u.Core{
+	user := &ur.User{
+		Core: ur.Core{
 			UName:    "Qing Miao",
 			Email:    "4987346@qq.com",
 			Password: "*pa55a@aD20TTTTT",
 		},
-		Profile: u.Profile{
+		Profile: ur.Profile{
 			Name:           "A boy has no name",
 			Phone:          "11",
 			Country:        "",
@@ -40,7 +41,7 @@ func main() {
 			AvatarType:     "",
 			Avatar:         []byte("abcdefg**********"),
 		},
-		Admin: u.Admin{
+		Admin: ur.Admin{
 			RegTime:   time.Now().Truncate(time.Second),
 			Active:    true,
 			Certified: false,

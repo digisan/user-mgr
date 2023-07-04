@@ -6,13 +6,12 @@ import (
 
 	bh "github.com/digisan/db-helper/badger"
 	lk "github.com/digisan/logkit"
-	"github.com/digisan/user-mgr/user/db"
-	. "github.com/digisan/user-mgr/user/registered"
-	"github.com/golang-jwt/jwt"
+	. "github.com/digisan/user-mgr/cst"
+	"github.com/digisan/user-mgr/db"
+	ur "github.com/digisan/user-mgr/user/registered"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
-
-///////////////////////////////////////////////////
 
 func RemoveUser(uname string, lock bool) error {
 	if lock {
@@ -24,7 +23,7 @@ func RemoveUser(uname string, lock bool) error {
 		[]byte("F" + SEP + uname + SEP),
 	}
 	for _, prefix := range prefixes {
-		n, err := bh.DeleteFirstObject[User](prefix)
+		n, err := bh.DeleteFirstObject[ur.User](prefix)
 		if err != nil {
 			return err
 		}
@@ -35,7 +34,7 @@ func RemoveUser(uname string, lock bool) error {
 	return nil
 }
 
-func UpdateUser(u *User) error {
+func UpdateUser(u *ur.User) error {
 	db.DbGrp.Lock()
 	defer db.DbGrp.Unlock()
 
@@ -45,7 +44,7 @@ func UpdateUser(u *User) error {
 	return bh.UpsertOneObject(u)
 }
 
-func LoadUser(uname string, active bool) (*User, bool, error) {
+func LoadUser(uname string, active bool) (*ur.User, bool, error) {
 	db.DbGrp.Lock()
 	defer db.DbGrp.Unlock()
 
@@ -53,18 +52,18 @@ func LoadUser(uname string, active bool) (*User, bool, error) {
 	if !active {
 		prefix = []byte("F" + SEP + uname + SEP)
 	}
-	u, err := bh.GetFirstObject[User](prefix, nil)
+	u, err := bh.GetFirstObject[ur.User](prefix, nil)
 	return u, err == nil && u != nil && u.Email != "", err
 }
 
-func LoadActiveUser(uname string) (*User, bool, error) {
+func LoadActiveUser(uname string) (*ur.User, bool, error) {
 	return LoadUser(uname, true)
 }
 
-func LoadAnyUser(uname string) (*User, bool, error) {
+func LoadAnyUser(uname string) (*ur.User, bool, error) {
 	uA, okA, errA := LoadUser(uname, true)
 	uD, okD, errD := LoadUser(uname, false)
-	var u *User
+	var u *ur.User
 	if okA {
 		u = uA
 	} else if okD {
@@ -79,11 +78,11 @@ func LoadAnyUser(uname string) (*User, bool, error) {
 	return u, err == nil && (okA || okD), err
 }
 
-func LoadUserByUniProp(propName, propVal string, active bool) (*User, bool, error) {
+func LoadUserByUniProp(propName, propVal string, active bool) (*ur.User, bool, error) {
 	var (
 		err error
 	)
-	users, err := ListUser(func(u *User) bool {
+	users, err := ListUser(func(u *ur.User) bool {
 		flag := u.IsActive()
 		if !active {
 			flag = !u.IsActive()
@@ -106,14 +105,14 @@ func LoadUserByUniProp(propName, propVal string, active bool) (*User, bool, erro
 	return nil, false, err
 }
 
-func LoadActiveUserByUniProp(propName, propVal string) (*User, bool, error) {
+func LoadActiveUserByUniProp(propName, propVal string) (*ur.User, bool, error) {
 	return LoadUserByUniProp(propName, propVal, true)
 }
 
-func LoadAnyUserByUniProp(propName, propVal string) (*User, bool, error) {
+func LoadAnyUserByUniProp(propName, propVal string) (*ur.User, bool, error) {
 	uA, okA, errA := LoadUserByUniProp(propName, propVal, true)
 	uD, okD, errD := LoadUserByUniProp(propName, propVal, false)
-	var u *User
+	var u *ur.User
 	if okA {
 		u = uA
 	} else if okD {
@@ -128,7 +127,7 @@ func LoadAnyUserByUniProp(propName, propVal string) (*User, bool, error) {
 	return u, err == nil && (okA || okD), err
 }
 
-func ListUser(filter func(*User) bool) ([]*User, error) {
+func ListUser(filter func(*ur.User) bool) ([]*ur.User, error) {
 	db.DbGrp.Lock()
 	defer db.DbGrp.Unlock()
 
@@ -171,7 +170,7 @@ func UsedByOther(uname_self, propName, propVal string) bool {
 	return false
 }
 
-func SetUserBoolField(uname, field string, flag bool) (u *User, ok bool, err error) {
+func SetUserBoolField(uname, field string, flag bool) (u *ur.User, ok bool, err error) {
 	if u, ok, err = LoadAnyUser(uname); err == nil {
 		if ok {
 			switch field {
@@ -195,15 +194,15 @@ func SetUserBoolField(uname, field string, flag bool) (u *User, ok bool, err err
 	return nil, false, err
 }
 
-func ActivateUser(uname string, flag bool) (*User, bool, error) {
+func ActivateUser(uname string, flag bool) (*ur.User, bool, error) {
 	return SetUserBoolField(uname, "active", flag)
 }
 
-func OfficializeUser(uname string, flag bool) (*User, bool, error) {
+func OfficializeUser(uname string, flag bool) (*ur.User, bool, error) {
 	return SetUserBoolField(uname, "official", flag)
 }
 
-func CertifyUser(uname string, flag bool) (*User, bool, error) {
+func CertifyUser(uname string, flag bool) (*ur.User, bool, error) {
 	return SetUserBoolField(uname, "certified", flag)
 }
 
@@ -212,12 +211,14 @@ func CertifyUser(uname string, flag bool) (*User, bool, error) {
 // to fetch field from "claims", map key must be json key.
 // may not struct field name.
 func TokenClaimsInHandler(c echo.Context) (*jwt.Token, jwt.MapClaims, error) {
-	if c.Get("user") == nil {
-		return nil, nil, errors.New("JWT token missing")
+	u := c.Get("user")
+	// fmt.Printf("--->\n%v\n", u)
+	if u == nil {
+		return nil, nil, errors.New("JWT token missing, (echo.Context cannot get 'user')")
 	}
-	token, ok := c.Get("user").(*jwt.Token) // by default token is stored under `user` key
+	token, ok := u.(*jwt.Token) // by default token is stored under `user` key
 	if !ok {
-		return nil, nil, errors.New("JWT token invalid")
+		return nil, nil, errors.New("JWT token invalid, ('user' in echo.Context cannot be *jwt.Token))")
 	}
 	claims, ok := token.Claims.(jwt.MapClaims) // by default claims is of type `jwt.MapClaims`
 	if !ok {
@@ -226,19 +227,19 @@ func TokenClaimsInHandler(c echo.Context) (*jwt.Token, jwt.MapClaims, error) {
 	return token, claims, nil
 }
 
-func ClaimsToUser(claims jwt.MapClaims) *User {
-	return &User{
-		Core: Core{
+func ClaimsToUser(claims jwt.MapClaims) *ur.User {
+	return &ur.User{
+		Core: ur.Core{
 			UName:    claims["uname"].(string),
 			Email:    claims["email"].(string),
 			Password: claims["password"].(string),
 		},
-		Profile: Profile{},
-		Admin:   Admin{},
+		Profile: ur.Profile{},
+		Admin:   ur.Admin{},
 	}
 }
 
-func Invoker(c echo.Context) (*User, error) {
+func Invoker(c echo.Context) (*ur.User, error) {
 	_, claims, err := TokenClaimsInHandler(c)
 	if err != nil {
 		return nil, err
@@ -246,7 +247,7 @@ func Invoker(c echo.Context) (*User, error) {
 	return ClaimsToUser(claims), nil
 }
 
-func ToFullUser(c echo.Context) (*User, error) {
+func ToFullUser(c echo.Context) (*ur.User, error) {
 	_, claims, err := TokenClaimsInHandler(c)
 	if err != nil {
 		return nil, err
@@ -262,7 +263,7 @@ func ToFullUser(c echo.Context) (*User, error) {
 	return user, nil
 }
 
-func ToActiveFullUser(c echo.Context) (*User, error) {
+func ToActiveFullUser(c echo.Context) (*ur.User, error) {
 	_, claims, err := TokenClaimsInHandler(c)
 	if err != nil {
 		return nil, err

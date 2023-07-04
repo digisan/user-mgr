@@ -7,6 +7,7 @@ import (
 	"time"
 
 	u "github.com/digisan/user-mgr/user"
+	ur "github.com/digisan/user-mgr/user/registered"
 )
 
 var (
@@ -73,7 +74,7 @@ func RemoveFrequentlyAccessRecord(uname string, delay time.Duration) {
 //////////////////////////////////////////////////////////////////////
 
 // if return nil, which means user exists normally
-func UserStatusIssue(login *u.User) error {
+func UserStatusIssue(login *ur.User) error {
 	uname, email := login.UName, login.Email
 	if u.UserExists(uname, email, true) {
 		return nil
@@ -85,7 +86,7 @@ func UserStatusIssue(login *u.User) error {
 }
 
 // if successful, then update login user
-func PwdOK(login *u.User) bool {
+func PwdOK(login *ur.User) bool {
 	mPropVal := map[string]string{
 		"uname": login.UName,
 		"email": login.Email,

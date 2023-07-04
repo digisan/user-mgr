@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/digisan/user-mgr/user/tool"
+	. "github.com/digisan/user-mgr/util"
 )
 
 func TestAdminFields(t *testing.T) {

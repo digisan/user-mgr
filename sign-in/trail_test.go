@@ -6,13 +6,14 @@ import (
 	"testing"
 	"time"
 
+	. "github.com/digisan/user-mgr/db"
 	u "github.com/digisan/user-mgr/user"
 )
 
 func TestOfflineMonitor(t *testing.T) {
 
-	u.InitDB("../server-example/data/user")
-	defer u.CloseDB()
+	InitDB("../server-example/data/user")
+	defer CloseDB()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

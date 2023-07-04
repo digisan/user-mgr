@@ -9,9 +9,11 @@ import (
 
 	"github.com/digisan/gotk/crypto"
 	lk "github.com/digisan/logkit"
+	. "github.com/digisan/user-mgr/db"
 	si "github.com/digisan/user-mgr/sign-in"
 	so "github.com/digisan/user-mgr/sign-out"
-	usr "github.com/digisan/user-mgr/user"
+	u "github.com/digisan/user-mgr/user"
+	ur "github.com/digisan/user-mgr/user/registered"
 	"github.com/golang-jwt/jwt/v5"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -35,13 +37,15 @@ func init() {
 	pubKey, _ = os.ReadFile("../server-example/cert/id_rsa.pub")
 }
 
-var user = &usr.User{
-	Core: usr.Core{
+// registered below user from /sign-up/example
+
+var user = &ur.User{
+	Core: ur.Core{
 		UName:    "",
 		Email:    "",
 		Password: "*pa55a@aD20TTTTT",
 	},
-	Profile: usr.Profile{
+	Profile: ur.Profile{
 		Name:           "",
 		Phone:          "",
 		Country:        "",
@@ -58,7 +62,7 @@ var user = &usr.User{
 		AvatarType:     "",
 		Avatar:         []byte{},
 	},
-	Admin: usr.Admin{
+	Admin: ur.Admin{
 		RegTime:   time.Now().Truncate(time.Second),
 		Active:    false,
 		Certified: false,
@@ -99,7 +103,7 @@ func login(c echo.Context) error {
 
 	fmt.Println("Login OK, Generating Token:")
 
-	claims := usr.MakeUserClaims(user)
+	claims := u.MakeUserClaims(user)
 	token, err := claims.GenerateToken(prvKey)
 	if err != nil {
 		return err
@@ -122,7 +126,7 @@ func auth(c echo.Context) error {
 
 	lk.Warn("---> auth")
 
-	invoker, err := usr.Invoker(c)
+	invoker, err := u.Invoker(c)
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
@@ -133,12 +137,12 @@ func logout(c echo.Context) error {
 
 	lk.Log("---> logout")
 
-	invoker, err := usr.Invoker(c)
+	invoker, err := u.Invoker(c)
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
-	invoker.DeleteToken()
+	u.DeleteToken(invoker)
 	return c.String(http.StatusOK, "See you "+invoker.UName+"!")
 }
 
@@ -146,7 +150,7 @@ func activate(c echo.Context) error {
 
 	lk.Log("---> activate")
 
-	invoker, err := usr.Invoker(c)
+	invoker, err := u.Invoker(c)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -157,12 +161,12 @@ func activate(c echo.Context) error {
 
 func ValidateToken(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		token, claims, err := usr.TokenClaimsInHandler(c)
+		token, claims, err := u.TokenClaimsInHandler(c)
 		if err != nil {
 			return err
 		}
-		invoker := usr.ClaimsToUser(claims)
-		if ok, err := invoker.ValidateToken(token.Raw, pubKey); ok && err == nil {
+		invoker := u.ClaimsToUser(claims)
+		if ok, err := u.ValidateToken(invoker, token.Raw, pubKey); ok && err == nil {
 			return next(c)
 		}
 		return c.JSON(http.StatusUnauthorized, map[string]any{
@@ -173,8 +177,8 @@ func ValidateToken(next echo.HandlerFunc) echo.HandlerFunc {
 
 func main() {
 
-	usr.InitDB("./data/user")
-	defer usr.CloseDB()
+	InitDB("./data/user")
+	defer CloseDB()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -182,7 +186,7 @@ func main() {
 	///////////////////////////////////////////////////////
 
 	cOffline := make(chan string, 2048)
-	si.SetOfflineTimeout(300 * time.Second)
+	si.SetOfflineTimeout(1800 * time.Second)
 	si.MonitorOffline(ctx, cOffline, func(uname string) error { return so.Logout(uname) })
 	go func() {
 		for offline := range cOffline {
@@ -193,8 +197,8 @@ func main() {
 	///////////////////////////////////////////////////////
 
 	cExpired := make(chan string, 2048)
-	usr.SetTokenValidPeriod(400 * time.Second)
-	usr.MonitorTokenExpired(ctx, cExpired, func(uname string) error { return nil })
+	u.SetTokenValidPeriod(400 * time.Second)
+	u.MonitorTokenExpired(ctx, cExpired, func(uname string) error { return nil })
 	go func() {
 		for exp := range cExpired {
 			fmt.Printf("[%s]'s session is expired\n", exp)

@@ -11,9 +11,10 @@ import (
 
 type DatabaseGroup struct {
 	sync.Mutex
-	Registered *badger.DB
-	Online     *badger.DB
-	Signing    *badger.DB
+	Registered *badger.DB // registered user
+	Online     *badger.DB // online user
+	Signing    *badger.DB // signing up in progress, but hasn't finished user
+	Rel        *badger.DB // users relationship, such as following
 }
 
 var (
@@ -48,6 +49,7 @@ func InitDB(dir string) *DatabaseGroup {
 				Registered: open(filepath.Join(dir, "registered")),
 				Online:     open(filepath.Join(dir, "online")),
 				Signing:    open(filepath.Join(dir, "signing")),
+				Rel:        open(filepath.Join(dir, "relation")),
 			}
 		})
 	}
@@ -69,5 +71,9 @@ func CloseDB() {
 	if DbGrp.Signing != nil {
 		lk.FailOnErr("%v", DbGrp.Signing.Close())
 		DbGrp.Signing = nil
+	}
+	if DbGrp.Rel != nil {
+		lk.FailOnErr("%v", DbGrp.Rel.Close())
+		DbGrp.Rel = nil
 	}
 }

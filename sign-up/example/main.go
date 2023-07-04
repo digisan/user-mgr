@@ -5,28 +5,29 @@ import (
 	"time"
 
 	lk "github.com/digisan/logkit"
+	. "github.com/digisan/user-mgr/db"
 	su "github.com/digisan/user-mgr/sign-up"
 	u "github.com/digisan/user-mgr/user"
-	vf "github.com/digisan/user-mgr/user/valfield"
+	ur "github.com/digisan/user-mgr/user/registered"
 )
 
 func main() {
 
 	lk.WarnDetail(false)
 
-	u.InitDB("../../server-example/data/user")
-	defer u.CloseDB()
+	InitDB("../../server-example/data/user")
+	defer CloseDB()
 
 	// get [user] from POST
 
 	// Will be POST header
-	user := &u.User{
-		Core: u.Core{
+	user := &ur.User{
+		Core: ur.Core{
 			UName:    "Qing.Miao",
 			Email:    "4987346@qq.com",
 			Password: "*pa55a@aD20TTTTT",
 		},
-		Profile: u.Profile{
+		Profile: ur.Profile{
 			Name:           "A boy has no name",
 			Phone:          "111111111",
 			Country:        "",
@@ -43,7 +44,7 @@ func main() {
 			AvatarType:     "",
 			Avatar:         []byte("abcdefg**********"),
 		},
-		Admin: u.Admin{
+		Admin: ur.Admin{
 			RegTime:   time.Now().Truncate(time.Second),
 			Active:    true,
 			Certified: false,
@@ -55,14 +56,14 @@ func main() {
 		},
 	}
 
-	su.SetValidator(map[string]func(o any, v any) u.ValRst{
-		vf.Employer: func(o, v any) u.ValRst {
+	su.SetValidator(map[string]func(o any, v any) u.ValidateResult{
+		u.Employer: func(o, v any) u.ValidateResult {
 			ok := len(v.(string)) > 6
-			return u.NewValRst(ok, "at least 6 length for employer")
+			return u.NewValidateResult(ok, "at least 6 length for employer")
 		},
 	})
 
-	if err := su.ChkInput(user, vf.Phone); err != nil { // vf.Phone
+	if err := su.ChkInput(user, u.Phone); err != nil { // vf.Phone
 		lk.WarnOnErr("%v", err)
 		return
 	}

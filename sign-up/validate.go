@@ -5,8 +5,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/digisan/user-mgr/tool"
-	usr "github.com/digisan/user-mgr/user"
+	u "github.com/digisan/user-mgr/user"
+	ur "github.com/digisan/user-mgr/user/registered"
+	. "github.com/digisan/user-mgr/util"
 )
 
 var (
@@ -19,16 +20,16 @@ func SetVerifyEmailTimeout(t time.Duration) {
 }
 
 // POST 1
-func ChkInput(user *usr.User, exclTags ...string) error {
-	return user.Validate(exclTags...)
+func ChkInput(user *ur.User, exclTags ...string) error {
+	return u.Validate(user, exclTags...)
 }
 
-func verifyEmail(user *usr.User) (string, error) {
-	return tool.SendCode(user.Email)
+func verifyEmail(user *ur.User) (string, error) {
+	return SendCode(user.Email)
 }
 
 // POST 1
-func ChkEmail(user *usr.User) error {
+func ChkEmail(user *ur.User) error {
 
 	var (
 		code string
@@ -53,13 +54,13 @@ func ChkEmail(user *usr.User) error {
 	mUserCodeTm.Store(user.UName, struct {
 		Code string
 		Tm   time.Time
-		user *usr.User
+		user *ur.User
 	}{code, time.Now(), user})
 	return nil
 }
 
 // POST 2
-func VerifyCode(uname, incode string) (*usr.User, error) {
+func VerifyCode(uname, incode string) (*ur.User, error) {
 
 	// fmt.Println("Input your code sent to you email")
 	// incode := ""
@@ -73,7 +74,7 @@ func VerifyCode(uname, incode string) (*usr.User, error) {
 	ctu := val.(struct {
 		Code string
 		Tm   time.Time
-		user *usr.User
+		user *ur.User
 	})
 
 	if time.Since(ctu.Tm) > timeoutVerify {

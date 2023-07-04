@@ -8,12 +8,8 @@ import (
 
 	"github.com/dgraph-io/badger/v4"
 	lk "github.com/digisan/logkit"
-	"github.com/digisan/user-mgr/user/db"
-)
-
-const (
-	SEP     = "^^"
-	SEP_TAG = "^"
+	. "github.com/digisan/user-mgr/cst"
+	"github.com/digisan/user-mgr/db"
 )
 
 // if modified, change 1. KO_OL_***, 2. mFldAddr, 3. 'auto-tags.go', 4. 'validator.go' in sign-up.
@@ -34,26 +30,26 @@ func (u User) String() string {
 
 // db key order
 const (
-	KO_OL_UName int = iota
-	KO_OL_END
+	KO_UName int = iota
+	KO_END
 )
 
 // db value order
 const (
-	VO_OL_Tm int = iota
-	VO_OL_END
+	VO_Tm int = iota
+	VO_END
 )
 
 func (u *User) KeyFieldAddr(ko int) any {
 	mFldAddr := map[int]any{
-		KO_OL_UName: &u.Uname,
+		KO_UName: &u.Uname,
 	}
 	return mFldAddr[ko]
 }
 
 func (u *User) ValFieldAddr(vo int) any {
 	mFldAddr := map[int]any{
-		VO_OL_Tm: &u.Tm,
+		VO_Tm: &u.Tm,
 	}
 	return mFldAddr[vo]
 }
@@ -68,7 +64,7 @@ func (u *User) Key() []byte {
 	var (
 		sb = &strings.Builder{}
 	)
-	for i := 0; i < KO_OL_END; i++ {
+	for i := 0; i < KO_END; i++ {
 		if i > 0 {
 			sb.WriteString(SEP)
 		}
@@ -86,7 +82,7 @@ func (u *User) Value() []byte {
 	var (
 		sb = &strings.Builder{}
 	)
-	for i := 0; i < VO_OL_END; i++ {
+	for i := 0; i < VO_END; i++ {
 		if i > 0 {
 			sb.WriteString(SEP)
 		}
@@ -118,7 +114,7 @@ func (u *User) Unmarshal(dbKey, dbVal []byte) (any, error) {
 	for ip, param := range params {
 		if len(param.in) > 0 {
 			for i, seg := range bytes.Split(param.in, []byte(SEP)) {
-				if (ip == 0 && i == KO_OL_END) || (ip == 1 && i == VO_OL_END) {
+				if (ip == 0 && i == KO_END) || (ip == 1 && i == VO_END) {
 					break
 				}
 				switch v := param.fnFldAddr(i).(type) {

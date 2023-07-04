@@ -5,26 +5,27 @@ import (
 	"time"
 
 	lk "github.com/digisan/logkit"
+	. "github.com/digisan/user-mgr/db"
 	rp "github.com/digisan/user-mgr/reset-pwd"
 	su "github.com/digisan/user-mgr/sign-up"
-	u "github.com/digisan/user-mgr/user"
+	ur "github.com/digisan/user-mgr/user/registered"
 )
 
 func main() {
 
-	u.InitDB("../../server-example/data/user")
-	defer u.CloseDB()
+	InitDB("../../server-example/data/user")
+	defer CloseDB()
 
 	// get [user] from GET
 
 	// Will be GET header
-	usr := u.User{
-		Core: u.Core{
+	usr := ur.User{
+		Core: ur.Core{
 			UName:    "QMiao",
 			Email:    "cdutwhu@outlook.com",
 			Password: "",
 		},
-		Profile: u.Profile{
+		Profile: ur.Profile{
 			Name:           "",
 			Phone:          "",
 			Country:        "",
@@ -41,7 +42,7 @@ func main() {
 			AvatarType:     "",
 			Avatar:         []byte{},
 		},
-		Admin: u.Admin{
+		Admin: ur.Admin{
 			RegTime:   time.Now().Truncate(time.Second),
 			Active:    true,
 			Certified: false,
@@ -88,7 +89,7 @@ AGAIN:
 	fmt.Scanf("%s", &pwdUpdated)
 	// get [pwdUpdated] from POST
 
-	if rst := su.ChkPwd(pwdUpdated); rst.OK {
+	if rst := su.CheckPwd(pwdUpdated); rst.OK {
 		user.Password = pwdUpdated
 	} else {
 		fmt.Println("invalid new password")

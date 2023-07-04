@@ -9,11 +9,9 @@ import (
 	bh "github.com/digisan/db-helper/badger"
 	. "github.com/digisan/go-generics/v2"
 	lk "github.com/digisan/logkit"
+	. "github.com/digisan/user-mgr/cst"
+	. "github.com/digisan/user-mgr/db"
 	u "github.com/digisan/user-mgr/user"
-)
-
-const (
-	SEP = "^"
 )
 
 const (
@@ -213,7 +211,7 @@ func relAction(me string, flag int, whom string, lock bool) error {
 		return nil
 	}
 
-	if DbGrp.Rel != nil && u.DbGrp != nil && u.DbGrp.Registered != nil {
+	if DbGrp != nil && DbGrp.Rel != nil && DbGrp.Registered != nil {
 		if !u.UserExists(me, "", false) {
 			return fmt.Errorf("'%s' is not registered", me)
 		}

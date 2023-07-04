@@ -2,11 +2,9 @@ package user
 
 import (
 	bh "github.com/digisan/db-helper/badger"
-	"github.com/digisan/user-mgr/user/db"
+	"github.com/digisan/user-mgr/db"
 	. "github.com/digisan/user-mgr/user/online"
 )
-
-///////////////////////////////////////////////////
 
 func GetOnline(uname string) (*User, error) {
 	db.DbGrp.Lock()

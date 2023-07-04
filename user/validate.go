@@ -1,4 +1,4 @@
-package registered
+package user
 
 import (
 	"fmt"
@@ -6,44 +6,45 @@ import (
 	"strings"
 	"sync"
 
-	. "github.com/digisan/go-generics/v2"
+	v2 "github.com/digisan/go-generics/v2"
 	lk "github.com/digisan/logkit"
-	. "github.com/digisan/user-mgr/user/tool"
+	ur "github.com/digisan/user-mgr/user/registered"
+	. "github.com/digisan/user-mgr/util"
 	"gopkg.in/go-playground/validator.v9"
 )
 
-type ValRst struct {
+type ValidateResult struct {
 	OK  bool
 	Err error
 }
 
-func NewValRst(ok bool, failMsg string) ValRst {
+func NewValidateResult(ok bool, failMsg string) ValidateResult {
 	if ok {
-		return ValRst{ok, nil}
+		return ValidateResult{ok, nil}
 	}
-	return ValRst{ok, fmt.Errorf("%v", failMsg)}
+	return ValidateResult{ok, fmt.Errorf("%v", failMsg)}
 }
 
 var (
-	vTags           = ListValidator(User{}.Core, User{}.Profile, User{}.Admin)
 	mFieldValidator = &sync.Map{}
 )
 
-func RegisterValidator(tag string, f func(o, v any) ValRst) {
+func RegisterValidator(tag string, f func(o, v any) ValidateResult) {
 	mFieldValidator.Store(tag, f)
 }
 
-func fnValidator(tag string) func(o, v any) ValRst {
+func fnValidator(tag string) func(o, v any) ValidateResult {
 	f, ok := mFieldValidator.Load(tag)
 	lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("missing [%s] validator", tag))
-	return f.(func(o, v any) ValRst)
+	return f.(func(o, v any) ValidateResult)
 }
 
-func (user *User) Validate(exclTags ...string) error {
+func Validate(user *ur.User, exclTags ...string) error {
+	vTags := ListValidator(user.Core, user.Profile, user.Admin)
 	mIfFail := make(map[string]error)
 	v := validator.New()
 	for _, vTag := range vTags {
-		if In(vTag, exclTags...) {
+		if v2.In(vTag, exclTags...) {
 			v.RegisterValidation(vTag, func(fl validator.FieldLevel) bool { return true })
 			continue
 		}

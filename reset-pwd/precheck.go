@@ -4,10 +4,11 @@ import (
 	"fmt"
 
 	u "github.com/digisan/user-mgr/user"
+	ur "github.com/digisan/user-mgr/user/registered"
 )
 
 // if return nil, which means user exists normally
-func UserStatusIssue(login *u.User) error {
+func UserStatusIssue(login *ur.User) error {
 	if u.UserExists(login.UName, login.Email, true) {
 		return nil
 	}
@@ -17,7 +18,7 @@ func UserStatusIssue(login *u.User) error {
 	return fmt.Errorf("[%v] is not existing", login.UName)
 }
 
-func EmailOK(login *u.User) bool {
+func EmailOK(login *ur.User) bool {
 	user, ok, err := u.LoadUser(login.UName, true)
 	return err == nil && ok && login.Email == user.Email
 }

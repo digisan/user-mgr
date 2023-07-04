@@ -1,4 +1,4 @@
-package registered
+package user
 
 // import (
 // 	"context"
@@ -6,14 +6,15 @@ package registered
 // 	"sync"
 // 	"time"
 
-// 	fd "github.com/digisan/gotk/filedir"
+// 	fd "github.com/digisan/gotk/file-dir"
 // 	lk "github.com/digisan/logkit"
+// 	ur "github.com/digisan/user-mgr/user/registered"
 // 	"github.com/golang-jwt/jwt/v5"
 // 	"github.com/labstack/echo/v4"
 // )
 
 // type UserClaims struct {
-// 	Core
+// 	ur.Core
 // 	jwt.RegisteredClaims
 // }
 
@@ -67,7 +68,7 @@ package registered
 // }
 
 // // invoke in 'login'
-// func MakeClaims(user *User) *UserClaims {
+// func MakeClaims(user *ur.User) *UserClaims {
 // 	now := time.Now()
 // 	return &UserClaims{
 // 		user.Core,
@@ -96,12 +97,12 @@ package registered
 // }
 
 // // invoke in 'logout'
-// func (u *User) DeleteToken() {
+// func DeleteToken(u *ur.User) {
 // 	smToken.Delete(u.UName)
 // }
 
 // // validate token
-// func (u *User) ValidateToken(token string) bool {
+// func ValidateToken(u *ur.User, token string) bool {
 // 	tkInfo, ok := smToken.Load(u.UName)
 // 	return ok && tkInfo.(*TokenInfo).value == token
 // }
@@ -120,19 +121,19 @@ package registered
 // 	return token, claims, nil
 // }
 
-// func ClaimsToUser(claims jwt.MapClaims) *User {
-// 	return &User{
-// 		Core: Core{
+// func ClaimsToUser(claims jwt.MapClaims) *ur.User {
+// 	return &ur.User{
+// 		Core: ur.Core{
 // 			UName:    claims["uname"].(string),
 // 			Email:    claims["email"].(string),
 // 			Password: claims["password"].(string),
 // 		},
-// 		Profile: Profile{},
-// 		Admin:   Admin{},
+// 		Profile: ur.Profile{},
+// 		Admin:   ur.Admin{},
 // 	}
 // }
 
-// func Invoker(c echo.Context) (*User, error) {
+// func Invoker(c echo.Context) (*ur.User, error) {
 // 	_, claims, err := TokenClaimsInHandler(c)
 // 	if err != nil {
 // 		return nil, err

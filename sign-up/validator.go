@@ -5,10 +5,10 @@ import (
 	"time"
 	"unicode"
 
-	. "github.com/digisan/go-generics/v2"
+	v2 "github.com/digisan/go-generics/v2"
 	"github.com/digisan/gotk/strs"
 	u "github.com/digisan/user-mgr/user"
-	vf "github.com/digisan/user-mgr/user/valfield"
+	ur "github.com/digisan/user-mgr/user/registered"
 )
 
 const (
@@ -18,158 +18,158 @@ const (
 var (
 	fSf = fmt.Sprintf
 
-	mFieldValidator = map[string]func(o, v any) u.ValRst{
+	mFieldValidator = map[string]func(o, v any) u.ValidateResult{
 
-		vf.Active: func(o, v any) u.ValRst {
-			return u.NewValRst(true, "")
+		u.Active: func(o, v any) u.ValidateResult {
+			return u.NewValidateResult(true, "")
 		},
 
-		vf.UName: func(o, v any) u.ValRst {
-			return ChkUName(v.(string))
+		u.UName: func(o, v any) u.ValidateResult {
+			return CheckUName(v.(string))
 		},
 
-		vf.EmailDB: func(o, v any) u.ValRst {
+		u.EmailDB: func(o, v any) u.ValidateResult {
 			ok := !u.UserExists("", v.(string), false)
-			return u.NewValRst(ok, fSf("[%v] is already existing", v))
+			return u.NewValidateResult(ok, fSf("[%v] is already existing", v))
 		},
 
-		vf.Name: func(o, v any) u.ValRst {
+		u.Name: func(o, v any) u.ValidateResult {
 			ok := v == "" || len(v.(string)) > 2
-			return u.NewValRst(ok, "invalid user real name")
+			return u.NewValidateResult(ok, "invalid user real name")
 		},
 
-		vf.Password: func(o, v any) u.ValRst {
-			return ChkPwd(v.(string))
+		u.Password: func(o, v any) u.ValidateResult {
+			return CheckPwd(v.(string))
 		},
 
-		vf.AvatarType: func(o, v any) u.ValRst {
-			return ChkAvatarType(v.(string))
+		u.AvatarType: func(o, v any) u.ValidateResult {
+			return CheckAvatarType(v.(string))
 		},
 
-		vf.Avatar: func(o, v any) u.ValRst {
-			return u.NewValRst(true, "")
+		u.Avatar: func(o, v any) u.ValidateResult {
+			return u.NewValidateResult(true, "")
 		},
 
-		vf.RegTime: func(o, v any) u.ValRst {
+		u.RegTime: func(o, v any) u.ValidateResult {
 			ok := v != nil && v != time.Time{}
-			return u.NewValRst(ok, "register time is mandatory when signing up successfully")
+			return u.NewValidateResult(ok, "register time is mandatory when signing up successfully")
 		},
 
-		vf.Official: func(o, v any) u.ValRst {
-			return u.NewValRst(true, "")
+		u.Official: func(o, v any) u.ValidateResult {
+			return u.NewValidateResult(true, "")
 		},
 
-		vf.Phone: func(o, v any) u.ValRst {
+		u.Phone: func(o, v any) u.ValidateResult {
 			ok := v == "" || len(v.(string)) > 6
-			return u.NewValRst(ok, "invalid telephone number")
+			return u.NewValidateResult(ok, "invalid telephone number")
 		},
 
-		vf.PhoneDB: func(o, v any) u.ValRst {
-			ok := v == "" || !u.UsedByOther(o.(*u.User).UName, "phone", v.(string))
-			return u.NewValRst(ok, fSf("phone [%v] is already used by other user", v))
+		u.PhoneDB: func(o, v any) u.ValidateResult {
+			ok := v == "" || !u.UsedByOther(o.(*ur.User).UName, "phone", v.(string))
+			return u.NewValidateResult(ok, fSf("phone [%v] is already used by other user", v))
 		},
 
-		vf.Country: func(o, v any) u.ValRst {
+		u.Country: func(o, v any) u.ValidateResult {
 			ok := v == "" || len(v.(string)) > 2
-			return u.NewValRst(ok, "invalid country")
+			return u.NewValidateResult(ok, "invalid country")
 		},
 
-		vf.City: func(o, v any) u.ValRst {
+		u.City: func(o, v any) u.ValidateResult {
 			ok := v == "" || len(v.(string)) > 2
-			return u.NewValRst(ok, "invalid city")
+			return u.NewValidateResult(ok, "invalid city")
 		},
 
-		vf.Addr: func(o, v any) u.ValRst {
+		u.Addr: func(o, v any) u.ValidateResult {
 			ok := v == "" || len(v.(string)) > 6
-			return u.NewValRst(ok, "invalid address")
+			return u.NewValidateResult(ok, "invalid address")
 		},
 
-		vf.SysRole: func(o, v any) u.ValRst {
+		u.SysRole: func(o, v any) u.ValidateResult {
 			ok := v == "" || len(v.(string)) > 2
-			return u.NewValRst(ok, "invalid system role")
+			return u.NewValidateResult(ok, "invalid system role")
 		},
 
-		vf.MemLevel: func(o, v any) u.ValRst {
-			ok := In(v.(uint8), 0, 1, 2, 3)
-			return u.NewValRst(ok, "membership level: [0-3]")
+		u.MemLevel: func(o, v any) u.ValidateResult {
+			ok := v2.In(v.(uint8), 0, 1, 2, 3)
+			return u.NewValidateResult(ok, "membership level: [0-3]")
 		},
 
-		vf.MemExpire: func(o, v any) u.ValRst {
-			return u.NewValRst(true, "")
+		u.MemExpire: func(o, v any) u.ValidateResult {
+			return u.NewValidateResult(true, "")
 		},
 
-		vf.PersonalIDType: func(o, v any) u.ValRst {
+		u.PersonalIDType: func(o, v any) u.ValidateResult {
 			ok := v == "" || len(v.(string)) > 2
-			return u.NewValRst(ok, "invalid personal ID type")
+			return u.NewValidateResult(ok, "invalid personal ID type")
 		},
 
-		vf.PersonalID: func(o, v any) u.ValRst {
+		u.PersonalID: func(o, v any) u.ValidateResult {
 			ok := v == "" || len(v.(string)) > 6
-			return u.NewValRst(ok, "invalid personal ID")
+			return u.NewValidateResult(ok, "invalid personal ID")
 		},
 
-		vf.Gender: func(o, v any) u.ValRst {
+		u.Gender: func(o, v any) u.ValidateResult {
 			ok := v == "" || v == "M" || v == "F"
-			return u.NewValRst(ok, "gender: 'M'/'F' for male/female")
+			return u.NewValidateResult(ok, "gender: 'M'/'F' for male/female")
 		},
 
-		vf.DOB: func(o, v any) u.ValRst {
+		u.DOB: func(o, v any) u.ValidateResult {
 			ok := v == "" || len(v.(string)) > 7
-			return u.NewValRst(ok, "invalid date of birth")
+			return u.NewValidateResult(ok, "invalid date of birth")
 		},
 
-		vf.Position: func(o, v any) u.ValRst {
+		u.Position: func(o, v any) u.ValidateResult {
 			ok := v == "" || len(v.(string)) > 3
-			return u.NewValRst(ok, "invalid position")
+			return u.NewValidateResult(ok, "invalid position")
 		},
 
-		vf.Title: func(o, v any) u.ValRst {
+		u.Title: func(o, v any) u.ValidateResult {
 			ok := v == "" || len(v.(string)) > 3
-			return u.NewValRst(ok, "invalid title")
+			return u.NewValidateResult(ok, "invalid title")
 		},
 
-		vf.Employer: func(o, v any) u.ValRst {
+		u.Employer: func(o, v any) u.ValidateResult {
 			ok := v == "" || len(v.(string)) > 2
-			return u.NewValRst(ok, "at least 2 length for employer")
+			return u.NewValidateResult(ok, "at least 2 length for employer")
 		},
 
-		vf.Certified: func(o, v any) u.ValRst {
-			return u.NewValRst(true, "")
+		u.Certified: func(o, v any) u.ValidateResult {
+			return u.NewValidateResult(true, "")
 		},
 
-		vf.Bio: func(o, v any) u.ValRst {
+		u.Bio: func(o, v any) u.ValidateResult {
 			ok := v == "" || len(v.(string)) > 3
-			return u.NewValRst(ok, "more words please")
+			return u.NewValidateResult(ok, "more words please")
 		},
 
-		vf.Tags: func(o, v any) u.ValRst {
+		u.Tags: func(o, v any) u.ValidateResult {
 			ok := v == "" || len(v.(string)) > 2
-			return u.NewValRst(ok, "invalid user tags")
+			return u.NewValidateResult(ok, "invalid user tags")
 		},
 	}
 )
 
-func SetValidator(extraValidator map[string]func(o, v any) u.ValRst) {
-	for field, validator := range MapSafeMerge(extraValidator, mFieldValidator) {
+func SetValidator(extraValidator map[string]func(o, v any) u.ValidateResult) {
+	for field, validator := range v2.MapSafeMerge(extraValidator, mFieldValidator) {
 		u.RegisterValidator(field, validator)
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-func ChkUName(s string) u.ValRst {
+func CheckUName(s string) u.ValidateResult {
 	for _, c := range s {
 		if unicode.IsPunct(c) || unicode.IsSymbol(c) || unicode.IsSpace(c) {
-			if NotIn(c, '.', '-', '_') { // only allow '.' '-' '_' in user name
-				return u.NewValRst(false, fSf("user name: [%v] has invalid character [%v]", s, string(c)))
+			if v2.NotIn(c, '.', '-', '_') { // only allow '.' '-' '_' in user name
+				return u.NewValidateResult(false, fSf("user name: [%v] has invalid character [%v]", s, string(c)))
 			}
 		}
 	}
 	ok := !u.UserExists(s, "", false)
-	return u.NewValRst(ok, fSf("[%v] is already existing", s))
+	return u.NewValidateResult(ok, fSf("[%v] is already existing", s))
 }
 
-func ChkPwd(s string) u.ValRst {
+func CheckPwd(s string) u.ValidateResult {
 	number, lower, upper, special := false, false, false, false
 	for _, c := range s {
 		switch {
@@ -182,7 +182,7 @@ func ChkPwd(s string) u.ValRst {
 		case unicode.IsPunct(c) || unicode.IsSymbol(c):
 			special = true
 		case c == '	' || c == '\t':
-			return u.NewValRst(false, "[space] and [table] are not allowed in password")
+			return u.NewValidateResult(false, "[space] and [table] are not allowed in password")
 
 		// case unicode.IsLetter(c) || c == ' ':
 
@@ -191,7 +191,7 @@ func ChkPwd(s string) u.ValRst {
 		}
 	}
 	ok := len(s) >= minPwdLen && (number && lower && upper && special)
-	return u.NewValRst(ok, "Password Rule: " + PwdRule())
+	return u.NewValidateResult(ok, "Password Rule: "+PwdRule())
 }
 
 func PwdRule() string {
@@ -199,7 +199,7 @@ func PwdRule() string {
 }
 
 // <img src="data:image/png;base64,******/>
-func ChkAvatarType(s string) u.ValRst {
+func CheckAvatarType(s string) u.ValidateResult {
 	ok := s == "" || strs.HasAnyPrefix(s, "image/")
-	return u.NewValRst(ok, "invalid avatar type, must be like 'image/png'")
+	return u.NewValidateResult(ok, "invalid avatar type, must be like 'image/png'")
 }

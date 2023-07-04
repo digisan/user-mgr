@@ -6,21 +6,23 @@ import (
 	"time"
 
 	lk "github.com/digisan/logkit"
+	. "github.com/digisan/user-mgr/db"
 	u "github.com/digisan/user-mgr/user"
+	ur "github.com/digisan/user-mgr/user/registered"
 )
 
 func TestUserInit(t *testing.T) {
-	u.InitDB("../server-example/data")
-	defer u.CloseDB()
+	InitDB("../server-example/data")
+	defer CloseDB()
 
 	for _, uname := range []string{"qing", "musk", "trump"} {
-		usr := u.User{
-			Core: u.Core{
+		usr := ur.User{
+			Core: ur.Core{
 				UName:    uname,
 				Email:    "abc@email.com",
 				Password: "",
 			},
-			Profile: u.Profile{
+			Profile: ur.Profile{
 				Name:           "",
 				Phone:          "",
 				Country:        "",
@@ -37,7 +39,7 @@ func TestUserInit(t *testing.T) {
 				AvatarType:     "",
 				Avatar:         []byte{},
 			},
-			Admin: u.Admin{
+			Admin: ur.Admin{
 				RegTime:   time.Time{},
 				Active:    true,
 				Certified: false,
@@ -53,8 +55,8 @@ func TestUserInit(t *testing.T) {
 }
 
 func TestUserCheck(t *testing.T) {
-	u.InitDB("../server-example/data")
-	defer u.CloseDB()
+	InitDB("../server-example/data")
+	defer CloseDB()
 
 	fmt.Println(u.ListUser(nil))
 }
@@ -74,8 +76,8 @@ func TestListRel(t *testing.T) {
 
 func TestClearRel(t *testing.T) {
 
-	u.InitDB("../server-example/data")
-	defer u.CloseDB()
+	InitDB("../server-example/data")
+	defer CloseDB()
 
 	InitDB("./data")
 	defer CloseDB()
@@ -85,8 +87,8 @@ func TestClearRel(t *testing.T) {
 
 func TestRelAction(t *testing.T) {
 
-	u.InitDB("../server-example/data")
-	defer u.CloseDB()
+	InitDB("../server-example/data")
+	defer CloseDB()
 
 	InitDB("./data")
 	defer CloseDB()

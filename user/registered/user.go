@@ -15,13 +15,9 @@ import (
 	. "github.com/digisan/go-generics/v2"
 	"github.com/digisan/gotk/crypto"
 	lk "github.com/digisan/logkit"
-	"github.com/digisan/user-mgr/user/db"
-	. "github.com/digisan/user-mgr/user/tool"
-)
-
-const (
-	SEP     = "^^"
-	SEP_TAG = "^"
+	. "github.com/digisan/user-mgr/cst"
+	"github.com/digisan/user-mgr/db"
+	. "github.com/digisan/user-mgr/util"
 )
 
 // if modified, change 1. KO_***, 2. mFldAddr, 3. 'auto-tags.go', 4. 'validator.go' in sign-up.

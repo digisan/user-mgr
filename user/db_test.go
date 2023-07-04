@@ -6,7 +6,7 @@ import (
 	"time"
 
 	lk "github.com/digisan/logkit"
-	"github.com/digisan/user-mgr/user/db"
+	"github.com/digisan/user-mgr/db"
 	. "github.com/digisan/user-mgr/user/registered"
 )
 
