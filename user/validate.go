@@ -13,30 +13,18 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
-type ValidateResult struct {
-	OK  bool
-	Err error
-}
-
-func NewValidateResult(ok bool, failMsg string) ValidateResult {
-	if ok {
-		return ValidateResult{ok, nil}
-	}
-	return ValidateResult{ok, fmt.Errorf("%v", failMsg)}
-}
-
 var (
 	mFieldValidator = &sync.Map{}
 )
 
-func RegisterValidator(tag string, f func(o, v any) ValidateResult) {
+func RegisterValidator(tag string, f func(o, v any) ResultOk) {
 	mFieldValidator.Store(tag, f)
 }
 
-func fnValidator(tag string) func(o, v any) ValidateResult {
+func fnValidator(tag string) func(o, v any) ResultOk {
 	f, ok := mFieldValidator.Load(tag)
 	lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("missing [%s] validator", tag))
-	return f.(func(o, v any) ValidateResult)
+	return f.(func(o, v any) ResultOk)
 }
 
 func Validate(user *ur.User, exclTags ...string) error {
@@ -53,7 +41,7 @@ func Validate(user *ur.User, exclTags ...string) error {
 		err := v.RegisterValidation(vTag, func(fl validator.FieldLevel) bool {
 			rst := fn(user, fl.Field().Interface())
 			mIfFail[tag] = rst.Err
-			return rst.OK
+			return rst.Ok
 		})
 		lk.FailOnErr("%v", err)
 	}

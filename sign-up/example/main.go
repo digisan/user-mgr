@@ -7,8 +7,8 @@ import (
 	lk "github.com/digisan/logkit"
 	. "github.com/digisan/user-mgr/db"
 	su "github.com/digisan/user-mgr/sign-up"
-	u "github.com/digisan/user-mgr/user"
 	ur "github.com/digisan/user-mgr/user/registered"
+	. "github.com/digisan/user-mgr/util"
 )
 
 func main() {
@@ -57,14 +57,14 @@ func main() {
 		},
 	}
 
-	su.SetValidator(map[string]func(o any, v any) u.ValidateResult{
-		u.Employer: func(o, v any) u.ValidateResult {
+	su.SetValidator(map[string]func(o any, v any) ResultOk{
+		ur.Employer: func(o, v any) ResultOk {
 			ok := len(v.(string)) > 6
-			return u.NewValidateResult(ok, "at least 6 length for employer")
+			return NewResultOk(ok, "at least 6 length for employer")
 		},
 	})
 
-	if err := su.ChkInput(user, u.Phone); err != nil { // vf.Phone
+	if err := su.ChkInput(user, ur.Phone); err != nil { // vf.Phone
 		lk.WarnOnErr("%v", err)
 		return
 	}
