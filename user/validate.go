@@ -76,8 +76,8 @@ func Validate(user *ur.User, exclTags ...string) error {
 func ErrField(err error) (string, string) {
 	r := regexp.MustCompile(`'[^\.\s]+'`)
 	es := fmt.Sprint(err)
-	fieldtag := r.FindAllString(es, -1)
-	field, tag := fieldtag[0], fieldtag[1]
+	fieldTag := r.FindAllString(es, -1)
+	field, tag := fieldTag[0], fieldTag[1]
 	field = strings.Trim(field, "'")
 	tag = strings.Trim(tag, "'")
 	return field, tag

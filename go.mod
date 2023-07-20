@@ -4,14 +4,14 @@ go 1.20
 
 require (
 	github.com/dgraph-io/badger/v4 v4.1.0
-	github.com/digisan/db-helper v0.0.30
-	github.com/digisan/go-generics v0.3.5
-	github.com/digisan/go-mail v0.2.7
-	github.com/digisan/gotk v0.3.8
-	github.com/digisan/logkit v0.2.5
+	github.com/digisan/db-helper v0.0.31
+	github.com/digisan/go-generics v0.3.6
+	github.com/digisan/go-mail v0.2.8
+	github.com/digisan/gotk v0.3.9
+	github.com/digisan/logkit v0.2.6
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
-	github.com/labstack/echo/v4 v4.10.2
+	github.com/labstack/echo/v4 v4.11.1
 	gopkg.in/go-playground/validator.v9 v9.31.0
 )
 
@@ -19,10 +19,10 @@ require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
-	github.com/digisan/fileflatter v0.0.14 // indirect
-	github.com/digisan/go-config v0.2.6 // indirect
+	github.com/digisan/fileflatter v0.0.15 // indirect
+	github.com/digisan/go-config v0.2.7 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/go-chi/chi/v5 v5.0.8 // indirect
+	github.com/go-chi/chi/v5 v5.0.10 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
@@ -55,10 +55,10 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.10.0 // indirect
-	golang.org/x/net v0.11.0 // indirect
-	golang.org/x/sys v0.9.0 // indirect
-	golang.org/x/text v0.10.0 // indirect
+	golang.org/x/crypto v0.11.0 // indirect
+	golang.org/x/net v0.12.0 // indirect
+	golang.org/x/sys v0.10.0 // indirect
+	golang.org/x/text v0.11.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect

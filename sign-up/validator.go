@@ -5,7 +5,7 @@ import (
 	"time"
 	"unicode"
 
-	v2 "github.com/digisan/go-generics/v2"
+	. "github.com/digisan/go-generics/v2"
 	"github.com/digisan/gotk/strs"
 	u "github.com/digisan/user-mgr/user"
 	ur "github.com/digisan/user-mgr/user/registered"
@@ -90,7 +90,7 @@ var (
 		},
 
 		u.MemLevel: func(o, v any) u.ValidateResult {
-			ok := v2.In(v.(uint8), 0, 1, 2, 3)
+			ok := In(v.(uint8), 0, 1, 2, 3)
 			return u.NewValidateResult(ok, "membership level: [0-3]")
 		},
 
@@ -142,15 +142,20 @@ var (
 			return u.NewValidateResult(ok, "more words please")
 		},
 
-		u.Tags: func(o, v any) u.ValidateResult {
+		u.Notes: func(o, v any) u.ValidateResult {
 			ok := v == "" || len(v.(string)) > 2
-			return u.NewValidateResult(ok, "invalid user tags")
+			return u.NewValidateResult(ok, "invalid user notes")
+		},
+
+		u.Status: func(o, v any) u.ValidateResult {
+			ok := v == "" || len(v.(string)) > 2
+			return u.NewValidateResult(ok, "invalid user status")
 		},
 	}
 )
 
 func SetValidator(extraValidator map[string]func(o, v any) u.ValidateResult) {
-	for field, validator := range v2.MapSafeMerge(extraValidator, mFieldValidator) {
+	for field, validator := range MapSafeMerge(extraValidator, mFieldValidator) {
 		u.RegisterValidator(field, validator)
 	}
 }
@@ -160,7 +165,7 @@ func SetValidator(extraValidator map[string]func(o, v any) u.ValidateResult) {
 func CheckUName(s string) u.ValidateResult {
 	for _, c := range s {
 		if unicode.IsPunct(c) || unicode.IsSymbol(c) || unicode.IsSpace(c) {
-			if v2.NotIn(c, '.', '-', '_') { // only allow '.' '-' '_' in user name
+			if NotIn(c, '.', '-', '_') { // only allow '.' '-' '_' in user name
 				return u.NewValidateResult(false, fSf("user name: [%v] has invalid character [%v]", s, string(c)))
 			}
 		}

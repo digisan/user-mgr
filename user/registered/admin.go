@@ -15,7 +15,8 @@ type Admin struct {
 	SysRole   string    `json:"role" validate:"sysRole"`        // optional
 	MemLevel  uint8     `json:"level" validate:"memLevel"`      // 0-3
 	MemExpire time.Time `json:"expire" validate:"memExpire"`    // optional
-	Tags      string    `json:"tags" validate:"tags"`           // optional, linked by '^^'
+	Notes     string    `json:"notes" validate:"notes"`         // optional, linked by '^'
+	Status    string    `json:"status" validate:"status"`       // optional
 }
 
 func (a Admin) String() string {

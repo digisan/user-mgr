@@ -70,7 +70,8 @@ var user = &ur.User{
 		SysRole:   "",
 		MemLevel:  0,
 		MemExpire: time.Time{},
-		Tags:      "",
+		Notes:     "",
+		Status:    "",
 	},
 }
 

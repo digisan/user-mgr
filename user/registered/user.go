@@ -66,7 +66,8 @@ const (
 	KO_MemExpire
 	KO_Official
 	KO_Certified
-	KO_Tags
+	KO_Notes
+	KO_Status
 	//
 	KO_END
 )
@@ -109,7 +110,8 @@ func (u *User) KeyFieldAddr(ko int) any {
 		KO_MemExpire: &u.MemExpire,
 		KO_Official:  &u.Official,
 		KO_Certified: &u.Certified,
-		KO_Tags:      &u.Tags,
+		KO_Notes:     &u.Notes,
+		KO_Status:    &u.Status,
 	}
 	return mFldAddr[ko]
 }
@@ -288,21 +290,29 @@ func (u *User) SinceJoined() time.Duration {
 	return time.Since(*t)
 }
 
-func (u *User) GetTags() []string {
-	return strings.Split(u.Tags, SEP_TAG)
+func (u *User) GetNotes() []string {
+	return strings.Split(u.Notes, SEP_STR)
 }
 
-func (u *User) AddTags(tags ...string) {
-	tagsExs := strings.Split(u.Tags, SEP_TAG)
-	tags = append(tags, tagsExs...)
-	tags = Settify(tags...)
-	u.Tags = strings.TrimSuffix(strings.Join(tags, SEP_TAG), SEP_TAG)
+func (u *User) AddNotes(notes ...string) {
+	notesExs := strings.Split(u.Notes, SEP_STR)
+	notes = append(notes, notesExs...)
+	notes = Settify(notes...)
+	u.Notes = strings.TrimSuffix(strings.Join(notes, SEP_STR), SEP_STR)
 }
 
-func (u *User) RmTags(tags ...string) {
-	tagsExs := strings.Split(u.Tags, SEP_TAG)
-	tags = Minus(tagsExs, tags)
-	u.Tags = strings.TrimSuffix(strings.Join(tags, SEP_TAG), SEP_TAG)
+func (u *User) RmNotes(notes ...string) {
+	notesExs := strings.Split(u.Notes, SEP_STR)
+	notes = Minus(notesExs, notes)
+	u.Notes = strings.TrimSuffix(strings.Join(notes, SEP_STR), SEP_STR)
+}
+
+func (u *User) GetStatus() string {
+	return u.Status
+}
+
+func (u *User) SetStatus(status string) {
+	u.Status = status
 }
 
 func (u *User) SetAvatar(r io.Reader, avatarType string) {

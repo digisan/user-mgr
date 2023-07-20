@@ -47,7 +47,8 @@ func TestUserInit(t *testing.T) {
 				SysRole:   "",
 				MemLevel:  0,
 				MemExpire: time.Time{},
-				Tags:      "",
+				Notes:     "",
+				Status:    "",
 			},
 		}
 		u.UpdateUser(&usr)

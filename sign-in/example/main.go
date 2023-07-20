@@ -49,7 +49,8 @@ func main() {
 			SysRole:   "admin",
 			MemLevel:  1,
 			MemExpire: time.Time{},
-			Tags:      "",
+			Notes:     "",
+			Status:    "",
 		},
 	}
 

@@ -36,13 +36,15 @@ func TestClaims(t *testing.T) {
 			Avatar:         []byte("******"),
 		},
 		Admin: ur.Admin{
+			RegTime:   time.Time{},
 			Active:    true,
+			Certified: false,
+			Official:  false,
 			SysRole:   "",
 			MemLevel:  0,
 			MemExpire: time.Time{},
-			RegTime:   time.Now(),
-			Official:  false,
-			Tags:      "",
+			Notes:     "",
+			Status:    "",
 		},
 	}
 	fmt.Println(user)
