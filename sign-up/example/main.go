@@ -7,8 +7,8 @@ import (
 	lk "github.com/digisan/logkit"
 	. "github.com/digisan/user-mgr/db"
 	su "github.com/digisan/user-mgr/sign-up"
+	. "github.com/digisan/user-mgr/user"
 	ur "github.com/digisan/user-mgr/user/registered"
-	. "github.com/digisan/user-mgr/util"
 )
 
 func main() {
@@ -64,12 +64,12 @@ func main() {
 		},
 	})
 
-	if err := su.ChkInput(user, ur.Phone); err != nil { // vf.Phone
+	if err := su.CheckInput(user, ur.Phone); err != nil {
 		lk.WarnOnErr("%v", err)
 		return
 	}
 
-	if err := su.ChkEmail(user); err != nil {
+	if err := su.CheckEmail(user); err != nil {
 		lk.WarnOnErr("%v", err)
 		return
 	}
@@ -85,7 +85,7 @@ func main() {
 	}
 
 	// double check input before storing
-	if err := su.ChkInput(user); err != nil {
+	if err := su.CheckInput(user); err != nil {
 		lk.WarnOnErr("%v", err)
 		return
 	}

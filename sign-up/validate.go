@@ -20,7 +20,7 @@ func SetVerifyEmailTimeout(t time.Duration) {
 }
 
 // POST 1
-func ChkInput(user *ur.User, exclTags ...string) error {
+func CheckInput(user *ur.User, exclTags ...string) error {
 	return u.Validate(user, exclTags...)
 }
 
@@ -29,7 +29,7 @@ func verifyEmail(user *ur.User) (string, error) {
 }
 
 // POST 1
-func ChkEmail(user *ur.User) error {
+func CheckEmail(user *ur.User) error {
 
 	var (
 		code string

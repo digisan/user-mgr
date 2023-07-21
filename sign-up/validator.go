@@ -7,9 +7,8 @@ import (
 
 	. "github.com/digisan/go-generics/v2"
 	"github.com/digisan/gotk/strs"
-	u "github.com/digisan/user-mgr/user"
+	. "github.com/digisan/user-mgr/user"
 	ur "github.com/digisan/user-mgr/user/registered"
-	. "github.com/digisan/user-mgr/util"
 )
 
 const (
@@ -30,7 +29,7 @@ var (
 		},
 
 		ur.EmailDB: func(o, v any) ResultOk {
-			ok := !u.UserExists("", v.(string), false)
+			ok := !UserExists("", v.(string), false)
 			return NewResultOk(ok, fSf("[%v] is already existing", v))
 		},
 
@@ -66,8 +65,8 @@ var (
 		},
 
 		ur.PhoneDB: func(o, v any) ResultOk {
-			ok := v == "" || !u.UsedByOther(o.(*ur.User).UName, "phone", v.(string))
-			return NewResultOk(ok, fSf("phone [%v] is already used by other user", v))
+			ok := v == "" || !UsedByOther(o.(*ur.User).UName, "phone", v.(string))
+			return NewResultOk(ok, fSf("phone [%v] is used by others", v))
 		},
 
 		ur.Country: func(o, v any) ResultOk {
@@ -157,7 +156,7 @@ var (
 
 func SetValidator(extraValidator map[string]func(o, v any) ResultOk) {
 	for field, validator := range MapSafeMerge(extraValidator, mFieldValidator) {
-		u.RegisterValidator(field, validator)
+		RegisterValidator(field, validator)
 	}
 }
 
@@ -171,7 +170,7 @@ func CheckUName(s string) ResultOk {
 			}
 		}
 	}
-	ok := !u.UserExists(s, "", false)
+	ok := !UserExists(s, "", false)
 	return NewResultOk(ok, fSf("[%v] is already existing", s))
 }
 

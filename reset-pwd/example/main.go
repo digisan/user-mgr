@@ -64,7 +64,7 @@ func main() {
 		return
 	}
 
-	if err := su.ChkEmail(&usr); err != nil {
+	if err := su.CheckEmail(&usr); err != nil {
 		fmt.Println(err)
 		return
 	}
