@@ -129,7 +129,7 @@ func TestExisting(t *testing.T) {
 
 ///////////////////////////////////////////////////////////////////
 
-func TestOnlines(t *testing.T) {
+func TestOnline(t *testing.T) {
 
 	db.InitDB(dbPath)
 	defer db.CloseDB()
