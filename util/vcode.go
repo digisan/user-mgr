@@ -14,6 +14,7 @@ func genCode(email string) string {
 	return strs.Maxlen(fmt.Sprintf("%06x", crypto.Encrypt(email, key)), 6)
 }
 
+// obsoleted !!!
 // func SendCode(ctx context.Context, recipient string, timeout time.Duration) (string, error) {
 
 // 	header := "Sign-Up Verification Code"
@@ -40,6 +41,7 @@ func genCode(email string) string {
 // 	}
 // }
 
+// if do unit test, comment out 'gm' invoked !!!
 func SendCode(recipient string) (string, error) {
 
 	subject := "Sign-Up Verification Code"

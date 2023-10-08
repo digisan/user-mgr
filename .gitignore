@@ -26,3 +26,6 @@ point/
 
 server-example/server-example
 server-example/cert
+
+util/*.png
+util/*.txt

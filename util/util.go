@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"image"
@@ -76,6 +77,28 @@ func SavePNG(img image.Image, path string) (image.Image, error) {
 		return nil, err
 	}
 	return img, nil
+}
+
+func SaveImageFromBase64(b64str, output string) error {
+
+	// Split the base64 string to get the actual data (after "base64,")
+	parts := strings.Split(b64str, ",")
+	if len(parts) != 2 {
+		return fmt.Errorf("invalid base64 string")
+	}
+
+	// Decode the base64 data
+	data, err := base64.StdEncoding.DecodeString(parts[1])
+	if err != nil {
+		return err
+	}
+
+	// Write the binary data to an image file
+	if err := os.WriteFile(output, data, 0644); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // note must be 'crop:x,y,w,h'
