@@ -8,9 +8,9 @@ require (
 	github.com/dgraph-io/badger/v4 v4.2.0
 	github.com/digisan/db-helper v0.0.36
 	github.com/digisan/go-generics v0.4.0
-	github.com/digisan/go-mail v0.2.14
-	github.com/digisan/gotk v0.4.3
-	github.com/digisan/logkit v0.2.10
+	github.com/digisan/go-mail v0.2.16
+	github.com/digisan/gotk v0.4.4
+	github.com/digisan/logkit v0.2.11
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.11.2
@@ -21,7 +21,7 @@ require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
-	github.com/digisan/go-config v0.2.11 // indirect
+	github.com/digisan/go-config v0.2.12 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/go-chi/chi/v5 v5.0.10 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
