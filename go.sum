@@ -17,8 +17,8 @@ github.com/dgraph-io/ristretto v0.1.1 h1:6CWw5tJNgpegArSHpNHJKldNeq03FQCwYvfMVWa
 github.com/dgraph-io/ristretto v0.1.1/go.mod h1:S1GPSBCYCIhmVNfcth17y2zZtQT6wzkzgwUve0VDWWA=
 github.com/dgryski/go-farm v0.0.0-20190423205320-6a90982ecee2 h1:tdlZCpZ/P9DhczCTSixgIKmwPv6+wP5DGjqLYw5SUiA=
 github.com/dgryski/go-farm v0.0.0-20190423205320-6a90982ecee2/go.mod h1:SqUrOPUnsFjfmXRMNPybcSiG0BgUW2AuFH8PAnS2iTw=
-github.com/digisan/db-helper v0.0.36 h1:aupdyLP9xVSVb2sfyLSazU9lW0wxYEtUNajCyjG0nys=
-github.com/digisan/db-helper v0.0.36/go.mod h1:Y8qJzHJXLAXy2jOi6bfYnfaJPcdBkI9n8WvFRkq/dKk=
+github.com/digisan/db-helper v0.0.37 h1:OTxfYv6pvhp3rmX5pjksbKSJCPRaos4P12JQmS8nxXM=
+github.com/digisan/db-helper v0.0.37/go.mod h1:Y8qJzHJXLAXy2jOi6bfYnfaJPcdBkI9n8WvFRkq/dKk=
 github.com/digisan/go-config v0.2.12 h1:18sOVO0CHaM/Lpx9ChSe94BXHLgB1O/+ELbWNtkeXFI=
 github.com/digisan/go-config v0.2.12/go.mod h1:ZWP4hnmmAX1LWX500Okv9bSMr/vi0YmACqj9KjXG+Hc=
 github.com/digisan/go-generics v0.4.0 h1:8AqfkwhE1vmy3HvY3YkzwRk2LY4140JvnTZkfoFZenI=

@@ -6,7 +6,7 @@ toolchain go1.21.1
 
 require (
 	github.com/dgraph-io/badger/v4 v4.2.0
-	github.com/digisan/db-helper v0.0.36
+	github.com/digisan/db-helper v0.0.37
 	github.com/digisan/go-generics v0.4.0
 	github.com/digisan/go-mail v0.2.16
 	github.com/digisan/gotk v0.4.4
