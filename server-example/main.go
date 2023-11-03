@@ -143,7 +143,7 @@ func logout(c echo.Context) error {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
-	u.DeleteToken(invoker)
+	u.DeleteToken(invoker.UName)
 	return c.String(http.StatusOK, "See you "+invoker.UName+"!")
 }
 

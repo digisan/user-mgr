@@ -107,8 +107,8 @@ func MakeUserClaims(user *ur.User) *UserClaims {
 }
 
 // invoke in 'logout'
-func DeleteToken(user *ur.User) {
-	smToken.Delete(user.UName)
+func DeleteToken(uname string) {
+	smToken.Delete(uname)
 }
 
 // validate token

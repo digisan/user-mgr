@@ -25,8 +25,8 @@ github.com/digisan/go-generics v0.4.0 h1:8AqfkwhE1vmy3HvY3YkzwRk2LY4140JvnTZkfoF
 github.com/digisan/go-generics v0.4.0/go.mod h1:2aTVLuSocslv7ZotYw/YhKeIxyqsERsF9hfR/UsvXm8=
 github.com/digisan/go-mail v0.2.16 h1:+5TH8vRYpDVZxZdRzI1VBrEXSlEiYJMkM2nbKng92ek=
 github.com/digisan/go-mail v0.2.16/go.mod h1:Ar1YWris6aHIzgZS5RVOYSL3WpVxiKX0h0QxNi2w+cA=
-github.com/digisan/gotk v0.4.4 h1:80QnK7U90BRg7gglvp56V/5vkrEl3IkmmLPo+uWWGLc=
-github.com/digisan/gotk v0.4.4/go.mod h1:2aiS8KRgpzKpW36xgHcKyxINSyXpHLGQLdKVYCNwFk8=
+github.com/digisan/gotk v0.4.5 h1:8msbZ6RhzWEWad/bv3fetssairszS8XnkM8vciurcZk=
+github.com/digisan/gotk v0.4.5/go.mod h1:2aiS8KRgpzKpW36xgHcKyxINSyXpHLGQLdKVYCNwFk8=
 github.com/digisan/logkit v0.2.11 h1:rdEHfmGZ1KgFooAlB/2+i0qXpmO/CM1X46RRHEzGS48=
 github.com/digisan/logkit v0.2.11/go.mod h1:P672VV3gWufc+e8txcwJAsFoKP6v06xEPrQc0QKSUFg=
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=

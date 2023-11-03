@@ -9,7 +9,7 @@ require (
 	github.com/digisan/db-helper v0.0.37
 	github.com/digisan/go-generics v0.4.0
 	github.com/digisan/go-mail v0.2.16
-	github.com/digisan/gotk v0.4.4
+	github.com/digisan/gotk v0.4.5
 	github.com/digisan/logkit v0.2.11
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
