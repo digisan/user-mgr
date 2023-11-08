@@ -30,7 +30,7 @@ var (
 
 		ur.EmailDB: func(o, v any) ResultOk {
 			ok := !UserExists("", v.(string), false)
-			return NewResultOk(ok, fSf("[%v] is already existing", v))
+			return NewResultOk(ok, fSf("[%v] exists already", v))
 		},
 
 		ur.Name: func(o, v any) ResultOk {
@@ -171,7 +171,7 @@ func CheckUName(s string) ResultOk {
 		}
 	}
 	ok := !UserExists(s, "", false)
-	return NewResultOk(ok, fSf("[%v] is already existing", s))
+	return NewResultOk(ok, fSf("[%v] exists already", s))
 }
 
 func CheckPwd(s string) ResultOk {
