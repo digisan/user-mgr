@@ -9,11 +9,11 @@ require (
 	github.com/digisan/db-helper v0.1.0
 	github.com/digisan/go-generics v0.4.1
 	github.com/digisan/go-mail v0.2.17
-	github.com/digisan/gotk v0.4.6
+	github.com/digisan/gotk v0.4.8
 	github.com/digisan/logkit v0.2.12
-	github.com/golang-jwt/jwt/v5 v5.0.0
+	github.com/golang-jwt/jwt/v5 v5.1.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
-	github.com/labstack/echo/v4 v4.11.2
+	github.com/labstack/echo/v4 v4.11.3
 	gopkg.in/go-playground/validator.v9 v9.31.0
 )
 
@@ -39,7 +39,7 @@ require (
 	github.com/klauspost/compress v1.17.2 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
-	github.com/mailgun/mailgun-go/v4 v4.11.0 // indirect
+	github.com/mailgun/mailgun-go/v4 v4.11.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
