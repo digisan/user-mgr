@@ -5,6 +5,7 @@ import (
 	"time"
 
 	lk "github.com/digisan/logkit"
+	. "github.com/digisan/user-mgr/cst"
 	. "github.com/digisan/user-mgr/db"
 	su "github.com/digisan/user-mgr/sign-up"
 	. "github.com/digisan/user-mgr/user"
@@ -60,7 +61,7 @@ func main() {
 	su.SetValidator(map[string]func(o any, v any) ResultOk{
 		ur.Employer: func(o, v any) ResultOk {
 			ok := len(v.(string)) > 6
-			return NewResultOk(ok, "at least 6 length for employer")
+			return NewResultOk(ok, Err(ERR_USER_INV_FIELD).Wrap("employer, at least 6 length"))
 		},
 	})
 

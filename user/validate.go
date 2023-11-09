@@ -19,11 +19,11 @@ type ResultOk struct {
 	Err error
 }
 
-func NewResultOk(ok bool, failMsg string) ResultOk {
+func NewResultOk(ok bool, failErr error) ResultOk {
 	if ok {
 		return ResultOk{ok, nil}
 	}
-	return ResultOk{ok, Err(ERR_ON_FALSE).Wrap(failMsg)}
+	return ResultOk{ok, failErr}
 }
 
 ///////////////////////////////////////////////////////////////////
