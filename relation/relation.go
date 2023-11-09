@@ -134,7 +134,7 @@ func RemoveRel(uname string, flag int, lock bool) error {
 	}
 
 	key, ok := mKey[flag]
-	lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("invalid flag"))
+	lk.FailOnErrWhen(!ok, "%v", Err(ERR_INV_PARAM).Wrap("flag from [FOLLOWING FOLLOWER BLOCK MUTED]"))
 
 	_, err := bh.DeleteOneObject[Rel](key)
 	return err
@@ -168,7 +168,7 @@ func LoadRel(uname string, flag int, lock bool) (*Rel, bool, error) {
 	}
 
 	key, ok := mKey[flag]
-	lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("invalid flag, only accept [FOLLOWING FOLLOWER BLOCKED MUTED]"))
+	lk.FailOnErrWhen(!ok, "%v", Err(ERR_INV_PARAM).Wrap("flag from [FOLLOWING FOLLOWER BLOCKED MUTED]"))
 
 	r, err := bh.GetOneObject[Rel](key)
 	return r, r != nil && r.uname != "", err
@@ -213,10 +213,10 @@ func relAction(me string, flag int, whom string, lock bool) error {
 
 	if DbGrp != nil && DbGrp.Rel != nil && DbGrp.Registered != nil {
 		if !u.UserExists(me, "", false) {
-			return fmt.Errorf("'%s' is not registered", me)
+			return Err(ERR_USER_NOT_REG).Wrap(me)
 		}
 		if !u.UserExists(whom, "", false) {
-			return fmt.Errorf("'%s' is not registered", whom)
+			return Err(ERR_USER_NOT_REG).Wrap(whom)
 		}
 
 		switch flag {
@@ -310,7 +310,7 @@ func relAction(me string, flag int, whom string, lock bool) error {
 		}
 
 	} else {
-		return fmt.Errorf("DbGrp.Rel or DbGrp.Reg is nil")
+		return Err(ERR_DB_NOT_INIT).Wrap("DbGrp.Rel or DbGrp.Reg is nil")
 	}
 	return nil
 }

@@ -14,6 +14,7 @@ import (
 
 	. "github.com/digisan/go-generics/v2"
 	fd "github.com/digisan/gotk/file-dir"
+	. "github.com/digisan/user-mgr/cst"
 )
 
 func ListField(objects ...any) (fields []string) {
@@ -84,7 +85,7 @@ func SaveImageFromBase64(b64str, output string) error {
 	// Split the base64 string to get the actual data (after "base64,")
 	parts := strings.Split(b64str, ",")
 	if len(parts) != 2 {
-		return fmt.Errorf("invalid base64 string")
+		return Err(ERR_INV_DATA_FMT).Wrap("invalid base64")
 	}
 
 	// Decode the base64 data

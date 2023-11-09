@@ -7,6 +7,7 @@ import (
 	gm "github.com/digisan/go-mail"
 	"github.com/digisan/gotk/crypto"
 	"github.com/digisan/gotk/strs"
+	. "github.com/digisan/user-mgr/cst"
 )
 
 func genCode(email string) string {
@@ -56,6 +57,6 @@ func SendCode(recipient string) (string, error) {
 		if len(errs) > 0 {
 			return "", errs[0]
 		}
-		return "", fmt.Errorf("verification code sending failed to %v", recipient)
+		return "", Err(ERR_SEND_EMAIL).Wrap(recipient)
 	}
 }

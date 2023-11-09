@@ -1,8 +1,7 @@
 package signin
 
 import (
-	"fmt"
-
+	. "github.com/digisan/user-mgr/cst"
 	u "github.com/digisan/user-mgr/user"
 	ur "github.com/digisan/user-mgr/user/registered"
 )
@@ -14,9 +13,9 @@ func UserStatusIssue(login *ur.User) error {
 		return nil
 	}
 	if u.UserExists(uname, email, false) {
-		return fmt.Errorf("[%v] is dormant, cannot login", uname)
+		return Err(ERR_USER_DORMANT).Wrap(uname)
 	}
-	return fmt.Errorf("[%v] is not existing", uname)
+	return Err(ERR_USER_NOT_EXISTS).Wrap(uname)
 }
 
 // if successful, then update login user

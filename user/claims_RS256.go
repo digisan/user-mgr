@@ -7,6 +7,7 @@ import (
 	"time"
 
 	lk "github.com/digisan/logkit"
+	. "github.com/digisan/user-mgr/cst"
 	ur "github.com/digisan/user-mgr/user/registered"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -31,7 +32,7 @@ func (uc *UserClaims) GenerateToken(prvKey []byte) (string, error) {
 
 	key, err := jwt.ParseRSAPrivateKeyFromPEM(prvKey)
 	if err != nil {
-		return "", fmt.Errorf("create: parse key: %w", err)
+		return "", Err(ERR_3RD_LIB).Wrap(err)
 	}
 
 	// now := time.Now().UTC()
@@ -43,7 +44,7 @@ func (uc *UserClaims) GenerateToken(prvKey []byte) (string, error) {
 
 	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, uc).SignedString(key)
 	if err != nil {
-		return "", fmt.Errorf("create: sign token: %w", err)
+		return "", Err(ERR_3RD_LIB).Wrap(err)
 	}
 
 	smToken.Store(uc.UName, &TokenInfo{
@@ -116,27 +117,27 @@ func ValidateToken(user *ur.User, ts string, pubKey []byte) (bool, error) {
 
 	key, err := jwt.ParseRSAPublicKeyFromPEM(pubKey)
 	if err != nil {
-		return false, fmt.Errorf("validate: parse key: %w", err)
+		return false, Err(ERR_3RD_LIB).Wrap(err)
 	}
 
 	token, err := jwt.Parse(ts, func(jwtToken *jwt.Token) (interface{}, error) {
 		if _, ok := jwtToken.Method.(*jwt.SigningMethodRSA); !ok {
-			return nil, fmt.Errorf("unexpected method: %s", jwtToken.Header["alg"])
+			return nil, Err(ERR_TYPE_CVT).Wrap(fmt.Sprintf("unexpected method: %s", jwtToken.Header["alg"]))
 		}
 		return key, nil
 	})
 	if err != nil {
-		return false, fmt.Errorf("validate: %w", err)
+		return false, Err(ERR_3RD_LIB).Wrap(err)
 	}
 
 	_, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
-		return false, fmt.Errorf("validate: token to MapClaims")
+		return false, Err(ERR_TYPE_CVT).Wrap("token to MapClaims")
 	}
 
 	tkInfo, ok := smToken.Load(user.UName)
 	if !ok || tkInfo.(*TokenInfo).value != ts {
-		return false, fmt.Errorf("validate: token doesn't exist in record")
+		return false, Err(ERR_TOKEN_MISSING).Wrap("token doesn't exist in record")
 	}
 
 	return true, nil

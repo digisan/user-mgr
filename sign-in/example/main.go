@@ -5,6 +5,7 @@ import (
 	"time"
 
 	lk "github.com/digisan/logkit"
+	. "github.com/digisan/user-mgr/cst"
 	. "github.com/digisan/user-mgr/db"
 	si "github.com/digisan/user-mgr/sign-in"
 	ur "github.com/digisan/user-mgr/user/registered"
@@ -55,7 +56,7 @@ func main() {
 	}
 
 	lk.FailOnErr("%v", si.UserStatusIssue(user))
-	lk.FailOnErrWhen(!si.PwdOK(user), "%v", fmt.Errorf("incorrect password"))
+	lk.FailOnErrWhen(!si.PwdOK(user), "%v", Err(ERR_USER_PWD_INCORRECT))
 	lk.FailOnErr("%v", si.Hail(user.UName))
 
 	fmt.Println("Login OK")

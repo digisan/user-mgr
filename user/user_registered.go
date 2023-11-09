@@ -181,7 +181,7 @@ func SetUserBoolField(uname, field string, flag bool) (u *ur.User, ok bool, err 
 			case "Certified", "certified", "CERTIFIED":
 				u.Certified = flag
 			default:
-				lk.FailOnErr("%v", fmt.Errorf("[%s] is unsupported setting BoolField", field))
+				lk.FailOnErr("%v", Err(ERR_INV_PARAM).Wrap(fmt.Sprintf("[%s] is unsupported BoolField", field)))
 			}
 			if err = UpdateUser(u); err != nil {
 				return nil, false, err
@@ -189,7 +189,7 @@ func SetUserBoolField(uname, field string, flag bool) (u *ur.User, ok bool, err 
 			u, ok, err = LoadAnyUser(uname)
 			return u, err == nil && ok, err
 		}
-		return nil, false, fmt.Errorf("couldn't find [%s] for setting [%s]", uname, field)
+		return nil, false, Err(ERR_USER_NOT_EXISTS).Wrap(uname)
 	}
 	return nil, false, err
 }
@@ -258,7 +258,7 @@ func ToFullUser(c echo.Context) (*ur.User, error) {
 		return nil, err
 	}
 	if !ok {
-		return nil, fmt.Errorf("cannot find [%s] for its full fields", userSlim.UName)
+		return nil, Err(ERR_USER_NOT_EXISTS).Wrap(userSlim.UName)
 	}
 	return user, nil
 }
@@ -274,7 +274,7 @@ func ToActiveFullUser(c echo.Context) (*ur.User, error) {
 		return nil, err
 	}
 	if !ok {
-		return nil, fmt.Errorf("cannot find active [%s] for its full fields", userSlim.UName)
+		return nil, Err(ERR_USER_NOT_EXISTS).Wrap(userSlim.UName)
 	}
 	return user, nil
 }

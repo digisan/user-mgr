@@ -8,6 +8,7 @@ import (
 
 	v2 "github.com/digisan/go-generics/v2"
 	lk "github.com/digisan/logkit"
+	. "github.com/digisan/user-mgr/cst"
 	ur "github.com/digisan/user-mgr/user/registered"
 	. "github.com/digisan/user-mgr/util"
 	"gopkg.in/go-playground/validator.v9"
@@ -22,7 +23,7 @@ func NewResultOk(ok bool, failMsg string) ResultOk {
 	if ok {
 		return ResultOk{ok, nil}
 	}
-	return ResultOk{ok, fmt.Errorf("%v", failMsg)}
+	return ResultOk{ok, Err(ERR_ON_FALSE).Wrap(failMsg)}
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -37,7 +38,7 @@ func RegisterValidator(tag string, f func(o, v any) ResultOk) {
 
 func fnValidator(tag string) func(o, v any) ResultOk {
 	f, ok := mFieldValidator.Load(tag)
-	lk.FailOnErrWhen(!ok, "%v", fmt.Errorf("missing [%s] validator", tag))
+	lk.FailOnErrWhen(!ok, "%v", Err(ERR_VALIDATOR_MISSING).Wrap(tag))
 	return f.(func(o, v any) ResultOk)
 }
 
@@ -66,7 +67,7 @@ func Validate(user *ur.User, exclTags ...string) error {
 			if err, ok := mIfFail[tag]; ok && err != nil {
 				return err
 			}
-			return fmt.Errorf("%v", e)
+			return Err(ERR_UNKNOWN).Wrap(e)
 		}
 	}
 	lk.FailOnErr("%v", err)

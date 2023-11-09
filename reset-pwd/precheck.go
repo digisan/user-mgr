@@ -1,8 +1,7 @@
 package resetpwd
 
 import (
-	"fmt"
-
+	. "github.com/digisan/user-mgr/cst"
 	u "github.com/digisan/user-mgr/user"
 	ur "github.com/digisan/user-mgr/user/registered"
 )
@@ -13,9 +12,9 @@ func UserStatusIssue(login *ur.User) error {
 		return nil
 	}
 	if u.UserExists(login.UName, login.Email, false) {
-		return fmt.Errorf("[%v] is dormant", login.UName)
+		return Err(ERR_USER_DORMANT).Wrap(login.UName)
 	}
-	return fmt.Errorf("[%v] is not existing", login.UName)
+	return Err(ERR_USER_NOT_EXISTS).Wrap(login.UName)
 }
 
 func EmailOK(login *ur.User) bool {

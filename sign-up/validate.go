@@ -1,10 +1,10 @@
 package signup
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
+	. "github.com/digisan/user-mgr/cst"
 	u "github.com/digisan/user-mgr/user"
 	ur "github.com/digisan/user-mgr/user/registered"
 	. "github.com/digisan/user-mgr/util"
@@ -68,7 +68,7 @@ func VerifyCode(uname, incode string) (*ur.User, error) {
 
 	val, ok := mUserCodeTm.Load(uname)
 	if !ok {
-		return nil, fmt.Errorf("there is no email verification code for [%s]", uname)
+		return nil, Err(ERR_VCODE_MISSING).Wrap(uname)
 	}
 
 	ctu := val.(struct {
@@ -78,11 +78,11 @@ func VerifyCode(uname, incode string) (*ur.User, error) {
 	})
 
 	if time.Since(ctu.Tm) > timeoutVerify {
-		return nil, fmt.Errorf("email verification code is expired")
+		return nil, Err(ERR_VCODE_EXP)
 	}
 
 	if ctu.Code != incode {
-		return nil, fmt.Errorf("email couldn't be verified")
+		return nil, Err(ERR_VCODE_VERIFY_FAIL).Wrap("email")
 	}
 
 	mUserCodeTm.Delete(uname)

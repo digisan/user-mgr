@@ -12,6 +12,7 @@ import (
 	fd "github.com/digisan/gotk/file-dir"
 	"github.com/digisan/gotk/strs"
 	lk "github.com/digisan/logkit"
+	. "github.com/digisan/user-mgr/cst"
 	. "github.com/digisan/user-mgr/util"
 )
 
@@ -138,7 +139,7 @@ func TestUser(t *testing.T) {
 	fmt.Println("reflect.DeepEqual(*user.COre, *user1.Core) :", reflect.DeepEqual(user.Core, user1.Core))
 	fmt.Println("reflect.DeepEqual(*user.Profile, *user1.Profile) :", reflect.DeepEqual(user.Profile, user1.Profile))
 	fmt.Println("reflect.DeepEqual(*user.Admin, *user1.Admin) :", reflect.DeepEqual(user.Admin, user1.Admin))
-	lk.FailOnErrWhen(!reflect.DeepEqual(*user, *user1), "%v", fmt.Errorf("Marshal-Unmarshal ERROR"))
+	lk.FailOnErrWhen(!reflect.DeepEqual(*user, *user1), "%v", Err(ERR_MARSHAL_UNMARSHAL))
 }
 
 // *** Auto Generate Validate Field Tag Const, Output is in ../validate/auto-tags.go *** //
