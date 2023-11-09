@@ -27,6 +27,7 @@ const (
 	ERR_TOKEN_MISSING
 	ERR_VALIDATOR_MISSING
 	ERR_INV_DATA_FMT
+	ERR_INPUT_INCONSISTENT
 	ERR_MARSHAL_UNMARSHAL
 	ERR_TYPE_CVT
 	ERR_UNKNOWN
@@ -56,8 +57,9 @@ var (
 		ERR_TOKEN_MISSING:      errors.New("token is missing"),
 		ERR_VALIDATOR_MISSING:  errors.New("validator is missing"),
 		ERR_INV_DATA_FMT:       errors.New("invalid data format"),
+		ERR_INPUT_INCONSISTENT: errors.New("input values or content are inconsistent"),
 		ERR_MARSHAL_UNMARSHAL:  errors.New("marshal or unmarshal error"),
-		ERR_TYPE_CVT:           errors.New("data type convert error"),
+		ERR_TYPE_CVT:           errors.New("data type conversion error"),
 		ERR_UNKNOWN:            errors.New("unknown error"),
 	}
 )
