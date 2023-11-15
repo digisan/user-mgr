@@ -6,11 +6,11 @@ toolchain go1.21.1
 
 require (
 	github.com/dgraph-io/badger/v4 v4.2.0
-	github.com/digisan/db-helper v0.1.1
-	github.com/digisan/go-generics v0.4.1
-	github.com/digisan/go-mail v0.2.18
-	github.com/digisan/gotk v0.4.9
-	github.com/digisan/logkit v0.2.13
+	github.com/digisan/db-helper v0.1.2
+	github.com/digisan/go-generics v0.4.2
+	github.com/digisan/go-mail v0.2.19
+	github.com/digisan/gotk v0.4.11
+	github.com/digisan/logkit v0.2.14
 	github.com/golang-jwt/jwt/v5 v5.1.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.11.3
@@ -21,7 +21,7 @@ require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
-	github.com/digisan/go-config v0.2.14 // indirect
+	github.com/digisan/go-config v0.2.15 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/go-chi/chi/v5 v5.0.10 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -36,8 +36,8 @@ require (
 	github.com/gookit/color v1.5.4 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.17.2 // indirect
-	github.com/labstack/gommon v0.4.0 // indirect
+	github.com/klauspost/compress v1.17.3 // indirect
+	github.com/labstack/gommon v0.4.1 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/mailgun/mailgun-go/v4 v4.11.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

@@ -12,7 +12,7 @@ import (
 
 func genCode(email string) string {
 	key := []byte(fmt.Sprintf("%d", time.Now().UnixNano())[3:19])
-	return strs.Maxlen(fmt.Sprintf("%06x", crypto.Encrypt(email, key)), 6)
+	return strs.MaxLen(fmt.Sprintf("%06x", crypto.Encrypt(email, key)), 6)
 }
 
 // obsoleted !!!
