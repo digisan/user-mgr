@@ -1,15 +1,15 @@
 module github.com/digisan/user-mgr
 
-go 1.21.4
+go 1.21.5
 
 require (
 	github.com/dgraph-io/badger/v4 v4.2.0
 	github.com/digisan/db-helper v0.1.3
 	github.com/digisan/go-generics v0.4.3
 	github.com/digisan/go-mail v0.2.20
-	github.com/digisan/gotk v0.4.12
+	github.com/digisan/gotk v0.4.13
 	github.com/digisan/logkit v0.2.14
-	github.com/golang-jwt/jwt/v5 v5.1.0
+	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.11.3
 	gopkg.in/go-playground/validator.v9 v9.31.0
@@ -34,7 +34,7 @@ require (
 	github.com/gookit/color v1.5.4 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.17.3 // indirect
+	github.com/klauspost/compress v1.17.4 // indirect
 	github.com/labstack/gommon v0.4.1 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/mailgun/mailgun-go/v4 v4.12.0 // indirect
@@ -44,7 +44,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sendgrid/rest v2.6.9+incompatible // indirect
-	github.com/sendgrid/sendgrid-go v3.13.0+incompatible // indirect
+	github.com/sendgrid/sendgrid-go v3.14.0+incompatible // indirect
 	github.com/tidwall/gjson v1.17.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect

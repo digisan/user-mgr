@@ -77,3 +77,7 @@ func CloseDB() {
 		DbGrp.Rel = nil
 	}
 }
+
+func IsInit() bool {
+	return DbGrp != nil
+}

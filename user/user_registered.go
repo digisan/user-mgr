@@ -14,6 +14,9 @@ import (
 )
 
 func RemoveUser(uname string, lock bool) error {
+	if !db.IsInit() {
+		return fmt.Errorf("db is not initialized")
+	}
 	if lock {
 		db.DbGrp.Lock()
 		defer db.DbGrp.Unlock()
@@ -35,6 +38,9 @@ func RemoveUser(uname string, lock bool) error {
 }
 
 func UpdateUser(u *ur.User) error {
+	if !db.IsInit() {
+		return fmt.Errorf("db is not initialized")
+	}
 	db.DbGrp.Lock()
 	defer db.DbGrp.Unlock()
 
@@ -45,6 +51,9 @@ func UpdateUser(u *ur.User) error {
 }
 
 func LoadUser(uname string, active bool) (*ur.User, bool, error) {
+	if !db.IsInit() {
+		return nil, false, fmt.Errorf("db is not initialized")
+	}
 	db.DbGrp.Lock()
 	defer db.DbGrp.Unlock()
 
@@ -128,6 +137,9 @@ func LoadAnyUserByUniProp(propName, propVal string) (*ur.User, bool, error) {
 }
 
 func ListUser(filter func(*ur.User) bool) ([]*ur.User, error) {
+	if !db.IsInit() {
+		return nil, fmt.Errorf("db is not initialized")
+	}
 	db.DbGrp.Lock()
 	defer db.DbGrp.Unlock()
 
