@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	v2 "github.com/digisan/go-generics/v2"
+	v2 "github.com/digisan/go-generics"
 	lk "github.com/digisan/logkit"
 	. "github.com/digisan/user-mgr/cst"
 	ur "github.com/digisan/user-mgr/user/registered"

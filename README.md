@@ -2,6 +2,9 @@
 
 Lib for user sign-up, sign-in, sign-out, and reset password
 
+go upgrade to 1.22.0
+version => v0.9.0
+
 ### *Run command below first to create both private and public RSA keys*
 
 > `openssl genrsa -out cert/id_rsa 4096`

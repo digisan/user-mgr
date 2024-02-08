@@ -5,7 +5,7 @@ import (
 	"time"
 	"unicode"
 
-	. "github.com/digisan/go-generics/v2"
+	. "github.com/digisan/go-generics"
 	"github.com/digisan/gotk/strs"
 	. "github.com/digisan/user-mgr/cst"
 	. "github.com/digisan/user-mgr/user"
