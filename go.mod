@@ -1,6 +1,6 @@
 module github.com/digisan/user-mgr
 
-go 1.22.0
+go 1.22.1
 
 require (
 	github.com/dgraph-io/badger/v4 v4.2.0
@@ -8,7 +8,7 @@ require (
 	github.com/digisan/go-generics v0.5.1
 	github.com/digisan/go-mail v0.3.1
 	github.com/digisan/gotk v0.5.1
-	github.com/digisan/logkit v0.3.1
+	github.com/digisan/logkit v0.3.3
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.11.4
@@ -28,7 +28,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/glog v1.2.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/flatbuffers v23.5.26+incompatible // indirect
 	github.com/gookit/color v1.5.4 // indirect
@@ -58,7 +58,7 @@ require (
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
