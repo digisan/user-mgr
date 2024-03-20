@@ -2,8 +2,8 @@
 
 Lib for user sign-up, sign-in, sign-out, and reset password
 
-go upgrade to 1.22.0
-version => v0.9.0
+go upgrade to 1.22.1
+version => v0.9.2
 
 ### *Run command below first to create both private and public RSA keys*
 

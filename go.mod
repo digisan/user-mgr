@@ -4,11 +4,11 @@ go 1.22.1
 
 require (
 	github.com/dgraph-io/badger/v4 v4.2.0
-	github.com/digisan/db-helper v0.2.1
-	github.com/digisan/go-generics v0.5.1
-	github.com/digisan/go-mail v0.3.1
-	github.com/digisan/gotk v0.5.1
-	github.com/digisan/logkit v0.3.3
+	github.com/digisan/db-helper v0.2.2
+	github.com/digisan/go-generics v0.5.2
+	github.com/digisan/go-mail v0.3.2
+	github.com/digisan/gotk v0.5.2
+	github.com/digisan/logkit v0.3.4
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.11.4
@@ -19,7 +19,7 @@ require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
-	github.com/digisan/go-config v0.3.1 // indirect
+	github.com/digisan/go-config v0.3.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/go-chi/chi/v5 v5.0.12 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -30,7 +30,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/flatbuffers v23.5.26+incompatible // indirect
+	github.com/google/flatbuffers v24.3.7+incompatible // indirect
 	github.com/gookit/color v1.5.4 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
