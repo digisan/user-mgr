@@ -4,11 +4,11 @@ go 1.22.2
 
 require (
 	github.com/dgraph-io/badger/v4 v4.2.0
-	github.com/digisan/db-helper v0.2.3
-	github.com/digisan/go-generics v0.5.3
-	github.com/digisan/go-mail v0.3.3
-	github.com/digisan/gotk v0.5.6
-	github.com/digisan/logkit v0.3.6
+	github.com/digisan/db-helper v0.2.4
+	github.com/digisan/go-generics v0.5.4
+	github.com/digisan/go-mail v0.3.4
+	github.com/digisan/gotk v0.5.7
+	github.com/digisan/logkit v0.3.7
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.12.0
@@ -19,7 +19,7 @@ require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
-	github.com/digisan/go-config v0.3.3 // indirect
+	github.com/digisan/go-config v0.3.4 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/go-chi/chi/v5 v5.0.12 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
